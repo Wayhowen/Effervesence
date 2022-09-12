@@ -15,6 +15,6 @@ class Map:
                 self.map.append([e for e in line])
         
     
-    def __str__(self) -> str:
+    def print(self) -> str:
         for row in self.map:
             print(row)

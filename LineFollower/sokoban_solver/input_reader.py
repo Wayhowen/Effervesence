@@ -13,19 +13,20 @@ class InputReader:
         
     def _map_input_to_representation(self):
         map_textual_representation = []
-        maps = []
+        maps = {}
         for index, line in enumerate(self._raw_input):
             if line.startswith(";") and index != 0:
-                maps.append(Map(map_textual_representation))
+                map = Map(map_textual_representation)
+                maps[map.name] = map
                 map_textual_representation = []
             if len(line) > 0:
                 map_textual_representation.append(line)
         return maps
 
-    def print_map(self):
-        print(self._maps[0])
+    def print_map(self, map_name: str):
+        self._maps[map_name].print()
 
 
 if __name__ == "__main__":
     ir = InputReader("map_input.txt")
-    ir.print_map()
+    ir.print_map("Claire")
