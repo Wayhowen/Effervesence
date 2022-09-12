@@ -25,6 +25,9 @@ class InputReader:
 
     def print_map(self, map_name: str):
         self._maps[map_name].print()
+        
+    def get_map(self, map_name: str) -> Map:
+        self._maps[map_name]
 
 
 if __name__ == "__main__":
