@@ -6,24 +6,7 @@ import os
 from typing import List, Tuple
 
 from input_reader import InputReader
-
-
-class PriorityQueue:
-    def __init__(self):
-        self.Heap = []
-        self.Count = 0
-
-    def push(self, item, priority):
-        entry = (priority, self.Count, item)
-        heapq.heappush(self.Heap, entry)
-        self.Count += 1
-
-    def pop(self):
-        (_, _, item) = heapq.heappop(self.Heap)
-        return item
-
-    def isEmpty(self):
-        return len(self.Heap) == 0
+from queue import PriorityQueue
 
 
 def find_element(state: List[List[int]], element_to_find: int) -> List[Tuple[int, int]]:
