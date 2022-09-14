@@ -3,6 +3,7 @@ import collections
 #import numpy as np
 import heapq
 import os
+from typing import List, Tuple
 
 from input_reader import InputReader
 
@@ -25,29 +26,29 @@ class PriorityQueue:
         return len(self.Heap) == 0
 
 
-def find_function(state, matchcase):
+def find_element(state: List[List[int]], element_to_find: int) -> List[Tuple[int, int]]:
     result = []
-    for rowi, row in enumerate(state):
-        for coli, elem in enumerate(row):
-            if elem == matchcase:
-                result.append((rowi, coli))
+    for row_index, row in enumerate(state):
+        for column_index, element in enumerate(row):
+            if element == element_to_find:
+                result.append((row_index, column_index))
 
     return result
 
-def find_walls(state):
-    return find_function(state, 1)
+def find_walls(state: List[List[int]]):
+    return find_element(state, 1)
 
 
-def find_diamonds(state):
-    return find_function(state, 2).extend(find_function(state, 4))
+def find_diamonds(state: List[List[int]]):
+    return find_element(state, 2).extend(find_element(state, 4))
 
 
-def find_goals(state):
-    return find_function(state, 3)
+def find_goals(state: List[List[int]]):
+    return find_element(state, 3)
 
 
-def find_player(state):
-    return find_function(state, 5)
+def find_player(state: List[List[int]]):
+    return find_element(state, 5)
 
 
 if __name__ == "__main__":
