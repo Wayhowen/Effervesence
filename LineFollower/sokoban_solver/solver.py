@@ -2,11 +2,13 @@ import sys
 import collections
 #import numpy as np
 import heapq
-import input_reader
 import os
 
+from input_reader import InputReader
+
+
 class PriorityQueue:
-    def  __init__(self):
+    def __init__(self):
         self.Heap = []
         self.Count = 0
 
@@ -22,53 +24,36 @@ class PriorityQueue:
     def isEmpty(self):
         return len(self.Heap) == 0
 
-def LayoutReader():
-    layout = input_reader.InputReader("map_input.txt").get_map("Claire")
-    
-    tLayout = []
 
-    for row in layout.map:
-        tLayout.append([])
-        for elem in row:
-            if elem == ' ': tLayout[-1].append(0)       # empty
-            elif elem  == '#': tLayout[-1].append(1)    # wall
-            elif elem  == '$': tLayout[-1].append(2)    # diamond
-            elif elem  == '.': tLayout[-1].append(3)    # goal
-            elif elem  == '*': tLayout[-1].append(4)    # diamond in goal
-            elif elem  == '@': tLayout[-1].append(5)    # player
-    
-    return tLayout
-
-def FindFunc(state, matchcase):
+def find_function(state, matchcase):
     result = []
     for rowi, row in enumerate(state):
         for coli, elem in enumerate(row):
-            if elem == matchcase: result.append((rowi, coli))
+            if elem == matchcase:
+                result.append((rowi, coli))
 
     return result
 
-def FindWalls(state):
-    return FindFunc(state, 1)
+def find_walls(state):
+    return find_function(state, 1)
 
-def FindDiamonds(state):
-    return FindFunc(state, 2).extend(FindFunc(state, 4))
 
-def FindGoals(state):
-    return FindFunc(state, 3)
+def find_diamonds(state):
+    return find_function(state, 2).extend(find_function(state, 4))
 
-def FindPlayer(state):
-    return FindFunc(state, 5)
+
+def find_goals(state):
+    return find_function(state, 3)
+
+
+def find_player(state):
+    return find_function(state, 5)
+
 
 if __name__ == "__main__":
-    state = LayoutReader()
+    input_reader = InputReader("map_input.txt")
+    state = input_reader.get_map("Claire").enumerated()
     for i in state:
         print(i)
-    print(FindPlayer(state))
-    print(FindGoals(state))
-
-
-    
-
-
-    
-        
+    print(find_player(state))
+    print(find_goals(state))

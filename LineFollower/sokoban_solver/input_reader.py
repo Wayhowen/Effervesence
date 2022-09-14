@@ -1,16 +1,17 @@
-from map_representation import Map
+from map import Map
+
 
 class InputReader:
     def __init__(self, file_path):
         self._raw_input = self._read_input(file_path)
-        
+
         self._maps = self._map_input_to_representation()
 
     def _read_input(self, file_path):
         with open(file_path, "r") as map_file:
             lines = map_file.readlines()
             return [line.rstrip() for line in lines]
-        
+
     def _map_input_to_representation(self):
         map_textual_representation = []
         maps = {}
@@ -25,7 +26,7 @@ class InputReader:
 
     def print_map(self, map_name: str):
         self._maps[map_name].print()
-        
+
     def get_map(self, map_name: str) -> Map:
         return self._maps[map_name]
 
