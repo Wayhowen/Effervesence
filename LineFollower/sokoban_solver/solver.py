@@ -59,7 +59,7 @@ def get_possible_moves(playerState, diamondsState):
         if(check_move_valid(playerState, diamondsState, action)):
             validMoves.append(action)
     
-    return validMoves  
+    return validMoves
 
 def check_move_valid(playerState, diamondsState, action):
     playerX, playerY = playerState
@@ -69,6 +69,38 @@ def check_move_valid(playerState, diamondsState, action):
     else:
         x1, y1 = playerX + action[0], playerY + action[1]
     return (x1, y1) not in diamondsState + wallsState
+
+def diamond_stuck(diamondsState):
+    #List of all possible orientations from which we can view the neighbour tiles
+    orientations = [[0,1,2,3,4,5,6,7,8],
+                    [0,3,6,1,4,7,2,5,8],
+                    [2,1,0,5,4,3,8,7,6],
+                    [2,5,8,1,4,7,0,3,6],
+                    [6,7,8,3,4,5,0,1,2],
+                    [6,3,0,7,4,1,8,5,2],
+                    [8,7,6,5,4,3,2,1,0],
+                    [8,5,2,7,4,1,6,3,0]
+                    ]
+    
+    for diamond in diamondsState:
+        if diamond not in goalState:
+            #define neighbour tiles
+            x,y = diamond
+            neighbours = [(x-1,y-1),     (x-1,y),    (x-1,y+1),
+                             (x,y-1),       (x,y),      (x,y+1),
+                             (x+1,y-1),     (x+1,y),    (x+1,y+1)]
+
+            #test stuck rules against each orientation
+            for orientation in orientations:
+                #transform neighbour view to orientation
+                orientedNeighbours = [neighbours[pos] for pos in orientation]
+
+                #check against rules
+                if(orientedNeighbours[1] in wallsState and orientedNeighbours[5] in wallsState): return True
+                elif(orientedNeighbours[1] in wallsState+diamondsState and orientedNeighbours[2] in wallsState+diamondsState and orientedNeighbours[5] in wallsState+diamondsState): return True
+                elif(orientedNeighbours[1] in diamondsState and orientedNeighbours[2] in wallsState and orientedNeighbours[3] in wallsState and orientedNeighbours[7] in diamondsState and orientedNeighbours[8] in wallsState ): return True
+    return False
+    
 
 #Search
 
