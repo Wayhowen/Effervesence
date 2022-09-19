@@ -1,3 +1,4 @@
+import queue
 from typing import List, Tuple
 from input_reader import InputReader
 from queue import PriorityQueue
@@ -34,11 +35,11 @@ def find_goals_overlap(state: List[List[int]]):
 
 
 def find_player(state: List[List[int]]):
-    return find_element(state, 5)
+    return find_element(state, 5)[0]
 
-#Rules
-def check_game_won(diamondState: List[Tuple[int, int]]):
-    return (sorted(diamondState) == sorted(goalState))
+#Game Rules
+def check_game_won(diamondsState):
+    return (sorted(diamondsState) == sorted(goalState))
 
 def get_possible_moves(playerState, diamondsState):
     #coord of direction in relation to player
@@ -54,30 +55,146 @@ def get_possible_moves(playerState, diamondsState):
         if (moveX, moveY) in diamondsState:
             action.append(1)
         else:
-            action.append(1)
+            action.append(0)
         #add the valid moves to our list
         if(check_move_valid(playerState, diamondsState, action)):
             validMoves.append(action)
     
-    return validMoves  
+    return validMoves
 
 def check_move_valid(playerState, diamondsState, action):
     playerX, playerY = playerState
     #if pushing check the second space after the action
     if(action[-1] == 1):
-        x1, y1 = playerX + 2 * action[0], playerY + 2 * action[1]
+        x, y = playerX + action[0]* 2, playerY + action[1] * 2
     else:
-        x1, y1 = playerX + action[0], playerY + action[1]
-    return (x1, y1) not in diamondsState + wallsState
+        x, y = playerX + action[0], playerY + action[1]
+    
+    blocked = diamondsState + wallsState
+    return (x, y) not in blocked
+
+def update_state(playerState, diamondsState, action):
+    playerX, playerY = playerState
+    newPos = playerX + action[0], playerY + action[1]
+    _diamondsState = diamondsState.copy()
+
+    if (action[-1] == 1):
+        _diamondsState.remove(newPos)
+        _diamondsState.append((playerX + action[0] * 2, playerY + action[1] * 2))
+
+    return newPos, sorted(_diamondsState)
+
+def check_diamond_stuck(diamondsState):
+    #List of all possible orientations from which we can view the neighbour tiles
+    orientations = [[0,1,2,3,4,5,6,7,8],
+                    [0,3,6,1,4,7,2,5,8],
+                    [2,1,0,5,4,3,8,7,6],
+                    [2,5,8,1,4,7,0,3,6],
+                    [6,7,8,3,4,5,0,1,2],
+                    [6,3,0,7,4,1,8,5,2],
+                    [8,7,6,5,4,3,2,1,0],
+                    [8,5,2,7,4,1,6,3,0]
+                    ]
+    
+    for diamond in diamondsState:
+        if diamond not in goalState:
+            #define neighbour tiles
+            x,y = diamond
+            neighbours = [(x-1,y-1),     (x-1,y),    (x-1,y+1),
+                             (x,y-1),       (x,y),      (x,y+1),
+                             (x+1,y-1),     (x+1,y),    (x+1,y+1)]
+
+            #test stuck rules against each orientation
+            for orientation in orientations:
+                #transform neighbour view to orientation
+                orientedNeighbours = [neighbours[pos] for pos in orientation]
+
+                #check against rules
+                if(orientedNeighbours[1] in wallsState and orientedNeighbours[5] in wallsState): return True
+                elif(orientedNeighbours[1] in wallsState+diamondsState and orientedNeighbours[2] in wallsState+diamondsState 
+                    and orientedNeighbours[5] in wallsState+diamondsState): return True
+                elif(orientedNeighbours[1] in diamondsState and orientedNeighbours[2] in wallsState 
+                    and orientedNeighbours[3] in wallsState and orientedNeighbours[7] in diamondsState 
+                    and orientedNeighbours[8] in wallsState ): return True
+    return False
+    
 
 #Search
+def heuristic_distance(diamondsState):
+    h_value = 0
+    diamonds_and_goals = diamondsState+goalState
+    exclusive_diamond_state = [i for i in diamondsState if i not in diamonds_and_goals]
+    exclusive_goal_state = [i for i in goalState if i not in diamonds_and_goals]
+
+    for i in range(len(exclusive_diamond_state)):
+        h_value += abs(exclusive_diamond_state[i][0]-exclusive_goal_state[i][0]) + abs(exclusive_diamond_state[i][1]-exclusive_goal_state[i][1])
+
+    return h_value
+
+def cost(moves):
+    return len(moves)
+
+def solve():
+    player_start = find_player(state)
+    diamonds_start = find_diamonds_overlap(state)
+    starting_pos = (player_start, diamonds_start)
+
+    pqueue = queue.PriorityQueue()
+    explored = set()
+
+    pqueue.put((heuristic_distance(diamonds_start),[],[starting_pos]))
+
+    while(pqueue):
+        node = pqueue.get()
+        #print("Node: "+str(node[-1][-1]))
+        current_state = node[-1][-1]
+        current_actions = node[-2]
+        player_state = node[-1][-1][0]
+        diamonds_state = node[-1][-1][1]
+
+        if(check_game_won(diamonds_state)):
+            print("Path Found:")
+            print(current_actions)
+            for i in range(len(current_actions)):
+                if (current_actions[i][2] == 1):
+                    print(node[-1][i][0])
+                    print(current_actions[i])
+
+                    #match act:
+                    #    case (1,_,_): print("Down")
+                    #    case (-1,_,_): print("Up")
+                    #    case (_,1,_): print("Right")
+                    #    case (_,-1,_): print("Left")
+            #print(current_actions)
+            return
+
+        if(str(current_state)) not in explored:
+            explored.add(str(current_state))
+            node_cost = cost(current_actions)
+            #print("Diamonds: "+str(diamonds_state))
+            for action in get_possible_moves(player_state,diamonds_state):
+                next_player_pos, next_diamonds_pos = update_state(player_state, diamonds_state, action)
+                
+                if(check_diamond_stuck(diamonds_state)): continue
+
+                total_cost = node_cost+heuristic_distance(next_diamonds_pos)
+                #next_action = current_actions+[action]
+                #next_state = node[]+[next_player_pos,next_diamonds_pos]
+                pqueue.put((total_cost, current_actions+[action], node[-1]+[(next_player_pos,next_diamonds_pos)]))
+
+    print("no path")
+
 
 #Main
 if __name__ == "__main__":
-    input_reader = InputReader("map_input.txt")
+    input_reader = InputReader("LineFollower/sokoban_solver/map_input.txt")
     state = input_reader.get_map("Claire").enumerated()
-    for i in state:
-        print(i)
+    #for i in state:
+    #    print(i)
     wallsState = find_walls(state)
     goalState = find_goals_overlap(state)
-    print(check_game_won(find_diamonds(state)))
+    
+    #blocks = goalState + wallsState
+    #print(blocks)
+    #print((0, 0) not in blocks)
+    solve()
