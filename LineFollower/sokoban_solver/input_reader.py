@@ -32,5 +32,5 @@ class InputReader:
 
 
 if __name__ == "__main__":
-    ir = InputReader("map_input.txt")
+    ir = InputReader("LineFollower/sokoban_solver/map_input.txt")
     ir.print_map("Claire")
