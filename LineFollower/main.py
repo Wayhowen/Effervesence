@@ -153,19 +153,8 @@ class Controls:
     # TODO: inverse of forwards, not tested
     def drive_backwards(self):
         robot.straight(-100)
-        while True:
-            reflection = self.light_sensor.reflection()
-            if reflection > UPPER_REFLECTION_BOUNDARY:
-                robot.drive(-DRIVE_SPEED, -DRIVE_ADJUSTMENT_ANGLE)
-            elif reflection < LOWER_REFLECTION_BOUNDARY:
-                robot.drive(-DRIVE_SPEED, DRIVE_ADJUSTMENT_ANGLE)
-
-            lv = self.left_sensor.reflection()
-            rv = self.right_sensor.reflection()
-            if (lv < UPPER_REFLECTION_BOUNDARY or rv < UPPER_REFLECTION_BOUNDARY):
-                ev3.speaker.beep()
-                robot.straight(165)
-                break
+        self.turn("turnaround")
+        self.drive_straight()
 
     """
     This if statements allow for easier choosing of the current directions after turn
