@@ -1,4 +1,5 @@
 import queue
+import time
 from typing import List, Tuple
 from input_reader import InputReader
 from queue import PriorityQueue
@@ -78,6 +79,7 @@ def update_state(playerState, diamondsState, action):
     newPos = playerX + action[0], playerY + action[1]
     _diamondsState = diamondsState.copy()
 
+    #Move diamond if player moved to its space
     if (action[-1] == 1):
         _diamondsState.remove(newPos)
         _diamondsState.append((playerX + action[0] * 2, playerY + action[1] * 2))
@@ -126,6 +128,7 @@ def heuristic_distance(diamondsState):
     exclusive_diamond_state = [i for i in diamondsState if i not in diamonds_and_goals]
     exclusive_goal_state = [i for i in goalState if i not in diamonds_and_goals]
 
+    #Heuristic base of the distance between empty goals and their nearest open diamond
     for i in range(len(exclusive_diamond_state)):
         h_value += abs(exclusive_diamond_state[i][0]-exclusive_goal_state[i][0]) + abs(exclusive_diamond_state[i][1]-exclusive_goal_state[i][1])
 
@@ -144,9 +147,9 @@ def solve():
 
     pqueue.put((heuristic_distance(diamonds_start),[],[starting_pos]))
 
+    #A* search
     while(pqueue):
         node = pqueue.get()
-        #print("Node: "+str(node[-1][-1]))
         current_state = node[-1][-1]
         current_actions = node[-2]
         player_state = node[-1][-1][0]
@@ -156,30 +159,24 @@ def solve():
             print("Path Found:")
             print(current_actions)
             for i in range(len(current_actions)):
-                if (current_actions[i][2] == 1):
-                    print(node[-1][i][0])
-                    print(current_actions[i])
-
-                    #match act:
-                    #    case (1,_,_): print("Down")
-                    #    case (-1,_,_): print("Up")
-                    #    case (_,1,_): print("Right")
-                    #    case (_,-1,_): print("Left")
-            #print(current_actions)
+                if(i%3 == 0): print()
+                match current_actions[i]:
+                    case (1,_,_): print("Down")
+                    case (-1,_,_): print("Up")
+                    case (_,1,_): print("Right")
+                    case (_,-1,_): print("Left")
             return
 
         if(str(current_state)) not in explored:
             explored.add(str(current_state))
             node_cost = cost(current_actions)
-            #print("Diamonds: "+str(diamonds_state))
+
             for action in get_possible_moves(player_state,diamonds_state):
                 next_player_pos, next_diamonds_pos = update_state(player_state, diamonds_state, action)
                 
                 if(check_diamond_stuck(diamonds_state)): continue
 
                 total_cost = node_cost+heuristic_distance(next_diamonds_pos)
-                #next_action = current_actions+[action]
-                #next_state = node[]+[next_player_pos,next_diamonds_pos]
                 pqueue.put((total_cost, current_actions+[action], node[-1]+[(next_player_pos,next_diamonds_pos)]))
 
     print("no path")
@@ -187,14 +184,13 @@ def solve():
 
 #Main
 if __name__ == "__main__":
+    start = time.time()
     input_reader = InputReader("LineFollower/sokoban_solver/map_input.txt")
-    state = input_reader.get_map("Claire").enumerated()
-    #for i in state:
-    #    print(i)
+    state = input_reader.get_map("Alice").enumerated()
+    
     wallsState = find_walls(state)
     goalState = find_goals_overlap(state)
-    
-    #blocks = goalState + wallsState
-    #print(blocks)
-    #print((0, 0) not in blocks)
     solve()
+    
+    print("Time to calc:")
+    print(time.time()-start)
