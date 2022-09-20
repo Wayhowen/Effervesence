@@ -36,6 +36,9 @@ light_sensor = LightSensor(Port.S2)
 # robot = DriveBase(left_motor, right_motor, wheel_diameter=56, axle_track=120)
 robot = DriveBase(left_motor, right_motor, wheel_diameter=80, axle_track=120)
 
+# Claire
+#command = [(1, 2, 0), (2, 2, 1), (3, 2, 1), (3, 3, 0), (4, 3, 0), (4, 4, 0), (4, 5, 0), (3, 5, 0), (3, 4, 1), (3, 5, 0), (2, 5, 0), (2, 4, 1), (2, 3, 1), (3, 3, 1), (3, 2, 0), (3, 1, 0), (2, 1, 1)]
+
 commands = [
     (1, 0, 0),
     (1, 1, 0),
@@ -188,7 +191,7 @@ class Controls:
                 self._direction = left_directions[left_directions.index(self._direction) - 1]
         elif command == "left":
             # TODO: this is where the code fails with plows
-            robot.turn(TURN_BY + 10)
+            robot.turn(TURN_BY)
             while LOWER_REFLECTION_BOUNDARY < self.light_sensor.reflection() > UPPER_REFLECTION_BOUNDARY:
                 robot.turn(2)
                 

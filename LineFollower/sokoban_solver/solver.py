@@ -145,7 +145,7 @@ def solve():
     pqueue = queue.PriorityQueue()
     explored = set()
 
-    pqueue.put((heuristic_distance(diamonds_start),[],[starting_pos]))
+    pqueue.put((heuristic_distance(diamonds_start),[(player_start[0],player_start[1],0)],[starting_pos]))
 
     #A* search
     while(pqueue):
@@ -158,13 +158,13 @@ def solve():
         if(check_game_won(diamonds_state)):
             print("Path Found:")
             print(current_actions)
-            for i in range(len(current_actions)):
-                if(i%3 == 0): print()
-                match current_actions[i]:
-                    case (1,_,_): print("Down")
-                    case (-1,_,_): print("Up")
-                    case (_,1,_): print("Right")
-                    case (_,-1,_): print("Left")
+            #for i in range(len(current_actions)):
+            #    if(i%3 == 0): print()
+            #    match current_actions[i]:
+            #        case (1,_,_): print("Down")
+            #        case (-1,_,_): print("Up")
+            #        case (_,1,_): print("Right")
+            #        case (_,-1,_): print("Left")
             return
 
         if(str(current_state)) not in explored:
@@ -177,7 +177,7 @@ def solve():
                 if(check_diamond_stuck(diamonds_state)): continue
 
                 total_cost = node_cost+heuristic_distance(next_diamonds_pos)
-                pqueue.put((total_cost, current_actions+[action], node[-1]+[(next_player_pos,next_diamonds_pos)]))
+                pqueue.put((total_cost, current_actions+[(next_player_pos[0],next_player_pos[1],action[2])], node[-1]+[(next_player_pos,next_diamonds_pos)]))
 
     print("no path")
 
@@ -185,8 +185,8 @@ def solve():
 #Main
 if __name__ == "__main__":
     start = time.time()
-    input_reader = InputReader("LineFollower/sokoban_solver/map_input.txt")
-    state = input_reader.get_map("Alice").enumerated()
+    input_reader = InputReader("sokoban_solver/map_input.txt")
+    state = input_reader.get_map("Claire").enumerated()
     
     wallsState = find_walls(state)
     goalState = find_goals_overlap(state)
