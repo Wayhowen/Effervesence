@@ -186,7 +186,7 @@ def solve():
 if __name__ == "__main__":
     start = time.time()
     input_reader = InputReader("sokoban_solver/map_input.txt")
-    state = input_reader.get_map("Claire").enumerated()
+    state = input_reader.get_map("Ozzy").enumerated()
     
     wallsState = find_walls(state)
     goalState = find_goals_overlap(state)
