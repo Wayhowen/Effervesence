@@ -154,7 +154,7 @@ class Controls:
             if (lv < UPPER_REFLECTION_BOUNDARY or rv < UPPER_REFLECTION_BOUNDARY):
                 ev3.speaker.beep()
                 if not pushing:
-                    robot.straight(140)
+                    robot.straight(135)
                     break
                 
                 self.drive_backwards()
@@ -165,7 +165,7 @@ class Controls:
     def drive_backwards(self):
         robot.straight(-80)
         self.turn("turnaround")
-        robot.straight(-80)
+        robot.straight(-85)
         self.drive_straight()
         
     def good_drive_backwards(self):
