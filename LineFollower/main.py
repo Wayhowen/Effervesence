@@ -34,10 +34,10 @@ light_sensor = LightSensor(Port.S2)
 
 # Initialize the drive base.
 # robot = DriveBase(left_motor, right_motor, wheel_diameter=56, axle_track=120)
-robot = DriveBase(left_motor, right_motor, wheel_diameter=80, axle_track=120)
+robot = DriveBase(left_motor, right_motor, wheel_diameter=80, axle_track=170)
 
 # Claire
-commands =  [(0, 1, 0), (0, 2, 0), (1, 2, 1), (2, 2, 1), (1, 2, 0), (1, 1, 0), (2, 1, 1), (2, 0, 0), (1, 0, 1)]
+commands =  [(0, 0, 0), (1, 0, 0), (2, 0, 0), (3, 0, 0), (3, 1, 1), (3, 2, 1), (2, 2, 0), (2, 1, 1), (1, 1, 1), (1, 0, 0), (0, 0, 0), (0, 1, 1), (0, 2, 1)]
 
 # commands = [
 #     (1, 0, 0),
@@ -55,6 +55,7 @@ DRIVE_SPEED = 70
 DRIVE_ADJUSTMENT_ANGLE = 5
 LOWER_REFLECTION_BOUNDARY = 6
 UPPER_REFLECTION_BOUNDARY = 8
+DRIVE_BACKWARDS_FOR_SECONDS = 2
 
 """
 possible commands are:
@@ -72,12 +73,12 @@ class Controls:
         self.light_sensor = light_sensor
 
         self._current_position = current_position
-        self._direction = "N"
+        self._direction = "S"
 
     def _choose_direction_to_go(self, next_position) -> str:
-        if next_position[0] > self._current_position[0]:
+        if next_position[0] < self._current_position[0]:
             return "N"
-        elif next_position[0] < self._current_position[0]:
+        elif next_position[0] > self._current_position[0]:
             return "S"
         elif next_position[1] > self._current_position[1]:
             return "E"
@@ -143,7 +144,7 @@ class Controls:
             if (lv < UPPER_REFLECTION_BOUNDARY or rv < UPPER_REFLECTION_BOUNDARY):
                 ev3.speaker.beep()
                 if not pushing:
-                    robot.straight(165)
+                    robot.straight(140)
                     break
                 
                 self.drive_backwards()
@@ -152,9 +153,23 @@ class Controls:
     
     # TODO: inverse of forwards, not tested
     def drive_backwards(self):
-        robot.straight(-100)
+        robot.straight(-80)
         self.turn("turnaround")
+        robot.straight(-80)
         self.drive_straight()
+        
+    def good_drive_backwards(self):
+        stamp = time.time()
+        while True:
+            reflection = self.light_sensor.reflection()
+            if reflection > UPPER_REFLECTION_BOUNDARY:
+                robot.drive(-DRIVE_SPEED, -DRIVE_ADJUSTMENT_ANGLE)
+            elif reflection < LOWER_REFLECTION_BOUNDARY:
+                robot.drive(-DRIVE_SPEED, DRIVE_ADJUSTMENT_ANGLE)
+            
+            if time.time() > stamp + DRIVE_BACKWARDS_FOR_SECONDS:
+                break
+
 
     """
     This if statements allow for easier choosing of the current directions after turn
