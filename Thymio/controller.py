@@ -1,7 +1,6 @@
 from random import random
 
-from shapely.geometry import LineString
-from numpy import sin, cos, sqrt
+from sensor import Sensor
 
 
 class Controller:
@@ -13,12 +12,8 @@ class Controller:
         self.y = 0.0  # robot position in meters - y direction - positive up
         self.q = 0.0  # robot heading with respect to x-axis in radians
 
-        self.middle_ray = LineString(
-            [
-                (self.x, self.y),
-                (self.x + cos(self.q) * 2 * (W + H), (self.y + sin(self.q) * 2 * (W + H)))
-            ])  # a line from robot to a point outside arena in direction of q
+        # array of 5 sensors offset towards the front
+        self.sensors = [Sensor(W, H, (0.35 * i)) for i in range(-2, 3)]
 
-    def distance_to_wall(self, world):
-        s = world.intersection(self.middle_ray)
-        return sqrt((s.x - self.x) ** 2 + (s.y - self.y) ** 2)  # distance to wall
+    def distances_to_wall(self, world):
+        return [sensor.distance_to_wall(self.x, self.y, self.q, world) for sensor in self.sensors]

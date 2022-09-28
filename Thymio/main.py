@@ -15,7 +15,7 @@ controller = Controller(simulator.W, simulator.H)
 with open("trajectory.dat", "w") as file:
     for cnt in range(5000):
         # simple single-ray sensor
-        distance = controller.distance_to_wall(simulator.world)
+        distance = controller.distances_to_wall(simulator.world)[2]
 
         # simple controller - change direction of wheels every 10 seconds (100*robot_timestep) unless close to wall then turn on spot
         if distance < 0.5:
