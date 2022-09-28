@@ -1,6 +1,16 @@
 from numpy import sin, cos, sqrt
 from shapely.geometry import LineString
 
+map = {
+    "8.2": 1080,
+    "8": 1280,
+    "7.8": 1390,
+    "7.6": 1420,
+    "7.2": 1560,
+    "7": 1630,
+    "0": 4800
+
+}
 
 class Sensor:
     def __init__(self, W, H, offset: float):
