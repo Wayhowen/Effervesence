@@ -52,7 +52,7 @@ right_directions = ["N", "E", "S", "W"]
 left_directions = ["N", "W", "S", "E"]
 
 TURN_BY = 95
-DRIVE_SPEED = 140
+DRIVE_SPEED = 70
 DRIVE_ADJUSTMENT_ANGLE = 5
 LOWER_REFLECTION_BOUNDARY = 6
 UPPER_REFLECTION_BOUNDARY = 8

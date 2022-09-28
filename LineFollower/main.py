@@ -231,6 +231,13 @@ if __name__ == "__main__":
             else:
                 shortened_commands.append(rc)
     
+    for i, r in enumerate(shortened_commands):
+        if (r == "left" or r =="right") and (shortened_commands[i - 1] == "double_push" or shortened_commands[i - 1] == "push"):
+            if r == "left":
+                shortened_commands[i] = "right"
+            elif r =="right":
+                shortened_commands[i] = "left"
+    
     print(shortened_commands)
         
     for robot_command in shortened_commands:
