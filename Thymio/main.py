@@ -34,4 +34,4 @@ with open("trajectory.dat", "w") as file:
             break
 
         if cnt % 50 == 0:
-            file.write(f"{controller.x}, {controller.y}, {cos(controller.q) * 0.2}, {sin(controller.q)}\n")
+            file.write(f"{controller.x}, {controller.y}, {cos(controller.q) * 0.2}, {sin(controller.q) * 0.2}\n")
