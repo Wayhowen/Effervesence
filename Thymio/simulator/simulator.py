@@ -1,6 +1,6 @@
 from numpy import sin, cos
 
-from controller import Controller
+from simulator.robot_model.controller import Controller
 from shapely.geometry import LinearRing
 
 

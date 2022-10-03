@@ -12,6 +12,7 @@ map = {
 
 }
 
+
 class Sensor:
     def __init__(self, W, H, offset: float):
         self.W = W

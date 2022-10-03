@@ -1,3 +1,6 @@
+import os
+import sys
+
 from numpy import cos, sin
 from shapely.geometry import Point
 from random import random
@@ -6,8 +9,8 @@ from random import random
 
 # Constants
 ###########
-from controller import Controller
-from simulator import Simulator
+from simulator.robot_model.controller import Controller
+from simulator.simulator import Simulator
 
 simulator = Simulator()
 controller = Controller(simulator.W, simulator.H)

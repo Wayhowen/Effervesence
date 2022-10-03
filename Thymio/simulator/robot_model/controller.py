@@ -1,6 +1,6 @@
 from random import random
 
-from sensor import Sensor
+from .sensor import Sensor
 
 
 class Controller:

@@ -42,7 +42,7 @@ def config_plot(title, data, data_type):
     plt.show()
 
 def plot():
-    with open('./trajectory.dat', 'r') as f:
+    with open('../trajectory.dat', 'r') as f:
         lines = f.readlines()
         vectorList = [list(map(float,line.split(", "))) for line in lines]
         vectors = np.array(vectorList)[:,:2]
