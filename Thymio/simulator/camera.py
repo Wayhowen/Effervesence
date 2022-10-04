@@ -3,15 +3,21 @@ import cv2 as cv
 import numpy as np
 
 LOWER_YELLOW = (20, 50, 100)
-UPPER_YELLOW = (120, 255, 255)
+UPPER_YELLOW = (80, 255, 255)
 PREV_CIRCLE = None
 
 class Scope:
+    # TODO: might be useful https://mattmaulion.medium.com/color-image-segmentation-image-processing-4a04eca25c0
     def hsv(self, f):
         hsv = cv2.cvtColor(f, cv2.COLOR_BGR2HSV)
-        # cv2.imshow("hsv", hsv)
         mask = cv2.inRange(hsv, LOWER_YELLOW, UPPER_YELLOW)
-        return cv2.bitwise_and(f, f, mask=mask)
+        thresholded_img = cv2.bitwise_and(f, f, mask=mask)
+
+        # erosion
+        kernel = np.ones((3, 3), np.uint8)
+        binary_img = cv2.erode(thresholded_img, kernel, iterations=1)
+
+        return binary_img
 
     def find_circles(self, bf, f):
         global PREV_CIRCLE
@@ -19,6 +25,7 @@ class Scope:
                                   maxRadius=200)
         if circles is not None:
             circles = np.uint16(np.around(circles))
+            print(circles)
             chosen = None
             for i in circles[0, :]:
                 if chosen is None:
@@ -52,9 +59,12 @@ if __name__ == "__main__":
         # cv.imshow('blur_frame', blur_frame)
 
         res = s.hsv(frame)
-        s.find_circles(res, frame)
+        # s.find_circles(res, frame)
 
-        # cv2.imshow("res", res)
+        gray_frame = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
+        s.find_circles(gray_frame, gray_frame)
+
+        # cv2.imshow("res", gray_frame)
 
         if cv.waitKey(1) & 0xFF == ord("q"):
             break
