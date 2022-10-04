@@ -21,8 +21,8 @@ class Scope:
 
     def find_circles(self, bf, f):
         global PREV_CIRCLE
-        circles = cv.HoughCircles(bf, cv.HOUGH_GRADIENT, 1.2, 100, param1=100, param2=30, minRadius=75,
-                                  maxRadius=200)
+        circles = cv.HoughCircles(bf, cv.HOUGH_GRADIENT, 1.2, 45, param1=75, param2=40, minRadius=0,
+                                  maxRadius=300)
         if circles is not None:
             circles = np.uint16(np.around(circles))
             print(circles)
@@ -62,7 +62,8 @@ if __name__ == "__main__":
         # s.find_circles(res, frame)
 
         gray_frame = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
-        s.find_circles(gray_frame, gray_frame)
+        blur_frame = cv.GaussianBlur(gray_frame, (17, 17), 0)  # larger numbers in tuple (has to be odd) - more blur
+        s.find_circles(blur_frame, blur_frame)
 
         # cv2.imshow("res", gray_frame)
 
