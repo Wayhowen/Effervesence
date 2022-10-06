@@ -6,6 +6,9 @@ LOWER_YELLOW = (20, 50, 100)
 UPPER_YELLOW = (80, 255, 255)
 PREV_CIRCLE = None
 
+# statistical significance - explains that if we done something enough then it isnt a coincidence , if chance
+# is below 5% then we have this significance most likely
+
 class Scope:
     # TODO: might be useful https://mattmaulion.medium.com/color-image-segmentation-image-processing-4a04eca25c0
     def hsv(self, f):
