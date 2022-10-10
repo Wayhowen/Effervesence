@@ -1,4 +1,3 @@
-
 #!/usr/bin/python3
 import os
 
@@ -15,6 +14,19 @@ from threading import Thread
 class Thymio:
     def __init__(self):
         self.aseba = self.setup()
+
+    def move(self):
+        count = 1
+        left_wheel_velocity = 200
+        right_wheel_velocity = 200
+        # Get initial sensor values
+
+        while count < 500:
+            self.drive(left_wheel_velocity,right_wheel_velocity)
+            #robot.sens()
+            count += 1
+
+        self.stop()
 
     def drive(self, left_wheel_speed, right_wheel_speed):
         #print("Left_wheel_speed: " + str(left_wheel_speed))
@@ -39,6 +51,8 @@ class Thymio:
         print(prox_horizontal[2])
         print(prox_horizontal[3])
         print(prox_horizontal[4])
+    
+      
 
     ############## Bus and aseba setup ######################################
 
