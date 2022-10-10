@@ -3,7 +3,7 @@ import cv2 as cv
 import numpy as np
 
 LOWER_YELLOW = (20, 50, 100)
-UPPER_YELLOW = (80, 255, 255)
+UPPER_YELLOW = (100, 255, 255)
 PREV_CIRCLE = None
 
 # statistical significance - explains that if we done something enough then it isnt a coincidence , if chance

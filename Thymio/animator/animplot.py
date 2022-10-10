@@ -5,7 +5,7 @@ import numpy as np
 
 
 def plot():
-    with open('../trajectory.dat', 'r') as f:
+    with open('trajectory.dat', 'r') as f:
         lines = f.readlines()
         vector_list = [list(map(float, line.split(", "))) for line in lines]
         vectors = np.array(vector_list)
