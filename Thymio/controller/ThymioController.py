@@ -10,14 +10,13 @@ import dbus
 import dbus.mainloop.glib
 from threading import Thread
 
-
 class Thymio:
     def __init__(self):
         self.aseba = self.setup()
 
     def move(self):
         count = 1
-        left_wheel_velocity = 200
+        left_wheel_velocity = -200
         right_wheel_velocity = 200
         # Get initial sensor values
 
@@ -27,6 +26,12 @@ class Thymio:
             count += 1
 
         self.stop()
+    
+    def turn(self, l, r):
+        left_wheel_velocity = l
+        right_wheel_velocity = r
+        # Get initial sensor values
+        self.drive(left_wheel_velocity,right_wheel_velocity)
 
     def drive(self, left_wheel_speed, right_wheel_speed):
         #print("Left_wheel_speed: " + str(left_wheel_speed))

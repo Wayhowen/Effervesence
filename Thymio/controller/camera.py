@@ -1,6 +1,7 @@
 import cv2
 import cv2 as cv
 import numpy as np
+from picamera import PiCamera
 
 LOWER_YELLOW = (20, 50, 100)
 UPPER_YELLOW = (100, 255, 255)
@@ -41,25 +42,35 @@ class Scope:
             cv.circle(f, (chosen[0], chosen[1]), chosen[2], (255, 0, 255), 3)
             PREV_CIRCLE = chosen
 
-        cv.imshow("circles", f)
+        #cv.imshow("circles", f)
 
 
 if __name__ == "__main__":
-    video_capture = cv.VideoCapture(0)
+    #video_capture = cv.VideoCapture(0)
+    camera = PiCamera()
 
     prev_circle = None
     dist = lambda x1, y1, x2, y2: (x1-x2)**2 + (y1-y2)**2
 
     s = Scope()
     while True:
-        ret, frame = video_capture.read()
-        if not ret:
-            break
+        width = 640
+        height = 480
+
+        camera.resolution = (width,height)
+        camera.framerate = 24
+        image = np.empty((height,width,3), dtype=np.uint8)
+        camera.capture(image,'bgr')
+        frame = cv2.rotate(image, cv2.ROTATE_180)
+        #ret, frame = video_capture.read()
+        #if not ret:
+        #    break
         # cv.imshow("frame", frame)
 
         # gray_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         # blur_frame = cv.GaussianBlur(gray_frame, (17, 17), 0) # larger numbers in tuple (has to be odd) - more blur
         # cv.imshow('blur_frame', blur_frame)
+        
 
         res = s.hsv(frame)
         # s.find_circles(res, frame)
@@ -72,5 +83,5 @@ if __name__ == "__main__":
 
         if cv.waitKey(1) & 0xFF == ord("q"):
             break
-    video_capture.release()
+    #video_capture.release()
     cv2.destroyAllWindows()
