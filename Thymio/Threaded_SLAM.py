@@ -17,7 +17,7 @@ pose = [0, 0, 0]
 # Ideally we could use all 250 or so samples that the RPLidar delivers in one
 # scan, but on slower computers you'll get an empty map and unchanging position
 # at that rate.
-MIN_SAMPLES   = 200
+MIN_SAMPLES   = 100
 # Connect to Lidar unit
 lidar = Lidar(LIDAR_DEVICE)
 # Initialize an empty trajectory
@@ -65,7 +65,7 @@ def updateLidar(thread_name, delay):
 
         # Get current robot position
         pose[0], pose[1], pose[2] = slam.getpos()
-        print(f"x:{pose[0]} y:{pose[1]} theta {pose[2]}")
+        print(f"x:{pose[0]/60} y:{pose[1]/60} theta {pose[2]}")
         # Get current map bytes as grayscale
         slam.getmap(mapbytes)
         time.sleep(delay)
@@ -85,22 +85,28 @@ def saveMap():
     image = Image.frombuffer('L', (MAP_SIZE_PIXELS, MAP_SIZE_PIXELS), mapbytes, 'raw', 'L', 0, 1)
     image.save("map.jpg")
 
-def turnTest(delay):
+def move(steps):
+    speed = 190
+    robot.drive(speed, speed)
+    time.sleep(steps)
+    robot.stop()
+
+def turn(angle, delay):
     pos = getGridPosition()
     count = 0
     speed = 32
-    theta = pos[2]-90.0
+    theta = pos[2]+angle
     cycle_time = time.time()
     #time.sleep(5)
 
     while True:
         pos = getGridPosition()
+        print(pos[2])
         if pos[2] < theta+1 and pos[2] > theta-1:
             robot.stop()
             time.sleep(5)
             break
         if count % 2 == 0:
-            #print("try")
             if pos[2] > theta+1:
                 robot.turn(-speed, speed)
             elif pos[2] < theta-1:
@@ -109,26 +115,39 @@ def turnTest(delay):
         
         count = count+1
 
+        # makes turning more precise overtimer
         if time.time()-cycle_time > 20.0 and speed>8:
             print("slow down")
             speed = speed/2
             cycle_time = time.time()
+        
+        #for "threading"
         time.sleep(delay)
 
 if __name__ == "__main__":
-    t1 = threading.Thread(target=updateLidar, args=('thread1', 0.05))
+    t1 = threading.Thread(target=updateLidar, args=('thread1', 0.0))
     t1.daemon = True
     t1.start()
     robot = Thymio()
 
     try:
-        turnTest(0.1)
+        while True:
+            val = input("Next command:")
+            print(val)
+            if val == "w":
+                move(1)
+            elif val == "a":
+                turn(-90,0.1)
+            elif val == "d":
+                turn(90,0.1)
+            elif val == "q":
+                break
         saveMap()
     except KeyboardInterrupt:
         print("Interrupted")
     finally:
         runThread = False
-        t1.join()
+        #t1.join()
         lidar.stop()
         lidar.disconnect()
         robot.stop()
