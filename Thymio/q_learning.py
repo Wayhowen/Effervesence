@@ -5,6 +5,8 @@ import numpy as np
 
 class QLearner:
     def __init__(self, states, actions, initial_state):
+        self.states = states
+        self.actions = actions
         self.state = initial_state
 
         self.q_table = np.zeros((len(states), len(actions)))
@@ -17,7 +19,7 @@ class QLearner:
             """
             Explore: select a random action
             """
-            action = actions[random.randint(0, len(actions))]
+            action = random.randint(0, len(self.actions) - 1)
         else:
             """
             Exploit: select the action with max value (future reward)
@@ -28,11 +30,11 @@ class QLearner:
 
         old_value = self.q_table[self.state, action]
         next_max = np.max(self.q_table[next_state])
-        self.q_table[self.state, action] = self.update_rule(old_value, next_max)
+        self.q_table[self.state, action] = self.update_rule(old_value, next_max, reward)
 
         self.state = next_state
 
-    def update_rule(self, old_value, next_max):
+    def update_rule(self, old_value, next_max, reward):
         return (1 - self.learning_rate) * old_value + self.learning_rate * (reward + self.discount_factor * next_max - old_value)
 
 

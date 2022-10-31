@@ -17,3 +17,7 @@ class Controller:
 
     def distances_to_wall(self, world):
         return [sensor.distance_to_wall(self.x, self.y, self.q, world) for sensor in self.sensors]
+
+    def drive(self, left_wheel_velocity, right_wheel_velocity):
+        self.left_wheel_velocity = left_wheel_velocity
+        self.right_wheel_velocity = right_wheel_velocity
