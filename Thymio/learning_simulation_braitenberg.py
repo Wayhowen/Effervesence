@@ -55,6 +55,7 @@ if __name__ == '__main__':
                 file.write(f"{controller.x}, {controller.y}, {cos(controller.q) * 0.2}, {sin(controller.q) * 0.2}\n")
 
     print(q_leaner.q_table)
+    q_leaner.save_q_table()
             #
             # # check collision with arena walls
             # if simulator.world.distance(Point(controller.x, controller.y)) < simulator.L / 2:

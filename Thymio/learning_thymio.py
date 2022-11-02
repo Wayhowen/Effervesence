@@ -43,11 +43,11 @@ class Thymio:
 
     def detect(self, reward):
         distance = self.aseba.GetVariable("thymio-II", "prox.horizontal")
-        if distance[2] < 0.49:
+        if distance[2] < 3000:
             return self.states.index("INFRONT"), -10-reward
-        elif distance[0] < 0.49 or distance[1] < 0.49:
+        elif distance[0] < 3000 or distance[1] < 3000:
             return self.states.index("LEFT"), reward+10
-        elif distance[3] < 0.49 or distance[4] < 0.49:
+        elif distance[3] < 3000 or distance[4] < 3000:
             return self.states.index("RIGHT"), reward+10
         else:
             return self.states.index("EXPLORE"), reward+10
@@ -124,3 +124,4 @@ if __name__ == '__main__':
         print("asebamodulla killed")
     finally:
         print(q_leaner.q_table)
+        q_leaner.save_q_table()
