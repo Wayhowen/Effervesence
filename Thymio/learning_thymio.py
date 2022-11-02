@@ -3,14 +3,12 @@ import os
 
 # initialize asebamedulla in background and wait 0.3s to let
 # asebamedulla startup
-from q_learning import QLearner
-
 os.system("(asebamedulla ser:name=Thymio-II &) && sleep 0.3")
-import matplotlib.pyplot as plt
+
+from q_learning import QLearner
 from time import sleep
 import dbus
 import dbus.mainloop.glib
-from threading import Thread
 
 
 class Thymio:
@@ -104,9 +102,9 @@ class Thymio:
 
 # ------------------ Main -------------------------
 
-def main(controller, q_learner):
+def main(controller, q):
     for cnt in range(10000):
-        q_leaner.learn(controller.step_function)
+        q.learn(controller.step_function)
 
 
 # ------------------- Main ------------------------
