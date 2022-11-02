@@ -9,6 +9,7 @@ from time import sleep
 import dbus
 import dbus.mainloop.glib
 from threading import Thread
+from q_learning import QLearner
 
 class Thymio:
     def __init__(self):
@@ -48,7 +49,6 @@ class Thymio:
         self.aseba.SendEventName("motor.target", [left_wheel, right_wheel])
 
     def sens(self):
-
         prox_horizontal = self.aseba.GetVariable("thymio-II", "prox.horizontal")
         print("Sensing:")
         print(prox_horizontal[0])
@@ -60,12 +60,12 @@ class Thymio:
     def getdist(self):
         prox_horizontal = self.aseba.GetVariable("thymio-II", "prox.horizontal")
         dist = prox_horizontal[2]
-        if dist > 2000:
-            return "TOO CLOSE"
-        elif dist < 1900:
-            return "TOO FAR"
+        if dist < 1900:
+            return 0
+        elif dist > 2000:
+            return 1
         else:
-            return "PERFECT"
+            return 2
     
     def act(self, action):
         if action == "FORWARDS":
@@ -82,7 +82,7 @@ class Thymio:
     def explore(self, action):
         self.act(action)
         state = self.getdist()
-        if state == "TOO CLOSE" or state == "TOO FAR":
+        if state == 1 or state == 2:
             val = -1
         else:
             val = 1
@@ -124,14 +124,18 @@ class Thymio:
 # ------------------ Main -------------------------
 
 def main():
-    while True:
-        dist = robot.getdist()
-        if dist == "TOO FAR":
-            robot.act("FORWARDS")
-        elif dist == "TOO CLOSE":
-            robot.act("BACKWARDS")
-        else:
-            robot.act("STOP")
+    states = ("TOO FAR", "TOO CLOSE", "PERFECT")
+    actions = ("FORWARDS", "BACKWARDS", "STOP")
+    q_leaner = QLearner(states, actions, 0)
+
+    for i in range(1, 10001):
+        epochs, penalties, reward, = 0, 0, 0
+        done = False
+
+        q_leaner.learn(robot.explore)
+    
+    print("Done")
+    print(q_leaner.q_table)
 
 
 # ------------------- Main ------------------------
@@ -140,8 +144,8 @@ if __name__ == '__main__':
     try:
         robot = Thymio()
         main()
-        sleep()
-    except:
+    except Exception as e:
+        print(e)
         print("Stopping robot")
         robot.stop()
         exit_now = True

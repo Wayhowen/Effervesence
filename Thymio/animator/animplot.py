@@ -5,7 +5,7 @@ import numpy as np
 
 
 def plot():
-    with open('trajectory.dat', 'r') as f:
+    with open('animator/trajectory.dat', 'r') as f:
         lines = f.readlines()
         vector_list = [list(map(float, line.split(", "))) for line in lines]
         vectors = np.array(vector_list)
@@ -43,5 +43,5 @@ ani = FuncAnimation(fig, animate, frames=row,
 plt.close()
 
 # Save the animation as an animated GIF
-ani.save("simulation.gif", dpi=300,
+ani.save("animator/simulation.gif", dpi=300,
          writer=PillowWriter(fps=10))

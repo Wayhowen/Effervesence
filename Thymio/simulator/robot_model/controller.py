@@ -21,3 +21,6 @@ class Controller:
     def drive(self, left_wheel_velocity, right_wheel_velocity):
         self.left_wheel_velocity = left_wheel_velocity
         self.right_wheel_velocity = right_wheel_velocity
+    
+    def get_speed(self):
+        return self.left_wheel_velocity, self.left_wheel_velocity
