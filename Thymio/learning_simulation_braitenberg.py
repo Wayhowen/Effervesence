@@ -14,40 +14,35 @@ from simulator.simulator import Simulator
 
 
 if __name__ == '__main__':
-    states = ("INFRONT", "LEFT", "RIGHT", "EXPLORE", "BACKINGUP", "TURNING")
-    actions = ("GOFORWARDS", "GOBACKWARDS", "GOLEFT", "GORIGHT")
+    states = ("INFRONT", "LEFT", "RIGHT", "EXPLORE")
+    actions = ("GOFORWARDS", "GOLEFT", "GORIGHT")
     q_leaner = QLearner(states, actions, states.index("EXPLORE"))
     simulator = Simulator()
     controller = Controller(simulator.W, simulator.H)
 
 
     def step_function(action):
+        reward = 0
         if action == 0:
             controller.drive(0.4, 0.4)
+            reward = reward+10
         elif action == 1:
-            controller.drive(-0.4, -0.4)
-        elif action == 2:
-            controller.drive(-0.4, 0.4)
+            controller.drive(-0.8, 0.8)
         else:
-            controller.drive(0.4, -0.4)
+            controller.drive(0.8, -0.8)
         # step simulation
         simulator.step(controller)
 
         prox_horizontal = controller.distances_to_wall(simulator.world)
-        prox_odom_l, prox_odom_r = controller.get_speed()
         print(prox_horizontal[2])
         if prox_horizontal[2] < 0.49:
-            return states.index("INFRONT"), 5
+            return states.index("INFRONT"), -10-reward
         elif prox_horizontal[0] < 0.49 or prox_horizontal[1] < 0.49:
-            return states.index("LEFT"), 10
+            return states.index("LEFT"), reward+10
         elif prox_horizontal[3] < 0.49 or prox_horizontal[4] < 0.49:
-            return states.index("RIGHT"), 10
-        elif prox_odom_l+prox_odom_r < 0.0 :
-            return states.index("BACKINGUP"), 1
-        elif (prox_odom_l < 0.0 and prox_odom_r > 0.0) or (prox_odom_l > 0.0 and prox_odom_r < 0.0):
-            return states.index("TURNING"), 2
+            return states.index("RIGHT"), reward+10
         else:
-            return states.index("EXPLORE"), 20
+            return states.index("EXPLORE"), reward+10
 
     with open("animator/trajectory.dat", "w") as file:
         for cnt in range(10000):
