@@ -32,7 +32,6 @@ if __name__ == '__main__':
         simulator.step(controller)
 
         distance = controller.distances_to_wall(simulator.world)[2]
-        print(distance)
         if distance < 0.49:
             return states.index("TOO CLOSE"), -1
         elif distance > 0.51:
@@ -44,7 +43,9 @@ if __name__ == '__main__':
         q_leaner.learn(step_function)
         # check collision with arena walls
         if simulator.world.distance(Point(controller.x, controller.y)) < simulator.L / 2:
-            break
+            q_leaner.save_q_table()
+
+    q_leaner.save_q_table()
 
     print(q_leaner.q_table)
             #

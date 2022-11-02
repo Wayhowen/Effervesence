@@ -1,5 +1,7 @@
 import random
+from os.path import exists
 
+import numpy
 import numpy as np
 
 
@@ -9,10 +11,24 @@ class QLearner:
         self.actions = actions
         self.state = initial_state
 
-        self.q_table = np.zeros((len(states), len(actions)))
+        self.q_table = None
+        self.load_q_table()
+
         self.epsilon = 0.2
         self.learning_rate = 0.1  # between 0 and 1 / alpha
         self.discount_factor = 0.6  # between 0 and 1 / gamma
+
+    def load_q_table(self):
+        if exists("table.txt"):
+            with open("table.txt", "rb") as file:
+                self.q_table = numpy.load(file, allow_pickle=True)
+                print(self.q_table)
+        else:
+            self.q_table = np.zeros((len(self.states), len(self.actions)))
+
+    def save_q_table(self):
+        with open("table.txt", "wb") as file:
+            numpy.save(file, self.q_table, allow_pickle=True)
 
     def learn(self, step_function):
         if random.uniform(0, 1) < self.epsilon:
