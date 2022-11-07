@@ -55,16 +55,16 @@ class Thymio:
     def step_function(self, action):
         reward = 0
         if action == 0:
-            self.drive(50, 50)
+            self.drive(100, 100)
             reward += 10
         elif action == 1:
-            self.drive(-100, 100)
+            self.drive(-200, 200)
         elif action == 2:
-            self.drive(100, -100)
-        self.stop()
+            self.drive(200, -200)
 
         # time step
-        sleep(0.1)
+        sleep(0.2)
+
         return self.detect(reward)
 
     ############## Bus and aseba setup ######################################
