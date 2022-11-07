@@ -45,7 +45,7 @@ class Evolve:
     combination of truncation and roulette
     """
     def _select_offspring(self, offspring_with_fitness: Dict[Chromosome, float]) -> List[Chromosome]:
-        sorted_offspring = dict(sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1]))
+        sorted_offspring = dict(sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True))
 
         # truncation
         new_offspring = list(sorted_offspring.keys())[:self.truncation_size]
@@ -60,13 +60,18 @@ class Evolve:
         new_offspring: List[Chromosome] = []
         pairs = [[x, y] for x in selected_offspring for y in selected_offspring]
         for pair in pairs:
-            new_offspring.extend(Chromosome((pair[0].q_table + pair[1].q_table) / 2))
+            new_offspring.append(Chromosome((pair[0].q_table + pair[1].q_table) / 2))
         return new_offspring
 
-
-    def _mutate(self, new_offspring: List[Chromosome]) -> List[Chromosome]:
-        #mut = np.random.uniform(-20, 20, (4,3))
-        pass
+    def _mutate(self, offspring: List[Chromosome]) -> List[Chromosome]:
+        new_offspring: List[Chromosome] = []
+        for _ in range(self.population_size - len(offspring)):
+            random_chromosome = np.random.choice(new_offspring)
+            random_mask = np.stack([np.random.choice(a=[0, 1], size=random_chromosome.q_table.shape[1], p=[0.25, 0.75]) for _ in range(random_chromosome.q_table.shape[0])])
+            masked_q_table = random_chromosome.q_table * random_mask
+            masked_q_table[masked_q_table == 0] = random.uniform(np.min(masked_q_table), np.max(masked_q_table))
+            new_offspring.append(Chromosome(masked_q_table))
+        return new_offspring
 
     def _compute_fitness(self, offspring: Chromosome) -> float:
         return self.evaluator.eval(offspring.q_table)
