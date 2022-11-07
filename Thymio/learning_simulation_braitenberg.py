@@ -23,26 +23,39 @@ if __name__ == '__main__':
 
     def step_function(action):
         reward = 0
+        prox_horizontal = controller.distances_to_wall(simulator.world)
+
         if action == 0:
             controller.drive(0.4, 0.4)
-            reward = reward+10
+            if prox_horizontal[2] < 0.49:
+                reward -= 10
+            else:
+                reward += 20
         elif action == 1:
             controller.drive(-0.8, 0.8)
+            if prox_horizontal[0] > 0.49 or prox_horizontal[1] > 0.49:
+                reward -= 10
+            else:
+                reward += 10    
         else:
             controller.drive(0.8, -0.8)
+            if prox_horizontal[3] > 0.49 or prox_horizontal[4] > 0.49:
+                reward -= 10
+            else:
+                reward += 10 
         # step simulation
         simulator.step(controller)
 
-        prox_horizontal = controller.distances_to_wall(simulator.world)
+        
         print(prox_horizontal[2])
         if prox_horizontal[2] < 0.49:
-            return states.index("INFRONT"), -10-reward
+            return states.index("INFRONT"), reward
         elif prox_horizontal[0] < 0.49 or prox_horizontal[1] < 0.49:
-            return states.index("LEFT"), reward+10
+            return states.index("LEFT"), reward
         elif prox_horizontal[3] < 0.49 or prox_horizontal[4] < 0.49:
-            return states.index("RIGHT"), reward+10
+            return states.index("RIGHT"), reward
         else:
-            return states.index("EXPLORE"), reward+10
+            return states.index("EXPLORE"), reward
 
     with open("animator/trajectory.dat", "w") as file:
         for cnt in range(10000):
