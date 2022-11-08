@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import random
 from fitness_simulation import Evaluator
@@ -18,9 +19,13 @@ class Evolve:
     def work(self):
         initial_population = self._generate_population()
         offspring_with_fitness = {offspring: self._compute_fitness(offspring) for offspring in initial_population}
+        n = 0
 
         # while not converged
         while not self._is_converged(offspring_with_fitness):
+            print("Gen:", n)
+            n += 1
+
             new_offspring: List[Chromosome] = []
 
             # select
@@ -37,6 +42,13 @@ class Evolve:
             
             # compute fitness
             offspring_with_fitness = {offspring: self._compute_fitness(offspring) for offspring in new_offspring}
+            best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
+            print("Best table this gen:", best[0].get_table())
+            print("Score:", best[1])
+
+        
+        best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
+        return best
 
     def _generate_population(self, size=60) -> List[Chromosome]:
         return [Chromosome() for _ in range(size)]
@@ -51,8 +63,8 @@ class Evolve:
         new_offspring = list(sorted_offspring.keys())[:self.truncation_size]
 
         # roulette
-        for _ in range(self.selection_size - self.truncation_size):
-            new_offspring.extend(random.choice(list(sorted_offspring.keys())[self.truncation_size:]))
+        i = list(sorted_offspring.keys())[self.truncation_size:]
+        new_offspring.extend(list(random.sample(i, self.selection_size - self.truncation_size)))
 
         return new_offspring
 
@@ -74,7 +86,7 @@ class Evolve:
         return new_offspring
 
     def _compute_fitness(self, offspring: Chromosome) -> float:
-        return self.evaluator.eval(offspring.q_table)
+        return self.evaluator.eval(offspring.get_table())
 
     def _is_converged(self, offspring_with_fitness: Dict[Chromosome, float]) -> bool:
         current_fitness_score = sum(offspring_with_fitness.values()) / len(offspring_with_fitness)
@@ -85,4 +97,12 @@ class Evolve:
 
 
 if __name__ == "__main__":
+    print("Training Started...")
+    start = time.time()
     e = Evolve(60, 8)
+    result = e.work()
+    print("Training Complete")
+    print("Best table:", result[0].get_table())
+    print("Score:", result[1])
+    end = time.time()
+    print("Time training:", end - start)

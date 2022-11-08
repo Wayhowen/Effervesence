@@ -27,7 +27,7 @@ class Evaluator:
 
         if action == 0:
             self.controller.drive(0.4, 0.4)
-            self.fitness += 1
+            self.fitness += 10
         elif action == 1:
             self.controller.drive(-0.8, 0.8)   
         else:

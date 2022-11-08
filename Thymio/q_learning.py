@@ -11,7 +11,7 @@ class QLearner:
         self.state = initial_state
 
         self.q_table = q_table
-        if q_table == None:
+        if q_table is None:
             self.load_q_table()
 
         self.epsilon = epsilon

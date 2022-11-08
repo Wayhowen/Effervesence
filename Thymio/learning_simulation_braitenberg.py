@@ -1,6 +1,6 @@
 import pkgutil
 
-from numpy import cos, sin
+import numpy as np
 from shapely.geometry import Point
 from random import random
 
@@ -16,7 +16,12 @@ from simulator.simulator import Simulator
 if __name__ == '__main__':
     states = ("INFRONT", "LEFT", "RIGHT", "EXPLORE")
     actions = ("GOFORWARDS", "GOLEFT", "GORIGHT")
-    q_leaner = QLearner(states, actions, states.index("EXPLORE"))
+    qt = np.array([[ 3.10624095, 8.38157012, -12.93252732],
+                    [ 10.01043967, 10.02261024, -0.67002202],
+                    [ -1.68985408, 12.18825473, 3.78742241],
+                    [ 0.94576732, -15.20442771, -11.75258557]])
+
+    q_leaner = QLearner(states, actions, states.index("EXPLORE"), qt, 1.0)
     simulator = Simulator()
     controller = Controller(simulator.W, simulator.H)
 
@@ -65,7 +70,7 @@ if __name__ == '__main__':
                 break
             
             if cnt % 50 == 0:
-                file.write(f"{controller.x}, {controller.y}, {cos(controller.q) * 0.2}, {sin(controller.q) * 0.2}\n")
+                file.write(f"{controller.x}, {controller.y}, {np.cos(controller.q) * 0.2}, {np.sin(controller.q) * 0.2}\n")
 
     print(q_leaner.q_table)
     q_leaner.save_q_table()
