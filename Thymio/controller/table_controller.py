@@ -66,6 +66,13 @@ class TableController:
         sleep(0.2)
 
         return self.detect()
+    
+    def sendInformation(self, number):
+        self.aseba.SendEventName("prox.comm.tx", [number])
+    
+    def receiveInformation(self):
+        rx = self.aseba.GetVariable("thymio-II", "prox.comm.rx")
+        print(rx[0])
 
     def exec(self):
         action = np.argmax(self.q_table[self.state])
@@ -89,6 +96,9 @@ class TableController:
         asebaNetwork.LoadScripts(
             'thympi.aesl', reply_handler=self.dbusError, error_handler=self.dbusError
         )
+
+        #enable comm
+        asebaNetwork.SendEventName( "prox.comm.enable", [1])
 
         # scanning_thread = Process(target=robot.drive, args=(200,200,))
         return asebaNetwork
