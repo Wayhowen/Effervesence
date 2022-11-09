@@ -10,6 +10,7 @@ results in approximately 0.5cm per step
 Forward 20 step:
 motor speed 100,100 at an 0.2s interval
 results in approximately 13cm covered in total
+per step result in 0.65cm per step
 
 Turning right:
 motor speed 200,-200 at an 0.2s interval
