@@ -23,11 +23,13 @@ turning right one full revolution took 25.5 steps
 covering approximately an angle of 14.1 degrees each step
 """
 
+
 class Simulator:
     def __init__(self):
         self.R = 0.0225  # radius of wheels in meters
         self.L = 0.095  # distance between wheels in meters
 
+        # TODO: We need to reflect those changes in the animator
         self.W = 1.09  # width of arena
         self.H = 1.87  # height of arena
 

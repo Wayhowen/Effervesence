@@ -26,7 +26,7 @@ sensor_values = {
 }
 
 
-class Sensor:
+class SideSensor:
     def __init__(self, W, H, offset: float):
         self.W = W
         self.H = H
@@ -59,5 +59,4 @@ class Sensor:
                 (x + cos(q + self.offset) * 2 * (self.W + self.H), (y + sin(q + self.offset) * 2 * (self.W + self.H)))
             ])  # a line from robot to a point outside arena in direction of q
         s = world.intersection(ray)
-        print(s)
         return sqrt((s.x - x) ** 2 + (s.y - y) ** 2)  # distance to wall
