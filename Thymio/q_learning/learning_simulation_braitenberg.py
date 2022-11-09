@@ -62,7 +62,7 @@ if __name__ == '__main__':
         else:
             return states.index("EXPLORE"), reward
 
-    with open("animator/trajectory.dat", "w") as file:
+    with open("../animator/trajectory.dat", "w") as file:
         for cnt in range(10000):
             q_leaner.learn(step_function)
             # check collision with arena walls

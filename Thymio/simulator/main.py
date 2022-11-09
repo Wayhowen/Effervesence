@@ -1,5 +1,3 @@
-import pkgutil
-
 from numpy import cos, sin
 from shapely.geometry import Point
 from random import random

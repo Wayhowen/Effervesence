@@ -1,7 +1,7 @@
 import threading
 
 from buddy import BuddySaver
-from controller.lidar import Lidar
+from controller.modules.lidar.lidar import Lidar
 
 if __name__ == "__main__":
 
