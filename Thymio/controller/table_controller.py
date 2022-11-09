@@ -3,7 +3,7 @@ import os
 
 # initialize asebamedulla in background and wait 0.3s to let
 # asebamedulla startup
-os.system("(asebamedulla ser:name=Thymio-II &) && sleep 1")
+os.system("(asebamedulla ser:name=Thymio-II &) && sleep 3")
 
 import numpy as np
 from time import sleep
@@ -31,12 +31,14 @@ class TableController:
 
     def sens(self):
         prox_horizontal = self.aseba.GetVariable("thymio-II", "prox.horizontal")
+        reflected = self.aseba.GetVariable("thymio-II", "prox.ground.reflected")
         print("Sensing:")
         print(prox_horizontal[0])
         print(prox_horizontal[1])
         print(prox_horizontal[2])
         print(prox_horizontal[3])
         print(prox_horizontal[4])
+        print(reflected)
 
     def detect(self):
         distance = self.aseba.GetVariable("thymio-II", "prox.horizontal")
