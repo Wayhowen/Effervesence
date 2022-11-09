@@ -1,8 +1,8 @@
 import time
 import numpy as np
 import random
-from fitness_simulation import Evaluator
-from chromosome import Chromosome
+from q_learning.fitness_simulation import Evaluator
+from evolution.chromosome import Chromosome
 from typing import List, Dict
 
 class Evolve:

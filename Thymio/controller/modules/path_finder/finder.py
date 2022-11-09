@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from controller.path_finder.node import Node
+from controller.modules.path_finder.node import Node
 
 
 class Finder:

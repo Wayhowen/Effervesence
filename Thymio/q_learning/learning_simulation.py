@@ -1,8 +1,4 @@
-import pkgutil
-
-from numpy import cos, sin
 from shapely.geometry import Point
-from random import random
 
 # A prototype simulation of a differential-drive robot with one sensor
 

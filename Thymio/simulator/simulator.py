@@ -9,8 +9,8 @@ class Simulator:
         self.R = 0.0225  # radius of wheels in meters
         self.L = 0.095  # distance between wheels in meters
 
-        self.W = 2.0  # width of arena
-        self.H = 2.0  # height of arena
+        self.W = 1.09  # width of arena
+        self.H = 1.87  # height of arena
 
         # the world is a rectangular arena with width W and height H
         self.world = LinearRing(
