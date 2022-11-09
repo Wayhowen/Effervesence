@@ -2,7 +2,26 @@ from numpy import sin, cos
 
 from simulator.robot_model.controller import Controller
 from shapely.geometry import LinearRing
+"""
+Forward 1 step:
+motor speed 100,100 at an 0.2s interval
+results in approximately 0.5cm per step
 
+Forward 20 step:
+motor speed 100,100 at an 0.2s interval
+results in approximately 13cm covered in total
+per step result in 0.65cm per step
+
+Turning right:
+motor speed 200,-200 at an 0.2s interval
+turning right one full revolution took 22.5 steps
+covering approximately an angle of 16 degrees each step
+
+Turning left:
+motor speed 200,-200 at an 0.2s interval
+turning right one full revolution took 25.5 steps
+covering approximately an angle of 14.1 degrees each step
+"""
 
 class Simulator:
     def __init__(self):

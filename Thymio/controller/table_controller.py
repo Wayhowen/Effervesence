@@ -3,7 +3,7 @@ import os
 
 # initialize asebamedulla in background and wait 0.3s to let
 # asebamedulla startup
-os.system("(asebamedulla ser:name=Thymio-II &) && sleep 1")
+os.system("(asebamedulla ser:name=Thymio-II &) && sleep 3")
 
 import numpy as np
 from time import sleep
@@ -31,12 +31,14 @@ class TableController:
 
     def sens(self):
         prox_horizontal = self.aseba.GetVariable("thymio-II", "prox.horizontal")
+        reflected = self.aseba.GetVariable("thymio-II", "prox.ground.reflected")
         print("Sensing:")
         print(prox_horizontal[0])
         print(prox_horizontal[1])
         print(prox_horizontal[2])
         print(prox_horizontal[3])
         print(prox_horizontal[4])
+        print(reflected)
 
     def detect(self):
         distance = self.aseba.GetVariable("thymio-II", "prox.horizontal")
@@ -64,6 +66,13 @@ class TableController:
         sleep(0.2)
 
         return self.detect()
+    
+    def sendInformation(self, number):
+        self.aseba.SendEventName("prox.comm.tx", [number])
+    
+    def receiveInformation(self):
+        rx = self.aseba.GetVariable("thymio-II", "prox.comm.rx")
+        print(rx[0])
 
     def exec(self):
         action = np.argmax(self.q_table[self.state])
@@ -87,6 +96,9 @@ class TableController:
         asebaNetwork.LoadScripts(
             'thympi.aesl', reply_handler=self.dbusError, error_handler=self.dbusError
         )
+
+        #enable comm
+        asebaNetwork.SendEventName( "prox.comm.enable", [1])
 
         # scanning_thread = Process(target=robot.drive, args=(200,200,))
         return asebaNetwork
