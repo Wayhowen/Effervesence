@@ -29,7 +29,6 @@ covering approximately an angle of 14.1 degrees each step
 """
 
 
-
 class Simulator:
     def __init__(self):
         self.R = 0.0225  # radius of wheels in meters

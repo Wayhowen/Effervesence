@@ -1,19 +1,14 @@
 from numpy import cos, sin
-from shapely.geometry import Point
-from random import random
-
-# A prototype simulation of a differential-drive robot with one sensor
-
-# Constants
-###########
 from simulator.robot_model.controller import Controller
 from simulator import Simulator
 
 
+# TODO: might want to split it into separate files inheriting from behavior
 class Behaviors:
     def __init__(self):
         self.simulator = Simulator()
         self.controller = Controller(self.simulator.W, self.simulator.H)
+        self.controller_b = Controller(self.simulator.W, self.simulator.H, 0, 0.5, 2)
 
         # used for speed measurment
         self.distances = []
@@ -52,6 +47,11 @@ class Behaviors:
         if step % 48 == 0:
             print(abs(self.distances[-1] - self.distances[0]))
 
+    def two_robots_rotation(self, step):
+        self.controller.left_wheel_velocity = 1.445
+        self.controller.right_wheel_velocity = -1.445
+        print(self.controller.distances_to_objects(self.controller_b.body))
+
     @property
     def position(self):
         return f"{self.controller.x}, {self.controller.y}, {cos(self.controller.q) * 0.2}, {sin(self.controller.q) * 0.2}\n"
@@ -63,7 +63,7 @@ if __name__ == '__main__':
         for cnt in range(5000):
             # simple single-ray sensor
             try:
-                behaviors.rotation_measurment(cnt)
+                behaviors.two_robots_rotation(cnt)
 
                 # step simulation
                 behaviors.step()

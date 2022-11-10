@@ -60,3 +60,15 @@ class SideSensor:
             ])  # a line from robot to a point outside arena in direction of q
         s = world.intersection(ray)
         return sqrt((s.x - x) ** 2 + (s.y - y) ** 2)  # distance to wall
+
+    def distance_to_object(self, x, y, q, other_object):
+        ray = LineString(
+            [
+                (x, y),
+                (x + cos(q + self.offset) * 2 * (self.W + self.H), (y + sin(q + self.offset) * 2 * (self.W + self.H)))
+            ])  # a line from robot to a point outside arena in direction of q
+        s = other_object.intersection(ray)
+        if s.is_empty:
+            return None
+        closest_side = list(s.coords)[0]
+        return sqrt((closest_side[0] - x) ** 2 + (closest_side[1] - y) ** 2)  # distance to wall
