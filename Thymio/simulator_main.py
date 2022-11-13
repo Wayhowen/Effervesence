@@ -1,81 +1,61 @@
-from numpy import cos, sin
+import os
+
+from simulator.behaviors.avoider import Avoider
 from simulator.robot_model.controller import Controller
 from simulator import Simulator
 
 
-# TODO: might want to split it into separate files inheriting from behavior
-class Behaviors:
-    def __init__(self):
+class Main:
+    def __init__(self, number_of_robots=1, frequency_of_saves=50):
+        self._delete_previous_records()
+
+        self._number_of_robots = number_of_robots
+        self._frequency_of_saves = frequency_of_saves
+
         self.simulator = Simulator()
-        self.controller = Controller(self.simulator.W, self.simulator.H)
-        self.controller_b = Controller(self.simulator.W, self.simulator.H, 0, 0.5, 2)
+        self.robots = [
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0.5, 2))
+        ]
 
         # used for speed measurment
         self.distances = []
 
-    def step(self):
-        self.simulator.step(self.controller)
+    def _delete_previous_records(self):
+        dir_name = "animator/"
+        test = os.listdir(dir_name)
+        for item in test:
+            if item.endswith(".dat"):
+                os.remove(os.path.join(dir_name, item))
 
-    def wall_avoidance(self, step):
-        distance = self.controller.distances_to_wall(self.simulator.world)[2]
-        # simple controller - change direction of wheels every 10 seconds (100*robot_timestep) unless close to wall then turn on spot
-        if distance < 0.1:
-            self.controller.left_wheel_velocity = 1.445
-            self.controller.right_wheel_velocity = -1.445
-        else:
-            if step % 100 == 0:
-                self.controller.left_wheel_velocity = 1.445
-                self.controller.right_wheel_velocity = 1.445
+    def step(self, step: int):
+        for robot in self.robots:
+            self.simulator.step(robot.controller)
+            self.perform(step)
+        if cnt % self._frequency_of_saves == 0:
+            main.save_positions()
 
-    def speed_measurment(self, step):
-        self.distances.append(self.controller.distances_to_wall(self.simulator.world)[2])
+    def perform(self, step: int):
+        robots = self.robots[:self._number_of_robots]
+        for robot in robots:
+            robot.perform(step)
 
-        self.controller.left_wheel_velocity = 1.445
-        self.controller.right_wheel_velocity = 1.445
-
-        # print distance travelled in meters every 4 secs
-        if step % 40 == 0:
-            print(abs(self.distances[-1] - self.distances[0]))
-
-    def rotation_measurment(self, step):
-        self.distances.append(self.controller.q)
-
-        self.controller.left_wheel_velocity = 5.5241
-        self.controller.right_wheel_velocity = -5.5241
-
-        # print rotation in radians every 4 secs
-        if step % 48 == 0:
-            print(abs(self.distances[-1] - self.distances[0]))
-
-    def two_robots_rotation(self, step):
-        self.controller.left_wheel_velocity = 1.445
-        self.controller.right_wheel_velocity = -1.445
-        print(self.controller.distances_to_objects(self.controller_b.body))
-
-    @property
-    def position(self):
-        return f"{self.controller.x}, {self.controller.y}, {cos(self.controller.q) * 0.2}, {sin(self.controller.q) * 0.2}\n"
+    def save_positions(self):
+        robots = self.robots[:self._number_of_robots]
+        for index, robot in enumerate(robots):
+            with open(f"animator/trajectory_{index}.dat", "a") as file:
+                file.write(robot.position)
 
 
 if __name__ == '__main__':
-    behaviors = Behaviors()
-    with open("animator/trajectory.dat", "w") as file:
-        for cnt in range(5000):
-            # simple single-ray sensor
-            try:
-                behaviors.two_robots_rotation(cnt)
+    main = Main(number_of_robots=2, frequency_of_saves=50)
+    for cnt in range(5000):
+        # simple single-ray sensor
+        try:
+            # step simulation
+            main.step(cnt)
 
-                # step simulation
-                behaviors.step()
-
-                # # check collision with arena walls
-                # if controller.on_the_line(simulator.world):
-                #     file.write(f"{controller.x}, {controller.y}, {cos(controller.q) * 0.2}, {sin(controller.q) * 0.2}\n")
-                #     break
-
-                if cnt % 50 == 0:
-                    file.write(behaviors.position)
-            except AttributeError:
-                file.write(behaviors.position)
-                print("out of bounds")
-                break
+        except AttributeError:
+            main.save_positions()
+            print("out of bounds")
+            break
