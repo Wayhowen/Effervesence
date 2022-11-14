@@ -72,7 +72,8 @@ class TableController:
     
     def receiveInformation(self):
         rx = self.aseba.GetVariable("thymio-II", "prox.comm.rx")
-        print(rx[0])
+        if rx[0] != 0:
+            print(rx[0])
 
     def exec(self):
         action = np.argmax(self.q_table[self.state])
