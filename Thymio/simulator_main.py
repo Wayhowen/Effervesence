@@ -1,6 +1,9 @@
 import os
+from typing import List
 
 from simulator.behaviors.avoider import Avoider
+from simulator.behaviors.behavior import Behavior
+from simulator.behaviors.evolution.maximizer import Maximizer
 from simulator.behaviors.q_learning.avoider import Avoider as QAvoider
 from simulator.robot_model.controller import Controller
 from simulator import Simulator
@@ -14,7 +17,7 @@ class Main:
         self._frequency_of_saves = frequency_of_saves
 
         self.simulator = Simulator()
-        self.robots = [
+        self.robots: List[Behavior] = [
             QAvoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0.5, 2)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, -0.5, 2)),
@@ -57,19 +60,32 @@ class Main:
         for robot in self.robots[:self._number_of_robots]:
             robot.save()
 
+    # for running simulation with predefined controllers
+    def run(self, steps=10000, save_data=True):
+        for cnt in range(steps):
+            # simple single-ray sensor
+            try:
+                # step simulation
+                main.perform(cnt)
+                main.step()
+                main.finalize_calculations()
+            except AttributeError:
+                main.save_positions()
+                main.save_behavioral_data()
+                print("out of bounds")
+                break
+        if save_data:
+            main.save_behavioral_data()
+
+    # this is to be used as the evaluator
+    def eval(self, q_table, steps=10000):
+        self.robots[0] = Maximizer(self.simulator, Controller(self.simulator.W, self.simulator.H), q_table)
+
+        self.run(steps, False)
+
+        return self.robots[0].get_score()
+
 
 if __name__ == '__main__':
     main = Main(number_of_robots=5, frequency_of_saves=50)
-    for cnt in range(10000):
-        # simple single-ray sensor
-        try:
-            # step simulation
-            main.perform(cnt)
-            main.step()
-            main.finalize_calculations()
-        except AttributeError:
-            main.save_positions()
-            main.save_behavioral_data()
-            print("out of bounds")
-            break
-    main.save_behavioral_data()
+    main.run(10000)

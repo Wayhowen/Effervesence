@@ -16,7 +16,6 @@ class Avoider(Behavior):
     def perform(self, step, other_controllers):
         action = self._q_leaner.choose_next_action()
         self.perform_next_action(action)
-        return
 
     def perform_next_action(self, action):
         self._last_action = action

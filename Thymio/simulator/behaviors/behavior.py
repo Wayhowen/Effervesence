@@ -27,6 +27,10 @@ class Behavior:
     def callback(self):
         pass
 
+    @abstractmethod
+    def get_score(self):
+        pass
+
     @property
     def position(self):
         return f"{self.controller.x}, {self.controller.y}, {cos(self.controller.q) * 0.09}, {sin(self.controller.q) * 0.09}\n"
