@@ -38,6 +38,9 @@ class TableController:
         print(prox_horizontal[2])
         print(prox_horizontal[3])
         print(prox_horizontal[4])
+        print("-back-")
+        print(prox_horizontal[5])
+        print(prox_horizontal[6])
         print(reflected)
 
     def detect(self):
