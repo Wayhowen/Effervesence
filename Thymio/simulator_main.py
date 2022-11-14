@@ -43,7 +43,7 @@ class Main:
     def save_positions(self):
         robots = self.robots[:self._number_of_robots]
         for index, robot in enumerate(robots):
-            with open(f"animator/trajectory_{index}.dat", "a") as file:
+            with open(f"animator/trajectory_{index+1}.dat", "a") as file:
                 file.write(robot.position)
 
 
