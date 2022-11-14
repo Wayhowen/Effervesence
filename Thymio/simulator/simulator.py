@@ -1,7 +1,8 @@
 from numpy import sin, cos
 
 from simulator.robot_model.controller import Controller
-from shapely.geometry import LinearRing
+from shapely.geometry import LinearRing, Polygon
+
 """
 Forward 1 step:
 motor speed 100,100 at an 0.2s interval
@@ -37,6 +38,7 @@ class Simulator:
         # TODO: We need to reflect those changes in the animator
         self.W = 1.09  # width of arena
         self.H = 1.87  # height of arena
+        self.B = 0.03*2
 
         # the world is a rectangular arena with width W and height H
         self.world = LinearRing(
@@ -45,6 +47,14 @@ class Simulator:
                 (-self.W / 2, self.H / 2),
                 (-self.W / 2, -self.H / 2),
                 (self.W / 2, -self.H / 2)
+            ])
+
+        self.bounds = Polygon(
+            [
+                (self.W+self.B / 2, self.H+self.B / 2),
+                (-self.W-self.B / 2, self.H+self.B / 2),
+                (-self.W-self.B / 2, -self.H-self.B / 2),
+                (self.W+self.B / 2, -self.H-self.B / 2)
             ])
 
         self.robot_timestep = 0.1  # 1/robot_timestep equals update frequency of robot

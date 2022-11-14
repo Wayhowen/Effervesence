@@ -1,5 +1,5 @@
 from numpy import sin, cos
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Polygon, Point
 
 
 sensor_values = {
@@ -23,13 +23,10 @@ class BottomSensor:
         self.offset = offset  # offset of sensor from the middle in radians
 
     def real_world_sensor_value(self, x, y, q, world):
-        return 0
+        pass
 
-    def is_on_the_line(self, x, y, q, world) -> bool:
-        ray = LineString(
-            [
-                (x, y),
-                (x + cos(q + self.offset) * 2 * (self.W + self.H), (y + sin(q + self.offset) * 2 * (self.W + self.H)))
-            ])  # a line from robot to a point outside arena in direction of q
-        s = world.intersection(ray)
-        return s.is_empty
+    def is_on_the_line(self, x, y, world, bounds) -> bool:
+        pos = Point(x,y)
+        if bounds.contains(pos) and not Polygon(world).contains(pos):
+            return True
+        return False
