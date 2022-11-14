@@ -4,6 +4,8 @@ from matplotlib.animation import PillowWriter
 import numpy as np
 import os
 
+W = 1.09  # width of arena
+H = 1.87  # height of arena
 
 def plot():
     dir_name = "animator/"
@@ -25,7 +27,7 @@ points = plot()
 row, col = points[0].shape
 
 fig, ax = plt.subplots(1, 1)
-fig.set_size_inches(5, 5)
+fig.set_size_inches(8*(W/H), 8)
 
 
 def animate(i):
@@ -43,8 +45,10 @@ def animate(i):
         ax.plot(xs, ys,
                 label='original', marker='o')
         # Set the x and y axis to display a fixed range
-        ax.set_xlim([-1, 1])
-        ax.set_ylim([-1, 1])
+    
+    
+    ax.set_xlim([-W / 2, W / 2])
+    ax.set_ylim([-H / 2, H / 2])
 
 
 ani = FuncAnimation(fig, animate, frames=row,
