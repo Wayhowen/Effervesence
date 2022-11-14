@@ -132,7 +132,7 @@ def main():
         epochs, penalties, reward, = 0, 0, 0
         done = False
 
-        q_leaner.learn(robot.explore)
+        q_leaner.choose_next_action(robot.explore)
     
     print("Done")
     print(q_leaner.q_table)

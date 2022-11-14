@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
     with open("../animator/trajectory.dat", "w") as file:
         for cnt in range(10000):
-            q_leaner.learn(step_function)
+            q_leaner.choose_next_action(step_function)
             # check collision with arena walls
             if simulator.world.distance(Point(controller.x, controller.y)) < simulator.L / 2:
                 break

@@ -19,4 +19,3 @@ class WallAvoidance(Behavior):
                 self.controller.left_wheel_velocity = 1.445
                 self.controller.right_wheel_velocity = 1.445
 
-        self.simulator.step(self.controller)

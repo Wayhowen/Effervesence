@@ -34,7 +34,7 @@ def animate(i):
     ax.clear()
     # Get the point from the points list at index i
     # point = points[i]
-    for p in points:
+    for index, p in enumerate(points):
         xs = p[i, 0]
         ys = p[i, 1]
         x = [xs, p[i, 2] + xs]
@@ -42,8 +42,9 @@ def animate(i):
         # Plot that point using the x and y coordinates
         ax.plot(x, y, "-", linewidth=2, color='g')
 
+        point_color = 'r' if index == 0 else 'g'
         ax.plot(xs, ys,
-                label='original', marker='o')
+                label='original', marker='o', color=point_color)
         # Set the x and y axis to display a fixed range
     
     

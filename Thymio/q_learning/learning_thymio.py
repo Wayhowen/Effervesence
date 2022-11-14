@@ -104,7 +104,7 @@ class Thymio:
 
 def main(controller, q):
     for cnt in range(10000):
-        q.learn(controller.step_function)
+        q.choose_next_action(controller.perform_next_action)
 
 
 # ------------------- Main ------------------------

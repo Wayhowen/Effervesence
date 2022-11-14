@@ -1,6 +1,7 @@
 import os
 
 from simulator.behaviors.avoider import Avoider
+from simulator.behaviors.q_learning.avoider import Avoider as QAvoider
 from simulator.robot_model.controller import Controller
 from simulator import Simulator
 
@@ -14,7 +15,7 @@ class Main:
 
         self.simulator = Simulator()
         self.robots = [
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
+            QAvoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0.5, 2)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, -0.5, 2)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0.5, 0, 2)),
@@ -31,9 +32,9 @@ class Main:
             if item.endswith(".dat"):
                 os.remove(os.path.join(dir_name, item))
 
-    def step(self, step: int):
-        for _ in self.robots:
-            self.perform(step)
+    def step(self):
+        for robot in self.robots:
+            robot.step()
         if cnt % self._frequency_of_saves == 0:
             main.save_positions()
 
@@ -41,6 +42,10 @@ class Main:
         robots = self.robots[:self._number_of_robots]
         for robot in robots:
             robot.perform(step, list(filter(lambda x: robot is not x, robots)))
+
+    def finalize_calculations(self):
+        for robot in self.robots[:self._number_of_robots]:
+            robot.callback()
 
     def save_positions(self):
         robots = self.robots[:self._number_of_robots]
@@ -57,11 +62,14 @@ if __name__ == '__main__':
     main = Main(number_of_robots=5, frequency_of_saves=50)
     for cnt in range(5000):
         # simple single-ray sensor
-        # try:
+        try:
             # step simulation
-            main.step(cnt)
+            main.perform(cnt)
+            main.step()
+            main.finalize_calculations()
+        except AttributeError:
+            main.save_positions()
+            main.save_behavioral_data()
+            print("out of bounds")
+            break
     main.save_behavioral_data()
-        # except AttributeError:
-        #     main.save_positions()
-        #     print("out of bounds")
-        #     break

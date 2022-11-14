@@ -18,35 +18,42 @@ class QLearner:
         self.learning_rate = 0.1  # between 0 and 1 / alpha
         self.discount_factor = 0.6  # between 0 and 1 / gamma
 
+        self._current_action = None
+
     def load_q_table(self):
         if exists("../table.txt"):
+            print("Loading Q-Table fro memory")
             with open("../table.txt", "rb") as file:
                 self.q_table = np.load(file, allow_pickle=True)
                 print(self.q_table)
         else:
+            print("Creating new Q-Table")
             self.q_table = np.zeros((len(self.states), len(self.actions)))
 
     def save_q_table(self):
         with open("../table.txt", "wb") as file:
+            print(self.q_table)
             np.save(file, self.q_table, allow_pickle=True)
 
-    def learn(self, step_function):
+    # learn is split into 2 functions to allow for refactored simulator
+    def choose_next_action(self):
         if random.uniform(0, 1) < self.epsilon:
             """
             Explore: select a random action
             """
-            action = random.randint(0, len(self.actions) - 1)
+            self._current_action = random.randint(0, len(self.actions) - 1)
         else:
             """
             Exploit: select the action with max value (future reward)
             """
-            action = np.argmax(self.q_table[self.state])
+            self._current_action = np.argmax(self.q_table[self.state])
+        return self._current_action
 
-        next_state, reward = step_function(action)
-
-        old_value = self.q_table[self.state, action]
+    # this has to be called after action chosen -> step performed -> then this
+    def learn(self, next_state, reward):
+        old_value = self.q_table[self.state, self._current_action]
         next_max = np.max(self.q_table[next_state])
-        self.q_table[self.state, action] = self.update_rule(old_value, next_max, reward)
+        self.q_table[self.state, self._current_action] = self.update_rule(old_value, next_max, reward)
 
         self.state = next_state
 
@@ -64,4 +71,4 @@ if __name__ == '__main__':
         done = False
 
         while not done:
-            q_leaner.learn()
+            q_leaner.choose_next_action()

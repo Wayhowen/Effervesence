@@ -36,7 +36,7 @@ if __name__ == '__main__':
             return states.index("PERFECT"), 1
 
     for cnt in range(5000):
-        q_leaner.learn(step_function)
+        q_leaner.choose_next_action(step_function)
         # check collision with arena walls
         if simulator.world.distance(Point(controller.x, controller.y)) < simulator.L / 2:
             q_leaner.save_q_table()

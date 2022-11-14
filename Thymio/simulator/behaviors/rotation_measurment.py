@@ -18,4 +18,3 @@ class RotationMeasurment(Behavior):
         if step % 48 == 0:
             print(abs(self.distances[-1] - self.distances[0]))
 
-        self.simulator.step(self.controller)

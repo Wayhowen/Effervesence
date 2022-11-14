@@ -1,15 +1,5 @@
-import pkgutil
-
-import numpy as np
-from shapely.geometry import Point
-
 from q_learning.q_learning import QLearner
 from simulator.behaviors.behavior import Behavior
-from simulator.robot_model.controller import Controller
-from simulator.simulator import Simulator
-
-from abc import abstractmethod
-
 from numpy import cos, sin
 
 
@@ -21,34 +11,41 @@ class Avoider(Behavior):
         self._actions = ("GOFORWARDS", "GOLEFT", "GORIGHT")
         self._q_leaner = QLearner(self._states, self._actions, self._states.index("EXPLORE"))
 
+        self._last_action = 0
+
     def perform(self, step, other_controllers):
-        self._q_leaner.learn(self.step_function)
+        action = self._q_leaner.choose_next_action()
+        self.perform_next_action(action)
+        return
 
-    def step_function(self, action):
-        reward = 0
-        distance_to_objects = self.controller.distances_to_wall(self.simulator.world)
-
+    def perform_next_action(self, action):
+        self._last_action = action
         if action == 0:
             self.controller.drive(0.4, 0.4)
+        elif action == 1:
+            self.controller.drive(-0.8, 0.8)
+        else:
+            self.controller.drive(0.8, -0.8)
+
+    def get_next_state_and_reward(self):
+        distance_to_objects = self.controller.distances_to_wall(self.simulator.world)
+        reward = 0
+
+        if self._last_action == 0:
             if distance_to_objects[2] < 0.49:
                 reward -= 10
             else:
                 reward += 20
-        elif action == 1:
-            self.controller.drive(-0.8, 0.8)
+        elif self._last_action == 1:
             if distance_to_objects[0] > 0.49 or distance_to_objects[1] > 0.49:
                 reward -= 10
             else:
                 reward += 10
         else:
-            self.controller.drive(0.8, -0.8)
             if distance_to_objects[3] > 0.49 or distance_to_objects[4] > 0.49:
                 reward -= 10
             else:
                 reward += 10
-                # step simulation
-
-        self.simulator.step(self.controller)
 
         if distance_to_objects[2] < 0.49:
             return self._states.index("INFRONT"), reward
@@ -58,6 +55,12 @@ class Avoider(Behavior):
             return self._states.index("RIGHT"), reward
         else:
             return self._states.index("EXPLORE"), reward
+
+    def callback(self):
+        self._q_leaner.learn(*self.get_next_state_and_reward())
+
+    def save(self):
+        self._q_leaner.save_q_table()
 
     @property
     def position(self):
