@@ -1,7 +1,7 @@
 import time
 import numpy as np
 import random
-from q_learning.fitness_simulation import Evaluator
+from simulator_main import Main
 from evolution.chromosome import Chromosome
 from typing import List, Dict
 
@@ -14,7 +14,7 @@ class Evolve:
         self.statistical_significance = statistical_significance
 
         self._last_fitness_score = 0
-        self.evaluator = Evaluator()
+        self.evaluator = Main(number_of_robots=5, frequency_of_saves=50)
 
     def work(self):
         initial_population = self._generate_population()

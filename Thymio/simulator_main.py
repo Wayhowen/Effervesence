@@ -35,7 +35,7 @@ class Main:
             if item.endswith(".dat"):
                 os.remove(os.path.join(dir_name, item))
 
-    def step(self):
+    def step(self, cnt):
         for robot in self.robots:
             robot.step()
         if cnt % self._frequency_of_saves == 0:
@@ -67,7 +67,7 @@ class Main:
             try:
                 # step simulation
                 main.perform(cnt)
-                main.step()
+                main.step(cnt)
                 main.finalize_calculations()
             except AttributeError:
                 main.save_positions()
