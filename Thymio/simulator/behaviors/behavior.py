@@ -19,6 +19,10 @@ class Behavior:
     def perform(self, step, other_controllers):
         pass
 
+    @abstractmethod
+    def save(self):
+        pass
+
     @property
     def position(self):
         return f"{self.controller.x}, {self.controller.y}, {cos(self.controller.q) * 0.09}, {sin(self.controller.q) * 0.09}\n"

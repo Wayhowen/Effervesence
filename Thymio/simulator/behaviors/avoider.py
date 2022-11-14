@@ -22,3 +22,8 @@ class Avoider(Behavior):
             return
         self.controller.left_wheel_velocity = random.uniform(0, 5.5)
         self.controller.right_wheel_velocity = random.uniform(0, 5.5)
+
+        self.simulator.step(self.controller)
+
+    def save(self):
+        pass

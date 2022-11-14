@@ -8,7 +8,7 @@ from random import random
 
 # Constants
 ###########
-from q_learning import QLearner
+from q_learning.q_learning import QLearner
 from simulator.robot_model.controller import Controller
 from simulator.simulator import Simulator
 

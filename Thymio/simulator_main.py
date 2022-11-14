@@ -15,7 +15,10 @@ class Main:
         self.simulator = Simulator()
         self.robots = [
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0.5, 2))
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0.5, 2)),
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, -0.5, 2)),
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0.5, 0, 2)),
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -0.5, 0.5, 2))
         ]
 
         # used for speed measurment
@@ -29,8 +32,7 @@ class Main:
                 os.remove(os.path.join(dir_name, item))
 
     def step(self, step: int):
-        for robot in self.robots:
-            self.simulator.step(robot.controller)
+        for _ in self.robots:
             self.perform(step)
         if cnt % self._frequency_of_saves == 0:
             main.save_positions()
@@ -46,15 +48,19 @@ class Main:
             with open(f"animator/trajectory_{index+1}.dat", "a") as file:
                 file.write(robot.position)
 
+    def save_behavioral_data(self):
+        for robot in self.robots[:self._number_of_robots]:
+            robot.save()
+
 
 if __name__ == '__main__':
-    main = Main(number_of_robots=2, frequency_of_saves=50)
+    main = Main(number_of_robots=5, frequency_of_saves=50)
     for cnt in range(5000):
         # simple single-ray sensor
         # try:
             # step simulation
             main.step(cnt)
-
+    main.save_behavioral_data()
         # except AttributeError:
         #     main.save_positions()
         #     print("out of bounds")

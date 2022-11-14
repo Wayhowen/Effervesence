@@ -8,7 +8,7 @@ class WallAvoidance(Behavior):
         # used for speed measurment
         self.distances = []
 
-    def perform(self, step):
+    def perform(self, step, other_controllers):
         distance = self.controller.distances_to_wall(self.simulator.world)[2]
         # simple controller - change direction of wheels every 10 seconds (100*robot_timestep) unless close to wall then turn on spot
         if distance < 0.1:
@@ -18,3 +18,5 @@ class WallAvoidance(Behavior):
             if step % 100 == 0:
                 self.controller.left_wheel_velocity = 1.445
                 self.controller.right_wheel_velocity = 1.445
+
+        self.simulator.step(self.controller)

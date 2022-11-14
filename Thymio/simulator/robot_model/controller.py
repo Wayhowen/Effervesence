@@ -7,10 +7,10 @@ from .side_sensor import SideSensor
 
 
 class Controller:
-    def __init__(self, W, H, x=0.0, y=0.0, q=0.0, robot_radius=0.115):
+    def __init__(self, W, H, x=0.0, y=0.0, q=0.0, robot_radius=0.0575):
         self.left_wheel_velocity: float = random()  # robot left wheel velocity in radians/s
         self.right_wheel_velocity: float = random()  # robot right wheel velocity in radians/s
-        self._robot_diameter = robot_radius
+        self._robot_radius = robot_radius
 
         self.x = x  # robot position in meters - x direction - positive to the right
         self.y = y  # robot position in meters - y direction - positive up
@@ -26,7 +26,7 @@ class Controller:
 
     @property
     def body(self):
-        return Point(self.x, self.y).buffer(self._robot_diameter)
+        return Point(self.x, self.y).buffer(self._robot_radius)
 
     def distances_to_wall(self, world):
         return [sensor.distance_to_wall(self.x, self.y, self.q, world) for sensor in self.sensors]
