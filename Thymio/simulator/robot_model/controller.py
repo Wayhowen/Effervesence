@@ -31,8 +31,8 @@ class Controller:
     def distances_to_wall(self, world):
         return [sensor.distance_to_wall(self.x, self.y, self.q, world) for sensor in self.sensors]
 
-    def distances_to_objects(self, world):
-        return [sensor.distance_to_object(self.x, self.y, self.q, world) for sensor in self.sensors]
+    def distances_to_objects(self, other_robot):
+        return [sensor.distance_to_object(self.x, self.y, self.q, other_robot) for sensor in self.sensors]
 
     def values_of_sensors(self, world):
         return [sensor.real_world_sensor_value(self.x, self.y, self.q, world) for sensor in self.sensors]
