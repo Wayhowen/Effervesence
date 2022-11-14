@@ -1,14 +1,6 @@
-import pkgutil
-
-import time
 import numpy as np
 from shapely.geometry import Point
-from random import random
 
-# A prototype simulation of a differential-drive robot with one sensor
-
-# Constants
-###########
 from simulator.robot_model.controller import Controller
 from simulator.simulator import Simulator
 
@@ -20,7 +12,6 @@ class Evaluator:
         self.simulator = Simulator()
         self.controller = Controller(self.simulator.W, self.simulator.H)
         self.fitness = 1
-
 
     def step_function(self, action):
         prox_horizontal = self.controller.distances_to_wall(self.simulator.world)

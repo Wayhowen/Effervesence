@@ -60,7 +60,7 @@ class Main:
 
 if __name__ == '__main__':
     main = Main(number_of_robots=5, frequency_of_saves=50)
-    for cnt in range(5000):
+    for cnt in range(10000):
         # simple single-ray sensor
         try:
             # step simulation

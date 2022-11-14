@@ -5,6 +5,7 @@ from q_learning.fitness_simulation import Evaluator
 from evolution.chromosome import Chromosome
 from typing import List, Dict
 
+
 class Evolve:
     def __init__(self, population_size, selection_size, truncation_size=4, statistical_significance=0.2) -> None:
         self.population_size = population_size
@@ -14,7 +15,6 @@ class Evolve:
 
         self._last_fitness_score = 0
         self.evaluator = Evaluator()
-        
 
     def work(self):
         initial_population = self._generate_population()
@@ -46,7 +46,6 @@ class Evolve:
             print("Best table this gen:", best[0].get_table())
             print("Score:", best[1])
 
-        
         best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
         return best
 
