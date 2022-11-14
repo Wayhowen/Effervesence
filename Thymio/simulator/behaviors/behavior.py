@@ -20,4 +20,4 @@ class Behavior:
 
     @property
     def position(self):
-        return f"{self.controller.x}, {self.controller.y}, {cos(self.controller.q) * 0.2}, {sin(self.controller.q) * 0.2}\n"
+        return f"{self.controller.x}, {self.controller.y}, {cos(self.controller.q) * 0.09}, {sin(self.controller.q) * 0.09}\n"
