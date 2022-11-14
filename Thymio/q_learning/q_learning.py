@@ -32,7 +32,6 @@ class QLearner:
 
     def save_q_table(self):
         with open("../table.txt", "wb") as file:
-            print(self.q_table)
             np.save(file, self.q_table, allow_pickle=True)
 
     # learn is split into 2 functions to allow for refactored simulator
