@@ -25,7 +25,7 @@ class BottomSensor:
     def real_world_sensor_value(self, x, y, q, world):
         pass
 
-    def is_on_the_line(self, x, y, q, world, bounds) -> bool:
+    def is_on_the_line(self, x, y, world, bounds) -> bool:
         pos = Point(x,y)
         if bounds.contains(pos) and not Polygon(world).contains(pos):
             return True
