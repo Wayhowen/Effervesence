@@ -7,7 +7,7 @@ from .side_sensor import SideSensor
 
 
 class Controller:
-    def __init__(self, W, H, x=0.0, y=0.0, q=0.0, robot_radius=0.075):
+    def __init__(self, W, H, x=0.0, y=0.0, q=0.0, robot_radius=0.115):
         self.left_wheel_velocity: float = random()  # robot left wheel velocity in radians/s
         self.right_wheel_velocity: float = random()  # robot right wheel velocity in radians/s
         self._robot_diameter = robot_radius
