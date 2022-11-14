@@ -10,12 +10,13 @@ class Behavior:
 
         # used for speed measurment
         self.distances = []
+        self._score = 0
 
     def step(self):
         self.simulator.step(self.controller)
 
     @abstractmethod
-    def perform(self, step):
+    def perform(self, step, other_controllers):
         pass
 
     @property

@@ -38,7 +38,7 @@ class Main:
     def perform(self, step: int):
         robots = self.robots[:self._number_of_robots]
         for robot in robots:
-            robot.perform(step)
+            robot.perform(step, list(filter(lambda x: robot is not x, robots)))
 
     def save_positions(self):
         robots = self.robots[:self._number_of_robots]
@@ -51,11 +51,11 @@ if __name__ == '__main__':
     main = Main(number_of_robots=2, frequency_of_saves=50)
     for cnt in range(5000):
         # simple single-ray sensor
-        try:
+        # try:
             # step simulation
             main.step(cnt)
 
-        except AttributeError:
-            main.save_positions()
-            print("out of bounds")
-            break
+        # except AttributeError:
+        #     main.save_positions()
+        #     print("out of bounds")
+        #     break
