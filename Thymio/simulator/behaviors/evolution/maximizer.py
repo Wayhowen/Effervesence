@@ -40,7 +40,7 @@ class Maximizer(Behavior):
             self._fitness -= 10
             return self._states.index("LINE")
         elif closest_reading[2] < 0.49:
-            self._fitness += 10
+            self._fitness += 15
             return self._states.index("INFRONT")
         elif closest_reading[0] < 0.49 or closest_reading[1] < 0.49:
             self._fitness += 5
@@ -49,6 +49,7 @@ class Maximizer(Behavior):
             self._fitness += 5
             return self._states.index("RIGHT")
         else:
+            self._fitness += 10
             return self._states.index("EXPLORE")
         
         
