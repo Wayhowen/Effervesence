@@ -18,16 +18,16 @@ class Main:
 
         self.simulator = Simulator()
         qt = np.array([[1., 0., 0., 0.],
-                       [0., 1., 0., 0.],
                        [0., 0., 1., 0.],
+                       [0., 1., 0., 0.],
                        [1., 0., 0., 0.],
                        [0., 0., 0., 1.]])
         self.robots: List[Behavior] = [
+            Maximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, 0.5, 0.5, 2), qt),
             QAvoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
-            Maximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0.5, 2), qt),
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, -0.5, 2)),
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0.5, 0, 2)),
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -0.5, 0.5, 2))
+            #Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, -0.5, 2)),
+            #Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0.5, 0, 2)),
+            #Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -0.5, 0.5, 2))
         ]
 
         # used for speed measurment
@@ -44,7 +44,7 @@ class Main:
         for robot in self.robots:
             robot.step()
         if cnt % self._frequency_of_saves == 0:
-            main.save_positions()
+            self.save_positions()
 
     def perform(self, step: int):
         robots = self.robots[:self._number_of_robots]
@@ -71,17 +71,17 @@ class Main:
             # simple single-ray sensor
             try:
                 # step simulation
-                main.perform(cnt)
-                main.step(cnt)
-                main.finalize_calculations()
+                self.perform(cnt)
+                self.step(cnt)
+                self.finalize_calculations()
             except AttributeError as e:
-                main.save_positions()
-                main.save_behavioral_data()
+                self.save_positions()
+                self.save_behavioral_data()
                 print("out of bounds on step", cnt)
                 print(e)
                 break
         if save_data:
-            main.save_behavioral_data()
+            self.save_behavioral_data()
 
     # this is to be used as the evaluator
     def eval(self, q_table, steps=10000):

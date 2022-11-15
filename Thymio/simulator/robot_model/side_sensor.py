@@ -69,7 +69,7 @@ class SideSensor:
             ])  # a line from robot to a point outside arena in direction of q
         s = other_object.intersection(ray)
         if s.is_empty:
-            return None
+            return float('inf')
         if type(s) is MultiPoint:
             mult = list(s.geoms)
             closest_side = list(mult[0].coords)[0]

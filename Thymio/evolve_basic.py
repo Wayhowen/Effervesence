@@ -49,8 +49,8 @@ class Evolve:
         best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
         return best
 
-    def _generate_population(self, size=60) -> List[Chromosome]:
-        return [Chromosome() for _ in range(size)]
+    def _generate_population(self) -> List[Chromosome]:
+        return [Chromosome() for _ in range(self.population_size)]
 
     """
     combination of truncation and roulette
@@ -85,6 +85,7 @@ class Evolve:
         return new_offspring
 
     def _compute_fitness(self, offspring: Chromosome) -> float:
+        print("Evaluating...")
         return self.evaluator.eval(offspring.get_table())
 
     def _is_converged(self, offspring_with_fitness: Dict[Chromosome, float]) -> bool:
@@ -96,9 +97,10 @@ class Evolve:
 
 
 if __name__ == "__main__":
-    print("Training Started...")
+    print("Setup...")
     start = time.time()
-    e = Evolve(60, 8)
+    e = Evolve(15, 4, 2, 1000)
+    print("Training Started...")
     result = e.work()
     print("Training Complete")
     print("Best table:", result[0].get_table())

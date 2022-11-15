@@ -16,10 +16,10 @@ class Maximizer(Behavior):
         self.distances_to_objects = []
 
     def perform(self, step, other_controllers):
-        self.distances_to_objects = [self.controller.distances_to_objects(robot.controller.body)[2] for robot in other_controllers]
+        self.distances_to_objects = [self.controller.distances_to_objects(robot.controller.body) for robot in other_controllers]
         action = np.argmax(self._q_table[self._state])
         self.perform_next_action(action)
-        self._fitness += step
+        self._fitness += 1
 
     def perform_next_action(self, action):
         if action == 0:
@@ -33,25 +33,23 @@ class Maximizer(Behavior):
 
     def get_next_state(self):
         on_line = self.controller.on_the_line(self.simulator.world, self.simulator.bounds)
+        #Get the closest reading of those returned
+        closest_reading = min([(x, sum(x)) for x in self.distances_to_objects], key=lambda reading: reading[1])[0]
 
         if on_line:
-            #print("line")
+            self._fitness -= 10
             return self._states.index("LINE")
+        elif closest_reading[2] < 0.49:
+            self._fitness += 10
+            return self._states.index("INFRONT")
+        elif closest_reading[0] < 0.49 or closest_reading[1] < 0.49:
+            self._fitness += 5
+            return self._states.index("LEFT")
+        elif closest_reading[3] < 0.49 or closest_reading[4] < 0.49:
+            self._fitness += 5
+            return self._states.index("RIGHT")
         else:
             return self._states.index("EXPLORE")
-        """ **Todo** fix distance to object so it sends more than one value
-        elif any(self.distances_to_objects):
-            print(self.distances_to_objects)
-            if self.distances_to_objects[2] < 0.49:
-                #print("front")
-                return self._states.index("INFRONT")
-            elif self.distances_to_objects[0] < 0.49 or self.distances_to_objects[1] < 0.49:
-                #print("left")
-                return self._states.index("LEFT")
-            elif self.distances_to_objects[3] < 0.49 or self.distances_to_objects[4] < 0.49:
-                #print("right")
-                return self._states.index("RIGHT")
-        """
         
         
 
