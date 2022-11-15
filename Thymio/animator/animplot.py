@@ -6,6 +6,7 @@ import os
 
 W = 1.09  # width of arena
 H = 1.87  # height of arena
+B = 0.03 # boundary
 
 def plot():
     dir_name = "animator/"
@@ -30,8 +31,16 @@ fig, ax = plt.subplots(1, 1)
 fig.set_size_inches(8*(W/H), 8)
 
 
+# animate
 def animate(i):
     ax.clear()
+
+    #plot arena boundary
+    ax.plot([-W/2, W/2], [-H/2, -H/2], color='k')
+    ax.plot([-W/2, W/2], [H/2, H/2], color='k')
+    ax.plot([-W/2, -W/2], [-H/2, H/2], color='k')
+    ax.plot([W/2, W/2], [-H/2, H/2], color='k')
+
     # Get the point from the points list at index i
     # point = points[i]
     for index, p in enumerate(points):
@@ -42,14 +51,19 @@ def animate(i):
         # Plot that point using the x and y coordinates
         ax.plot(x, y, "-", linewidth=2, color='g')
 
-        point_color = 'r' if index == 0 else 'g'
+        point_color = 'g'
+        if index == 0:
+            point_color = 'r'     
+        elif  index == 1:
+            point_color = 'b'
+        
         ax.plot(xs, ys,
                 label='original', marker='o', color=point_color)
         # Set the x and y axis to display a fixed range
     
     
-    ax.set_xlim([-W / 2, W / 2])
-    ax.set_ylim([-H / 2, H / 2])
+    ax.set_xlim([(-W*1.10) / 2, (W*1.10) / 2])
+    ax.set_ylim([(-H*1.10) / 2, (H*1.10) / 2])
 
 
 ani = FuncAnimation(fig, animate, frames=row,
