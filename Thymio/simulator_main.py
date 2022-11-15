@@ -7,7 +7,7 @@ from simulator.behaviors.evolution.maximizer import Maximizer
 from simulator.behaviors.q_learning.avoider import Avoider as QAvoider
 from simulator.robot_model.controller import Controller
 from simulator import Simulator
-
+import numpy as np
 
 class Main:
     def __init__(self, number_of_robots=1, frequency_of_saves=50):
@@ -17,9 +17,14 @@ class Main:
         self._frequency_of_saves = frequency_of_saves
 
         self.simulator = Simulator()
+        qt = np.array([[1., 0., 0., 0.],
+                       [0., 1., 0., 0.],
+                       [0., 0., 1., 0.],
+                       [1., 0., 0., 0.],
+                       [0., 0., 0., 1.]])
         self.robots: List[Behavior] = [
             QAvoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0.5, 2)),
+            Maximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0.5, 2), qt),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, -0.5, 2)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0.5, 0, 2)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -0.5, 0.5, 2))
@@ -69,10 +74,11 @@ class Main:
                 main.perform(cnt)
                 main.step(cnt)
                 main.finalize_calculations()
-            except AttributeError:
+            except AttributeError as e:
                 main.save_positions()
                 main.save_behavioral_data()
-                print("out of bounds")
+                print("out of bounds on step", cnt)
+                print(e)
                 break
         if save_data:
             main.save_behavioral_data()

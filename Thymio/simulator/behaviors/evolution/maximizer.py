@@ -7,14 +7,16 @@ from numpy import cos, sin
 class Maximizer(Behavior):
     def __init__(self, simulator, controller, q_table):
         super().__init__(simulator, controller)
-        self._states = ("INFRONT", "LEFT", "RIGHT", "EXPLORE")
-        self._actions = ("GOFORWARDS", "GOLEFT", "GORIGHT")
+        self._states = ("INFRONT", "LEFT", "RIGHT", "EXPLORE", "LINE")
+        self._actions = ("GOFORWARDS", "GOLEFT", "GORIGHT", "REVERSE")
 
         self._q_table = q_table
         self._state = self._states.index("EXPLORE")
         self._fitness = 1
+        self.distances_to_objects = []
 
     def perform(self, step, other_controllers):
+        self.distances_to_objects = [self.controller.distances_to_objects(robot.controller.body)[2] for robot in other_controllers]
         action = np.argmax(self._q_table[self._state])
         self.perform_next_action(action)
         self._fitness += step
@@ -24,20 +26,34 @@ class Maximizer(Behavior):
             self.controller.drive(0.4, 0.4)
         elif action == 1:
             self.controller.drive(-0.8, 0.8)
-        else:
+        elif action == 2:
             self.controller.drive(0.8, -0.8)
+        else:
+            self.controller.drive(-0.4, 0.8)
 
     def get_next_state(self):
-        distance_to_objects = self.controller.distances_to_wall(self.simulator.world)
+        on_line = self.controller.on_the_line(self.simulator.world, self.simulator.bounds)
 
-        if distance_to_objects[2] < 0.49:
-            return self._states.index("INFRONT")
-        elif distance_to_objects[0] < 0.49 or distance_to_objects[1] < 0.49:
-            return self._states.index("LEFT")
-        elif distance_to_objects[3] < 0.49 or distance_to_objects[4] < 0.49:
-            return self._states.index("RIGHT")
+        if on_line:
+            #print("line")
+            return self._states.index("LINE")
         else:
             return self._states.index("EXPLORE")
+        """ **Todo** fix distance to object so it sends more than one value
+        elif any(self.distances_to_objects):
+            print(self.distances_to_objects)
+            if self.distances_to_objects[2] < 0.49:
+                #print("front")
+                return self._states.index("INFRONT")
+            elif self.distances_to_objects[0] < 0.49 or self.distances_to_objects[1] < 0.49:
+                #print("left")
+                return self._states.index("LEFT")
+            elif self.distances_to_objects[3] < 0.49 or self.distances_to_objects[4] < 0.49:
+                #print("right")
+                return self._states.index("RIGHT")
+        """
+        
+        
 
     def callback(self):
         self._state = self.get_next_state()
