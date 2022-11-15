@@ -1,5 +1,5 @@
 from numpy import sin, cos, sqrt
-from shapely.geometry import LineString
+from shapely.geometry import LineString, MultiPoint
 
 # sensor_values = {
 #     "8.2": 1080,
@@ -70,5 +70,9 @@ class SideSensor:
         s = other_object.intersection(ray)
         if s.is_empty:
             return None
-        closest_side = list(s.coords)[0]
+        if type(s) is MultiPoint:
+            mult = list(s.geoms)
+            closest_side = list(mult[0].coords)[0]
+        else:
+            closest_side = list(s.coords)[0]
         return sqrt((closest_side[0] - x) ** 2 + (closest_side[1] - y) ** 2)  # distance to wall
