@@ -11,6 +11,7 @@ class Behavior:
         # used for speed measurment
         self.distances = []
         self._score = 0
+        self._tagged = False
 
     def step(self):
         self.simulator.step(self.controller)
@@ -34,3 +35,14 @@ class Behavior:
     @property
     def position(self):
         return f"{self.controller.x}, {self.controller.y}, {cos(self.controller.q) * 0.09}, {sin(self.controller.q) * 0.09}\n"
+
+    def try_tagging(self, other_robot: 'Behavior') -> bool:
+        if not other_robot.is_tagged:
+            other_robot._tagged = True
+            return True
+        return False
+
+    @property
+    def is_tagged(self) -> bool:
+        return self._tagged
+

@@ -5,6 +5,7 @@ from simulator.behaviors.avoider import Avoider
 from simulator.behaviors.behavior import Behavior
 from simulator.behaviors.evolution.maximizer import Maximizer
 from simulator.behaviors.q_learning.avoider import Avoider as QAvoider
+from simulator.behaviors.tagger import Tagger
 from simulator.robot_model.controller import Controller
 from simulator import Simulator
 import numpy as np
@@ -23,11 +24,13 @@ class Main:
                        [1., 0., 0., 0.],
                        [0., 0., 0., 1.]])
         self.robots: List[Behavior] = [
-            Maximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, 0.5, 0.5, 2), qt),
-            QAvoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
-            #Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, -0.5, 2)),
-            #Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0.5, 0, 2)),
-            #Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -0.5, 0.5, 2))
+            # Maximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, 0.5, 0.5, 2), qt),
+            # QAvoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
+            Tagger(self.simulator, Controller(self.simulator.W, self.simulator.H, 0.5, 0.5, 2)),
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, -0.5, 2)),
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, 0.5, 0, 2)),
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -0.5, 0.5, 2))
         ]
 
         # used for speed measurment
@@ -94,4 +97,4 @@ class Main:
 
 if __name__ == '__main__':
     main = Main(number_of_robots=5, frequency_of_saves=50)
-    main.run(10000)
+    main.run(5000)

@@ -11,17 +11,17 @@ class Avoider(Behavior):
         self.distances = []
 
     def perform(self, step, other_controllers):
+        if self.is_tagged:
+            self.controller.drive(0, 0)
+            return
         distances_to_objects = [self.controller.distances_to_objects(robot.controller.body)[2] for robot in other_controllers]
         if any(d and d < 0.09 for d in distances_to_objects):
-            self.controller.left_wheel_velocity = 1.445
-            self.controller.right_wheel_velocity = -1.445
+            self.controller.drive(1.445, -1.445)
             return
         elif self.controller.distances_to_wall(self.simulator.world)[2] < 0.09:
-            self.controller.left_wheel_velocity = 1.445
-            self.controller.right_wheel_velocity = -1.445
+            self.controller.drive(1.445, -1.445)
             return
-        self.controller.left_wheel_velocity = random.uniform(0, 5.5)
-        self.controller.right_wheel_velocity = random.uniform(0, 5.5)
+        self.controller.drive(random.uniform(0, 5.5), random.uniform(0, 5.5))
 
     def save(self):
         pass
