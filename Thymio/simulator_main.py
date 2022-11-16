@@ -83,6 +83,9 @@ class Main:
                 print("out of bounds on step", cnt)
                 print(e)
                 break
+            if all(robot.is_tagged for robot in self.robots):
+                self.save_positions()
+                break
         if save_data:
             self.save_behavioral_data()
 

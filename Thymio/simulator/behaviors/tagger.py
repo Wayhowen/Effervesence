@@ -9,6 +9,7 @@ class Tagger(Behavior):
 
         # used for speed measurment
         self.distances = []
+        self._tagged = True
 
     def perform(self, step, other_controllers):
         # drive around
