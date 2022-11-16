@@ -1,6 +1,6 @@
 from random import random
 
-from shapely.geometry import Point
+from shapely.geometry import Point, Polygon
 
 from .bottom_sensor import BottomSensor
 from .side_sensor import SideSensor
@@ -38,7 +38,11 @@ class Controller:
         return [sensor.real_world_sensor_value(self.x, self.y, self.q, world) for sensor in self.sensors]
 
     def on_the_line(self, world, bounds) -> bool:
-        return self.bottom_sensor.is_on_the_line(self.x, self.y, world, bounds)
+        pos = Point(self.x, self.y)
+        return self.bottom_sensor.is_on_the_line(self.x, self.y, bounds) and not Polygon(world).covers(pos)
+
+    def in_the_safezone(self, world, safezone):
+        return self.bottom_sensor.is_on_the_line(self.x, self.y, safezone)
 
     def drive(self, left_wheel_velocity, right_wheel_velocity):
         self.left_wheel_velocity = left_wheel_velocity

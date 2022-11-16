@@ -35,10 +35,14 @@ class Simulator:
         self.R = 0.0225  # radius of wheels in meters
         self.L = 0.095  # distance between wheels in meters
 
-        # TODO: We need to reflect those changes in the animator
+        # big arena
         self.W = 1.09  # width of arena
         self.H = 1.87  # height of arena
         self.B = 0.03*2
+
+        # middle safezone
+        self.SBW = 0.05
+        self.SBH = 0.05
 
         # the world is a rectangular arena with width W and height H
         self.world = LinearRing(
@@ -56,6 +60,14 @@ class Simulator:
                 (-self.W-self.B / 2, -self.H-self.B / 2),
                 (self.W+self.B / 2, -self.H-self.B / 2)
             ])
+        self.safezone = Polygon(
+            [
+                (self.SBW / 2, self.SBH / 2),
+                (-self.SBW / 2, self.SBH / 2),
+                (-self.SBW / 2, -self.SBH / 2),
+                (self.SBW / 2, -self.SBH / 2)
+            ])
+
 
         self.robot_timestep = 0.1  # 1/robot_timestep equals update frequency of robot
         self.simulation_timestep = 0.01  # timestep in kinematics sim (probably don't touch..)

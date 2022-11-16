@@ -11,7 +11,7 @@ class Avoider(Behavior):
         self.distances = []
 
     def perform(self, step, other_controllers):
-        if self.is_tagged:
+        if self.is_tagged or self.is_in_safezone:
             self.controller.drive(0, 0)
             return
         distances_to_objects = [self.controller.distances_to_objects(robot.controller.body)[2] for robot in other_controllers]
