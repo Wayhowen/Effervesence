@@ -25,17 +25,18 @@ class Main:
         #                [0., 1., 0., 0.],
         #                [1., 0., 0., 0.],
         #                [0., 0., 0., 1.]])
-        qt = np.array([[2.6912336, -8.05926428, -9.88683191, -13.91666527],
-                       [11.53264843, 9.38577946, -10.92145655, 0.02460526],
-                       [-1.72789116, 14.65135718, -15.06050577, 5.63157866],
-                       [5.67430883, 0.59958208, 2.77673922, -13.2959877],
-                       [-1.70007198, -3.61565218, 9.77073823, 17.41248385],
-                       [-14.17177669, -6.72203539, 1.10478413, -14.43229334]])
+        qt = np.array([[-2.45092977, -6.19014622, 16.94927604, -19.60146905, 0.59315807],
+                       [4.6914578, -12.38485668, -12.92214886, 1.58434574, -18.1741076],
+                       [12.34233952, 5.20859123, -7.68773129, -6.46921212, 13.78779591],
+                       [15.99217255, 19.17506055, 11.97167978, -10.54686955, 3.63755071],
+                       [14.76471574, -4.34058819, 9.89114613, -8.69996267, -5.87376137],
+                       [5.41238945, 6.49553993, 8.89827301, 17.62363713, 17.82214014]])
 
         w = self.simulator.W - 0.1
         h = self.simulator.H - 0.1
         self.robots: List[Behavior] = [
-            TaggerMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0, 0), qt, self.number_of_steps),
+            TaggerMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0, 0), qt,
+                            self.number_of_steps),
             # QAvoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, w / 2, h / 2, 4)),
             # Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),

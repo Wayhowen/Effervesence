@@ -59,6 +59,7 @@ class Evolve:
             # compute fitness
             offspring_with_fitness = {offspring: self._compute_fitness(offspring) for offspring in new_offspring}
             best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
+            print(f"Sorted scores are : {best}")
             print("Best table this gen:", best[0].get_table())
             print("Score:", best[1])
 
@@ -115,7 +116,9 @@ class Evolve:
 if __name__ == "__main__":
     print("Setup...")
     start = time.time()
-    e = Evolve(15, 4, 2, 1000)
+    # this for better pcs
+    # e = Evolve(15, 4, 2, 1000)
+    e = Evolve(20, 4, 2, 1000)
     print("Training Started...")
     result = e.work()
     print("Training Complete")

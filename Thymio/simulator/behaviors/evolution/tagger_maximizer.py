@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 
 from simulator.behaviors.behavior import Behavior
@@ -7,8 +9,8 @@ from numpy import cos, sin
 class TaggerMaximizer(Behavior):
     def __init__(self, simulator, controller, q_table, total_steps):
         super().__init__(simulator, controller)
-        self.states = ("INFRONT", "LEFT", "RIGHT", "EXPLORE", "LINE", "BEHIND")
-        self.actions = ("GOFORWARDS", "GOLEFT", "GORIGHT", "REVERSE")
+        self.states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "LINE", "BEHIND")
+        self.actions = ("GOFORWARDS", "GOLEFT", "GORIGHT", "REVERSE", "RANDOM")
 
         self._q_table = q_table
         self._total_steps = total_steps
@@ -38,6 +40,8 @@ class TaggerMaximizer(Behavior):
             self.controller.drive(5.5241, -5.5241)
         elif action == 3:
             self.controller.drive(-1.445, -1.445)
+        elif action == 4:
+            self.controller.drive(random.uniform(2, 5.5), random.uniform(2, 5.5))
 
     def get_next_state(self):
         on_line = self.controller.on_the_line(self.simulator.world, self.simulator.bounds)
@@ -55,7 +59,7 @@ class TaggerMaximizer(Behavior):
         elif closest_reading[5] < 0.09:
             return self.states.index("BEHIND")
         else:
-            return self.states.index("EXPLORE")
+            return self.states.index("NOTHING")
 
     def callback(self):
         self._state = self.get_next_state()
