@@ -1,6 +1,9 @@
 import time
 import numpy as np
 import random
+
+from simulator.behaviors.evolution.tagger_maximizer import TaggerMaximizer
+from simulator.robot_model.controller import Controller
 from simulator_main import Main
 from evolution.chromosome import Chromosome
 from typing import List, Dict
@@ -13,11 +16,24 @@ class Evolve:
         self.truncation_size = truncation_size
         self.statistical_significance = statistical_significance
 
+        # change this to maximize different behavior
+        self._maximizer_to_use = TaggerMaximizer
+
         self._last_fitness_score = 0
-        self.evaluator = Main(number_of_robots=5, frequency_of_saves=50)
+        self.evaluator = Main(number_of_robots=5, frequency_of_saves=50, number_of_steps=5000)
+
+    def get_maximizer(self, q_table):
+        return TaggerMaximizer(
+            self.evaluator.simulator,
+            Controller(self.evaluator.simulator.W, self.evaluator.simulator.H), q_table,
+            self.evaluator.number_of_steps
+        )
 
     def work(self):
-        initial_population = self._generate_population()
+        # mock maximizer, useless
+        mock_maximizer = self.get_maximizer([])
+        initial_population = self._generate_population(len(mock_maximizer.states), len(mock_maximizer.actions))
+
         offspring_with_fitness = {offspring: self._compute_fitness(offspring) for offspring in initial_population}
         n = 0
 
@@ -49,8 +65,8 @@ class Evolve:
         best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
         return best
 
-    def _generate_population(self) -> List[Chromosome]:
-        return [Chromosome() for _ in range(self.population_size)]
+    def _generate_population(self, x, y) -> List[Chromosome]:
+        return [Chromosome(x=x, y=y) for _ in range(self.population_size)]
 
     """
     combination of truncation and roulette
@@ -86,7 +102,7 @@ class Evolve:
 
     def _compute_fitness(self, offspring: Chromosome) -> float:
         print("Evaluating...")
-        return self.evaluator.eval(offspring.get_table())
+        return self.evaluator.eval(self.get_maximizer(offspring.get_table()))
 
     def _is_converged(self, offspring_with_fitness: Dict[Chromosome, float]) -> bool:
         current_fitness_score = sum(offspring_with_fitness.values()) / len(offspring_with_fitness)
