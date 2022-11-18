@@ -112,5 +112,6 @@ class Main:
 
 
 if __name__ == '__main__':
-    main = Main(number_of_robots=5, frequency_of_saves=50, number_of_steps=5000)
-    main.run()
+    main = Main(number_of_robots=5, frequency_of_saves=50, number_of_steps=1)
+    main.save_positions()
+    # main.run()

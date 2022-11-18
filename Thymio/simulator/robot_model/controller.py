@@ -3,6 +3,7 @@ from random import random
 from shapely.geometry import Point, Polygon
 
 from .bottom_sensor import BottomSensor
+from .camera import Camera
 from .side_sensor import SideSensor
 
 
@@ -23,6 +24,7 @@ class Controller:
         self.sensors.append(SideSensor(W, H, 3.14))
 
         self.bottom_sensor = BottomSensor(W, H, 0)
+        self.camera = Camera(W, H, 2, 0.5)
 
     @property
     def body(self):

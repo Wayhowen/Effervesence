@@ -14,7 +14,7 @@ class TaggerMaximizer(Behavior):
 
         self._q_table = q_table
         self._total_steps = total_steps
-        self._state = self.states.index("EXPLORE")
+        self._state = self.states.index("NOTHING")
         self._fitness = 1
         self.distances_to_objects = []
 
