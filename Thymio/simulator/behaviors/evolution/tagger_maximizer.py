@@ -17,12 +17,19 @@ class TaggerMaximizer(Behavior):
         self._state = self.states.index("NOTHING")
         self._fitness = 1
         self.distances_to_objects = []
+        self._color = self._colors["safe_seeking"]
 
     def perform(self, step, other_controllers):
         self.distances_to_objects = [self.controller.distances_to_objects(robot.controller.body) for robot in other_controllers]
         action = np.argmax(self._q_table[self._state])
         self.perform_next_action(action)
         self.tag_other_robots(step, other_controllers)
+
+    def _choose_color(self):
+        if self.is_in_safezone:
+            self._color = self._colors["safe_seeking"]
+            return
+        self._color = self._colors["seeking"]
 
     def tag_other_robots(self, step, other_controllers):
         for robot in other_controllers:

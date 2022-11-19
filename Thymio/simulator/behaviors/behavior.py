@@ -13,6 +13,20 @@ class Behavior:
         self._score = 0
         self._tagged = False
 
+        # uninitialized is jellow
+        self._color = "EFFF00"
+        self._colors = {
+            "seeking": "FF0000",
+            "safe_seeking": "FF9100",
+            "avoiding": "2B00FF",
+            "safe_avoiding": "00FF22",
+            "tagged": "CD00FF"
+        }
+
+    @property
+    def color(self):
+        return self._color
+
     def step(self):
         self.simulator.step(self.controller)
 
