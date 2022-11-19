@@ -43,6 +43,9 @@ class Controller:
         pos = Point(self.x, self.y)
         return self.bottom_sensor.is_on_the_line(self.x, self.y, bounds) and not Polygon(world).covers(pos)
 
+    def robots_relative_positions_from_camera(self, robots):
+        return [self.camera.robot_relative_position(self.x, self.y, self.q, robot) for robot in robots]
+
     def in_the_safezone(self, world, safezone):
         return self.bottom_sensor.is_on_the_line(self.x, self.y, safezone)
 
