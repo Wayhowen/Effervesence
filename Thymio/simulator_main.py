@@ -82,7 +82,8 @@ class Main:
 
     # for running simulation with predefined controllers
     def run(self, save_data=True):
-        self.save_positions()
+        if save_data:
+            self.save_positions()
         for cnt in range(self.number_of_steps):
             # simple single-ray sensor
             try:
@@ -91,13 +92,15 @@ class Main:
                 self.step(cnt)
                 self.finalize_calculations()
             except AttributeError as e:
-                self.save_positions()
-                self.save_behavioral_data()
+                if save_data:
+                    self.save_positions()
+                    self.save_behavioral_data()
                 print("out of bounds on step", cnt)
                 print(e)
                 break
             if all(robot.is_tagged for robot in self.robots):
-                self.save_positions()
+                if save_data:
+                    self.save_positions()
                 break
         if save_data:
             self.save_behavioral_data()
