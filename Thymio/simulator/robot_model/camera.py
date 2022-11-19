@@ -51,3 +51,5 @@ class Camera:
             return "r"
         return None
 
+    def camera_range(self, x, y, q):
+        return f"{x + cos(q + self.fov / 2) * self.view_distance}, {x + cos(q + -self.fov / 2) * self.view_distance}, {y + sin(q + self.fov / 2) * self.view_distance}, {y + sin(q + -self.fov / 2) * self.view_distance}"

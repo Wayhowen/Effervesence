@@ -17,7 +17,7 @@ def plot():
         if item.endswith(".dat"):
             with open(dir_name + item, 'r') as f:
                 lines = f.readlines()
-                vector_list = [list(map(float, line.split(", "))) for line in lines]
+                vector_list = [list(line.strip().split(", ")) for line in lines]
                 vectors_set = np.array(vector_list)
 
             vectors.append(vectors_set)
@@ -45,24 +45,28 @@ def animate(i):
     # Get the point from the points list at index i
     # point = points[i]
     for index, p in enumerate(points):
-        xs = p[i, 0]
-        ys = p[i, 1]
-        x = [xs, p[i, 2] + xs]
-        y = [ys, p[i, 3] + ys]
+        xs = float(p[i, 0])
+        ys = float(p[i, 1])
+        x = [xs, float(p[i, 2]) + xs]
+        y = [ys, float(p[i, 3]) + ys]
         # Plot that point using the x and y coordinates
         ax.plot(x, y, "-", linewidth=2, color='g')
 
-        point_color = 'g'
+        #Camera
+        cx = [xs, float(p[i, 4]), float(p[i, 5])]
+        cy = [ys, float(p[i, 6]), float(p[i, 7])]
+        
         if index == 0:
-            point_color = 'r'
-        elif index == 1:
-            point_color = 'b'
+            ax.fill(cx, cy, color='#ff7575')
+        
+        #Color
+        point_color = p[i, 8]
 
         ax.plot(xs, ys,
                 label='original', marker='o', color=point_color)
         # Set the x and y axis to display a fixed range
 
-    # plot inner line
+    # zoom
     ax.set_xlim([(-W * 1.10) / 2, (W * 1.10) / 2])
     ax.set_ylim([(-H * 1.10) / 2, (H * 1.10) / 2])
 

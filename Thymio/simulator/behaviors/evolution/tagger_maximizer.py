@@ -76,7 +76,3 @@ class TaggerMaximizer(Behavior):
 
     def get_score(self):
         return self._fitness
-
-    @property
-    def position(self):
-        return f"{self.controller.x}, {self.controller.y}, {cos(self.controller.q) * 0.09}, {sin(self.controller.q) * 0.09}\n"

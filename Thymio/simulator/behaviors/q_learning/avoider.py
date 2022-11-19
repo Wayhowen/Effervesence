@@ -60,7 +60,3 @@ class Avoider(Behavior):
 
     def save(self):
         self._q_leaner.save_q_table()
-
-    @property
-    def position(self):
-        return f"{self.controller.x}, {self.controller.y}, {cos(self.controller.q) * 0.09}, {sin(self.controller.q) * 0.09}\n"

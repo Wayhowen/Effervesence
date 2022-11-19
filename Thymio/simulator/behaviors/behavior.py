@@ -14,13 +14,13 @@ class Behavior:
         self._tagged = False
 
         # uninitialized is jellow
-        self._color = "EFFF00"
+        self._color = "#EFFF00"
         self._colors = {
-            "seeking": "FF0000",
-            "safe_seeking": "FF9100",
-            "avoiding": "2B00FF",
-            "safe_avoiding": "00FF22",
-            "tagged": "CD00FF"
+            "seeking": "#FF0000",
+            "safe_seeking": "#FF9100",
+            "avoiding": "#2B00FF",
+            "safe_avoiding": "#00FF22",
+            "tagged": "#CD00FF"
         }
 
     @property
@@ -48,7 +48,11 @@ class Behavior:
 
     @property
     def position(self):
-        return f"{self.controller.x}, {self.controller.y}, {cos(self.controller.q) * 0.09}, {sin(self.controller.q) * 0.09}\n"
+        return f"{self.controller.x}, {self.controller.y}, {cos(self.controller.q) * 0.09}, {sin(self.controller.q) * 0.09}"
+
+    @property
+    def camera_range(self):
+        return self.controller.get_camera_range()
 
     def try_tagging(self, other_robot: 'Behavior') -> bool:
         if not other_robot.is_tagged and not other_robot.is_in_safezone:

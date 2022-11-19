@@ -55,3 +55,6 @@ class Controller:
     
     def get_speed(self):
         return self.left_wheel_velocity, self.left_wheel_velocity
+
+    def get_camera_range(self):
+        return self.camera.camera_range(self.x, self.y, self.q)

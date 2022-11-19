@@ -74,7 +74,7 @@ class Main:
         robots = self.robots[:self._number_of_robots]
         for index, robot in enumerate(robots):
             with open(f"animator/trajectory_{index + 1}.dat", "a") as file:
-                file.write(robot.position)
+                file.write(robot.position+", "+robot.camera_range+", "+robot.color+"\n")
 
     def save_behavioral_data(self):
         for robot in self.robots[:self._number_of_robots]:
@@ -115,6 +115,6 @@ class Main:
 
 
 if __name__ == '__main__':
-    main = Main(number_of_robots=5, frequency_of_saves=50, number_of_steps=1)
-    main.save_positions()
-    # main.run()
+    main = Main(number_of_robots=5, frequency_of_saves=50, number_of_steps=1000)
+    #main.save_positions()
+    main.run()
