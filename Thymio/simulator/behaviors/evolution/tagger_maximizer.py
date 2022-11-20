@@ -21,7 +21,6 @@ class TaggerMaximizer(Behavior):
         action = np.argmax(self._q_table[self._state])
         self.perform_next_action(action)
 
-
     def _choose_color(self):
         if self.is_in_safezone:
             self._color = self._colors["safe_seeking"]
@@ -47,7 +46,7 @@ class TaggerMaximizer(Behavior):
         elif action == 4:
             self.controller.drive(random.uniform(5, 11.976), random.uniform(0.01, 11.976))
 
-    def get_next_state(self, on_line, distances_to_objects, other_robot_positions):
+    def get_next_state(self, on_line, distances_to_objects, other_robot_camera_positions):
         #Get the closest reading of those returned
         closest_reading = min([(x, sum(x)) for x in distances_to_objects], key=lambda reading: reading[1])[0]
 
@@ -67,8 +66,8 @@ class TaggerMaximizer(Behavior):
     def callback(self, step, other_robots):
         distances_to_objects = [self.controller.distances_to_objects(robot.controller.body) for robot in other_robots]
         on_line = self.controller.on_the_line(self.simulator.world, self.simulator.bounds)
-        other_robot_positions = self.controller.robots_relative_positions_from_camera([body.controller.body for body in other_robots])
-        self._state = self.get_next_state(on_line, distances_to_objects, other_robot_positions)
+        other_robot_camera_positions = self.controller.robots_relative_positions_from_camera([body.controller.body for body in other_robots])
+        self._state = self.get_next_state(on_line, distances_to_objects, other_robot_camera_positions)
 
         self.tag_other_robots(step, other_robots)
 

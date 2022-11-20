@@ -94,7 +94,7 @@ class Main:
                 # step simulation
                 self.perform(cnt)
                 self.step(cnt)
-                self.finalize_calculations()
+                self.finalize_calculations(cnt)
             except AttributeError as e:
                 if save_data:
                     self.save_positions()
