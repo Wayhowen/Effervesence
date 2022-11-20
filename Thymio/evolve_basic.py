@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 import numpy as np
 import random
 
@@ -15,12 +16,17 @@ class Evolve:
         self.selection_size = selection_size
         self.truncation_size = truncation_size
         self.statistical_significance = statistical_significance
+        self.date_time = datetime.now().strftime("%m%d%Y_%H%M%S")
+        self.n = 0
 
         # change this to maximize different behavior
         self._maximizer_to_use = TaggerMaximizer
 
         self._last_fitness_score = 0
+
         self.evaluator = Main(number_of_robots=5, frequency_of_saves=50, number_of_steps=5000)
+        self.mock_maximizer = self.get_maximizer([])
+        self.best = (Chromosome(len(self.mock_maximizer.states), len(self.mock_maximizer.actions)), 0.0)
 
     def get_maximizer(self, q_table):
         return TaggerMaximizer(
@@ -31,16 +37,15 @@ class Evolve:
 
     def work(self):
         # mock maximizer, useless
-        mock_maximizer = self.get_maximizer([])
-        initial_population = self._generate_population(len(mock_maximizer.states), len(mock_maximizer.actions))
+       
+        initial_population = self._generate_population(len(self.mock_maximizer.states), len(self.mock_maximizer.actions))
 
         offspring_with_fitness = {offspring: self._compute_fitness(offspring) for offspring in initial_population}
-        n = 0
 
         # while not converged
         while not self._is_converged(offspring_with_fitness):
-            print("Gen:", n)
-            n += 1
+            print("Gen:", self.n)
+            self.n += 1
 
             new_offspring: List[Chromosome] = []
 
@@ -58,13 +63,12 @@ class Evolve:
             
             # compute fitness
             offspring_with_fitness = {offspring: self._compute_fitness(offspring) for offspring in new_offspring}
-            best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
-            print(f"Sorted scores are : {best}")
-            print("Best table this gen:", best[0].get_table())
-            print("Score:", best[1])
+            self.best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
+            print(f"Sorted scores are : {self.best}")
+            print("Best table this gen:", self.best[0].get_table())
+            print("Score:", self.best[1])
 
-        best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
-        return best
+        return self.best
 
     def _generate_population(self, x, y) -> List[Chromosome]:
         return [Chromosome(x=x, y=y) for _ in range(self.population_size)]
@@ -112,17 +116,32 @@ class Evolve:
             return False 
         return abs(current_fitness_score - self._last_fitness_score) < self.statistical_significance
 
+    def save_table(self):
+        with open(f"data/tables/Q_table_{self.date_time}.txt", "wb") as file:
+                np.save(file, self.best[0].get_table(), allow_pickle=True)
+    
+    def save_stats(self):
+        with open(f"data/stats/Stats_{self.date_time}.txt", "w") as file:
+                stats = f"generation {self.n} best score: {self.best[1]}\n"
+                file.write(stats)
 
 if __name__ == "__main__":
     print("Setup...")
     start = time.time()
     # this for better pcs
-    # e = Evolve(15, 4, 2, 1000)
-    e = Evolve(20, 4, 2, 1000)
-    print("Training Started...")
-    result = e.work()
-    print("Training Complete")
-    print("Best table:", result[0].get_table())
-    print("Score:", result[1])
-    end = time.time()
-    print("Time training:", end - start)
+    e = Evolve(15, 4, 2, 1000)
+    # e = Evolve(20, 4, 2, 1000)
+
+    try:
+        print("Training Started...")
+        result = e.work()
+        print("Training Complete")
+        print("Best table:", result[0].get_table())
+        
+        print("Score:", result[1])
+        end = time.time()
+        print("Time training:", end - start)
+    finally:
+        print("Saving...")
+        e.save_table()
+        e.save_stats()
