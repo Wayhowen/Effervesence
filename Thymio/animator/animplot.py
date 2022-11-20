@@ -61,10 +61,26 @@ def animate(i):
         # Plot sensors using the x and y coordinates
         x = [x1]
         y = [y1]
-        for i in range(-2,3):
-            rx, ry = rotate_lines(x1,y1,x2,y2,20*i)
-            x.append(rx)
-            y.append(ry)
+        
+        # for loop breaks this part for some weird reason, don't change
+        rx, ry = rotate_lines(x1,y1,x2,y2,-40)
+        x.append(rx)
+        y.append(ry)
+
+        rx, ry = rotate_lines(x1,y1,x2,y2,-20)
+        x.append(rx)
+        y.append(ry)
+
+        x.append(x2)
+        y.append(y2)
+
+        rx, ry = rotate_lines(x1,y1,x2,y2,20)
+        x.append(rx)
+        y.append(ry)
+
+        rx, ry = rotate_lines(x1,y1,x2,y2,40)
+        x.append(rx)
+        y.append(ry)
         
         ax.fill(x, y, color='g')
 
