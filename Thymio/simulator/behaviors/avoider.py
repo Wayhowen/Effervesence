@@ -27,7 +27,7 @@ class Avoider(Behavior):
         elif self.controller.distances_to_wall(self.simulator.world)[2] < 0.09:
             self.controller.drive(11.976, -11.976)
             return
-        self.controller.drive(random.uniform(0, 11.976), random.uniform(0, 0.1625))
+        self.controller.drive(random.uniform(0, 11.976), random.uniform(0, 11.976))
 
     def save(self):
         pass

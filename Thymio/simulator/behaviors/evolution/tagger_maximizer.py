@@ -48,7 +48,7 @@ class TaggerMaximizer(Behavior):
         elif action == 3:
             self.controller.drive(-7.41, -7.41)
         elif action == 4:
-            self.controller.drive(random.uniform(5, 11.976), random.uniform(0.01, 0.1625))
+            self.controller.drive(random.uniform(5, 11.976), random.uniform(0.01, 11.976))
 
     def get_next_state(self):
         on_line = self.controller.on_the_line(self.simulator.world, self.simulator.bounds)
