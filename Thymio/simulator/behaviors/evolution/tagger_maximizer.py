@@ -1,4 +1,5 @@
 import random
+from collections import Counter
 
 import numpy as np
 
@@ -49,14 +50,15 @@ class TaggerMaximizer(Behavior):
     def get_next_state(self, on_line, distances_to_objects, other_robot_camera_positions):
         #Get the closest reading of those returned
         closest_reading = min([(x, sum(x)) for x in distances_to_objects], key=lambda reading: reading[1])[0]
+        other_robot_counted_positions = Counter(other_robot_camera_positions)
 
         if on_line:
             return self.states.index("LINE")
-        elif closest_reading[2] < 0.09:
+        elif other_robot_counted_positions["m"] > 0:
             return self.states.index("INFRONT")
-        elif closest_reading[0] < 0.09 or closest_reading[1] < 0.09:
+        elif other_robot_counted_positions["l"] > 0:
             return self.states.index("LEFT")
-        elif closest_reading[3] < 0.09 or closest_reading[4] < 0.09:
+        elif other_robot_counted_positions["r"] > 0:
             return self.states.index("RIGHT")
         elif closest_reading[5] < 0.09:
             return self.states.index("BEHIND")
