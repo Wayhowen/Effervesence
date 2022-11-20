@@ -25,6 +25,8 @@ class TaggerMaximizer(Behavior):
         self.perform_next_action(action)
         self.tag_other_robots(step, other_controllers)
 
+        rel_positions = self.controller.robots_relative_positions_from_camera([body.controller.body for body in other_controllers])
+
     def _choose_color(self):
         if self.is_in_safezone:
             self._color = self._colors["safe_seeking"]

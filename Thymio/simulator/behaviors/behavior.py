@@ -68,3 +68,6 @@ class Behavior:
     def is_tagged(self) -> bool:
         return self._tagged
 
+    def robot_relative_positions_from_camera(self, robots):
+        return self.controller.robots_relative_positions_from_camera(robots)
+
