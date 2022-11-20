@@ -5,6 +5,8 @@ from simulator.behaviors.avoider import Avoider
 from simulator.behaviors.behavior import Behavior
 from simulator.behaviors.evolution.tagger_maximizer import TaggerMaximizer
 from simulator.behaviors.q_learning.avoider import Avoider as QAvoider
+from simulator.behaviors.rotation_measurment import RotationMeasurment
+from simulator.behaviors.speed_measurment import SpeedMeasurment
 from simulator.behaviors.tagger import Tagger
 from simulator.robot_model.controller import Controller
 from simulator import Simulator
@@ -12,7 +14,7 @@ import numpy as np
 
 
 class Main:
-    def __init__(self, number_of_robots=1, frequency_of_saves=50, number_of_steps=10000):
+    def __init__(self, number_of_robots=1, frequency_of_saves=50, number_of_steps=1800):
         self._delete_previous_records()
 
         self._number_of_robots = number_of_robots
@@ -35,11 +37,12 @@ class Main:
         w = self.simulator.W - 0.1
         h = self.simulator.H - 0.1
         self.robots: List[Behavior] = [
+            # RotationMeasurment(self.simulator,  Controller(self.simulator.W, self.simulator.H, 0, 0, 0))
             TaggerMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0, 0), qt,
                             self.number_of_steps),
             # QAvoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, w / 2, h / 2, 4)),
-            # Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
+            # # Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, w / 2, -h / 2, 2.5)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -w / 2, -h / 2, 1)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -w / 2, h / 2, 5.2))
@@ -115,6 +118,6 @@ class Main:
 
 
 if __name__ == '__main__':
-    main = Main(number_of_robots=5, frequency_of_saves=50, number_of_steps=1000)
+    main = Main(number_of_robots=5, frequency_of_saves=10, number_of_steps=1800)
     #main.save_positions()
     main.run()

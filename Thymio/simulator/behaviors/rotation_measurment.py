@@ -11,10 +11,8 @@ class RotationMeasurment(Behavior):
     def perform(self, step, other_controllers):
         self.distances.append(self.controller.q)
 
-        self.controller.left_wheel_velocity = 5.5241
-        self.controller.right_wheel_velocity = -5.5241
+        self.controller.left_wheel_velocity = 11.976
+        self.controller.right_wheel_velocity = -11.976
 
-        # print rotation in radians every 4 secs
-        if step % 48 == 0:
-            print(abs(self.distances[-1] - self.distances[0]))
+        print(self.distances[0] - self.distances[-1])
 
