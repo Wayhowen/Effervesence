@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.animation import PillowWriter
+from math import sin, cos, radians
 import numpy as np
 import os
 
@@ -45,24 +46,38 @@ def animate(i):
     # Get the point from the points list at index i
     # point = points[i]
     for index, p in enumerate(points):
-        xs = float(p[i, 0])
-        ys = float(p[i, 1])
-        x = [xs, float(p[i, 2]) + xs]
-        y = [ys, float(p[i, 3]) + ys]
-        # Plot that point using the x and y coordinates
-        ax.plot(x, y, "-", linewidth=2, color='g')
+        x1 = float(p[i, 0])
+        y1 = float(p[i, 1])
+        x2 = float(p[i, 2]) + x1
+        y2 = float(p[i, 3]) + y1
 
         #Camera
-        cx = [xs, float(p[i, 4]), float(p[i, 5])]
-        cy = [ys, float(p[i, 6]), float(p[i, 7])]
+        cx = [x1, float(p[i, 4]), float(p[i, 5])]
+        cy = [y1, float(p[i, 6]), float(p[i, 7])]
         
         if index == 0:
             ax.fill(cx, cy, color='#ff7575')
+
+        # Plot sensors using the x and y coordinates
+        x = [x1]
+        y = [y1]
+        for i in range(-2,3):
+            rx, ry = rotate_lines(x1,y1,x2,y2,20*i)
+            x.append(rx)
+            y.append(ry)
+        
+        ax.fill(x, y, color='g')
+
+        # back sensor
+        rx2, ry2 = rotate_lines(x1,y1,x2,y2,180)
+        x = [x1, rx2]
+        y = [y1, ry2]
+        ax.plot(x, y, "-", linewidth=2, color='g')
         
         #Color
         point_color = p[i, 8]
 
-        ax.plot(xs, ys,
+        ax.plot(x1, y1,
                 label='original', marker='o', color=point_color)
         # Set the x and y axis to display a fixed range
 
@@ -77,6 +92,16 @@ def animate(i):
     ax.plot([-SBW / 2, SBW / 2], [SBH / 2, SBH / 2], color='k')
     ax.plot([-SBW / 2, -SBW / 2], [-SBH / 2, SBH / 2], color='k')
     ax.plot([SBW / 2, SBW / 2], [-SBH / 2, SBH / 2], color='k')
+
+def rotate_lines(x1, y1, x2, y2, deg):
+    theta = radians(deg)  # Convert angle from degrees to radians
+
+    # Rotate each around whole polyline's center point
+    px = cos(theta) * (x2-x1) - sin(theta) * (y2-y1) + x1
+    py = sin(theta) * (x2-x1) + cos(theta) * (y2-y1) + y1
+
+    # Replace vertices with updated values
+    return px, py
 
 
 ani = FuncAnimation(fig, animate, frames=row,
