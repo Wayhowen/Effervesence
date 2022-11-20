@@ -41,6 +41,10 @@ class Evolve:
         initial_population = self._generate_population(len(self.mock_maximizer.states), len(self.mock_maximizer.actions))
 
         offspring_with_fitness = {offspring: self._compute_fitness(offspring) for offspring in initial_population}
+        self.best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
+        print(f"Sorted scores are : {list(self.best)}")
+        print("Best table this gen:", self.best[0].get_table())
+        print("Score:", self.best[1])
 
         # while not converged
         while not self._is_converged(offspring_with_fitness):
@@ -64,7 +68,7 @@ class Evolve:
             # compute fitness
             offspring_with_fitness = {offspring: self._compute_fitness(offspring) for offspring in new_offspring}
             self.best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
-            print(f"Sorted scores are : {self.best}")
+            print(f"Sorted scores are : {list(self.best)}")
             print("Best table this gen:", self.best[0].get_table())
             print("Score:", self.best[1])
 
@@ -129,8 +133,8 @@ if __name__ == "__main__":
     print("Setup...")
     start = time.time()
     # this for better pcs
-    e = Evolve(15, 4, 2, 1000)
-    # e = Evolve(20, 4, 2, 1000)
+    # e = Evolve(15, 4, 2, 1000)
+    e = Evolve(20, 4, 2, 1000)
 
     try:
         print("Training Started...")
