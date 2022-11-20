@@ -26,7 +26,13 @@ turning right one full revolution took 25.5 steps
 covering approximately an angle of 14.1 degrees each step
 
 -- i take average of those so 24 steps per turn so 4.8 sec
--- so 5.5241 is the speed rotation with this calculation
+-- so 0.0130 is the speed rotation with this calculation
+"""
+
+"""
+20.11.2022
+
+22.5 with 0.1 step -- 2.25s for 6.28 rad
 """
 
 

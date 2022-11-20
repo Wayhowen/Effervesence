@@ -25,6 +25,8 @@ class TaggerMaximizer(Behavior):
         self.perform_next_action(action)
         self.tag_other_robots(step, other_controllers)
 
+        rel_positions = self.controller.robots_relative_positions_from_camera([body.controller.body for body in other_controllers])
+
     def _choose_color(self):
         if self.is_in_safezone:
             self._color = self._colors["safe_seeking"]
@@ -40,15 +42,15 @@ class TaggerMaximizer(Behavior):
 
     def perform_next_action(self, action):
         if action == 0:
-            self.controller.drive(1.445, 1.445)
+            self.controller.drive(7.41, 7.41)
         elif action == 1:
-            self.controller.drive(-5.5241, 5.5241)
+            self.controller.drive(-11.976, 11.976)
         elif action == 2:
-            self.controller.drive(5.5241, -5.5241)
+            self.controller.drive(11.976, -11.976)
         elif action == 3:
-            self.controller.drive(-1.445, -1.445)
+            self.controller.drive(-7.41, -7.41)
         elif action == 4:
-            self.controller.drive(random.uniform(2, 5.5), random.uniform(2, 5.5))
+            self.controller.drive(random.uniform(5, 11.976), random.uniform(0.01, 11.976))
 
     def get_next_state(self):
         on_line = self.controller.on_the_line(self.simulator.world, self.simulator.bounds)
