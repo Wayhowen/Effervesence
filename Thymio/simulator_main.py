@@ -69,9 +69,10 @@ class Main:
         for robot in robots:
             robot.perform(step, list(filter(lambda x: robot is not x, robots)))
 
-    def finalize_calculations(self):
-        for robot in self.robots[:self._number_of_robots]:
-            robot.callback()
+    def finalize_calculations(self, step):
+        robots = self.robots[:self._number_of_robots]
+        for robot in robots:
+            robot.callback(step, list(filter(lambda x: robot is not x, robots)))
 
     def save_positions(self):
         robots = self.robots[:self._number_of_robots]

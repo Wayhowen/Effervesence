@@ -1,7 +1,6 @@
 import numpy as np
 
 from simulator.behaviors.behavior import Behavior
-from numpy import cos, sin
 
 
 class AvoiderMaximizer(Behavior):
@@ -14,11 +13,8 @@ class AvoiderMaximizer(Behavior):
         self._total_steps = total_steps
         self._state = self._states.index("EXPLORE")
         self._fitness = 1
-        self.distances_to_objects = []
 
     def perform(self, step, other_controllers):
-        self.distances_to_objects = [self.controller.distances_to_objects(robot.controller.body) for robot in
-                                     other_controllers]
         action = np.argmax(self._q_table[self._state])
         self.perform_next_action(action)
         self._fitness += 1
@@ -33,10 +29,9 @@ class AvoiderMaximizer(Behavior):
         elif action == 3:
             self.controller.drive(-7.41, -7.41)
 
-    def get_next_state(self):
-        on_line = self.controller.on_the_line(self.simulator.world, self.simulator.bounds)
+    def get_next_state(self, distances_to_objects, on_line):
         # Get the closest reading of those returned
-        closest_reading = min([(x, sum(x)) for x in self.distances_to_objects], key=lambda reading: reading[1])[0]
+        closest_reading = min([(x, sum(x)) for x in distances_to_objects], key=lambda reading: reading[1])[0]
 
         if on_line:
             self._fitness -= 10
@@ -57,8 +52,12 @@ class AvoiderMaximizer(Behavior):
             self._fitness += 10
             return self._states.index("EXPLORE")
 
-    def callback(self):
-        self._state = self.get_next_state()
+    def callback(self, step, other_robots):
+        distances_to_objects = [self.controller.distances_to_objects(robot.controller.body) for robot in
+                                     other_robots]
+        on_line = self.controller.on_the_line(self.simulator.world, self.simulator.bounds)
+
+        self._state = self.get_next_state(distances_to_objects, on_line)
 
     def save(self):
         pass

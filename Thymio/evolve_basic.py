@@ -29,7 +29,7 @@ class Evolve:
         self.best = (Chromosome(len(self.mock_maximizer.states), len(self.mock_maximizer.actions)), 0.0)
 
     def get_maximizer(self, q_table):
-        return TaggerMaximizer(
+        return self._maximizer_to_use(
             self.evaluator.simulator,
             Controller(self.evaluator.simulator.W, self.evaluator.simulator.H), q_table,
             self.evaluator.number_of_steps
