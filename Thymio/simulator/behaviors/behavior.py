@@ -39,7 +39,7 @@ class Behavior:
         pass
 
     @abstractmethod
-    def callback(self):
+    def callback(self, step: int, other_robots):
         pass
 
     @abstractmethod
