@@ -9,7 +9,7 @@ from simulator.behaviors.behavior import Behavior
 class TaggerMaximizer(Behavior):
     def __init__(self, simulator, controller, q_table, total_steps):
         super().__init__(simulator, controller)
-        self.states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "LINE", "BEHIND")
+        self.states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "LINE", "BEHIND", "TOOCLOSE")
         self.actions = ("GOFORWARDS", "GOLEFT", "GORIGHT", "REVERSE", "RANDOM")
 
         self._q_table = q_table
@@ -17,6 +17,7 @@ class TaggerMaximizer(Behavior):
         self._state = self.states.index("NOTHING")
         self._fitness = 1
         self._color = self._colors["safe_seeking"]
+        self._bad_behavior_penalty = 200
 
     def perform(self, step, other_controllers):
         action = np.argmax(self._q_table[self._state])
@@ -29,11 +30,13 @@ class TaggerMaximizer(Behavior):
         self._color = self._colors["seeking"]
 
     def tag_other_robots(self, step, other_controllers):
+        fitness_to_add = 0
         for robot in other_controllers:
             distances_to_objects = self.controller.distances_to_objects(robot.controller.body)
             if any(d and d < 0.09 for d in distances_to_objects):
                 if self.try_tagging(robot):
-                    self._fitness += self._total_steps - step
+                    fitness_to_add += self._total_steps - step
+        return fitness_to_add
 
     def perform_next_action(self, action):
         if action == 0:
@@ -54,6 +57,8 @@ class TaggerMaximizer(Behavior):
 
         if on_line:
             return self.states.index("LINE")
+        elif any(reading < 0.04 for reading in closest_reading):
+            return self.states.index("TOOCLOSE")
         elif other_robot_counted_positions["m"] > 0:
             return self.states.index("INFRONT")
         elif other_robot_counted_positions["l"] > 0:
@@ -71,7 +76,16 @@ class TaggerMaximizer(Behavior):
         other_robot_camera_positions = self.controller.robots_relative_positions_from_camera([body.controller.body for body in other_robots])
         self._state = self.get_next_state(on_line, distances_to_objects, other_robot_camera_positions)
 
-        self.tag_other_robots(step, other_robots)
+        score_form_tagging = self.tag_other_robots(step, other_robots)
+
+        self.manage_rewards(score_form_tagging)
+
+    def manage_rewards(self, score_form_tagging: int):
+        self._fitness += score_form_tagging
+        if self._state == self.states.index("LINE"):
+            self._fitness -= self._bad_behavior_penalty
+        if self._state == self.states.index("TOOCLOSE"):
+            self._fitness -= self._bad_behavior_penalty
 
     def save(self):
         pass
