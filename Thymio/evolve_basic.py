@@ -67,6 +67,7 @@ class Evolve:
             print(f"Sorted scores are : {self.best}")
             print("Best table this gen:", self.best[0].get_table())
             print("Score:", self.best[1])
+            self.save_stats()
 
         return self.best
 
