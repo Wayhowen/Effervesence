@@ -11,8 +11,8 @@ class TaggerMaximizer(Behavior):
         super().__init__(simulator, controller)
         self.states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "LINE", "BEHIND", "TOOCLOSE")
         self.actions = (
-            "GOFORWARDS", "GOLEFT", "GORIGHT", "REVERSE", "RANDOM", "LEAN_LEFT", "LEAN_RIGHT", "BACKWARDS_LEFT",
-            "BACKWARDS_RIGHT"
+            "GOFORWARDS", "GOLEFT", "GORIGHT", "RANDOM", "LEAN_LEFT", "LEAN_RIGHT", "SLOW_FORWARDS_LEFT",
+            "SLOW_FORWARDS_RIGHT", "SLOW_FORWARDS"
         )
 
         self._q_table = q_table
@@ -49,17 +49,17 @@ class TaggerMaximizer(Behavior):
         elif action == 2:
             self.controller.drive(11.976, -11.976)
         elif action == 3:
-            self.controller.drive(-7.41, -7.41)
-        elif action == 4:
             self.controller.drive(random.uniform(5, 11.976), random.uniform(0.01, 11.976))
-        elif action == 5:
+        elif action == 4:
             self.controller.drive(3.7, 7.41)
-        elif action == 6:
+        elif action == 5:
             self.controller.drive(7.41, 3.7)
+        elif action == 6:
+            self.controller.drive(1.85, 3.7)
         elif action == 7:
-            self.controller.drive(-3.7, -7.41)
+            self.controller.drive(3.7, 1.85)
         elif action == 8:
-            self.controller.drive(-7.41, -3.7)
+            self.controller.drive(3.7, 3.7)
 
     def get_next_state(self, on_line, closest_reading, other_robot_camera_positions: Dict[str, Behavior]):
         #Get the closest reading of those returned
