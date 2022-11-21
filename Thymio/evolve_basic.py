@@ -43,7 +43,7 @@ class Evolve:
         offspring_with_fitness = {offspring: self._compute_fitness(offspring) for offspring in initial_population}
         self.best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
         print(f"Sorted scores are : {list(self.best)}")
-        print("Best table this gen:", self.best[0].get_table())
+        print("Best table this gen:", repr(self.best[0].get_table()))
         print("Score:", self.best[1])
 
         # while not converged

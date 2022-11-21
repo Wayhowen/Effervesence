@@ -20,7 +20,7 @@ class TaggerMaximizer(Behavior):
         self._state = self.states.index("NOTHING")
         self._fitness = 1
         self._color = self._colors["safe_seeking"]
-        self._bad_behavior_penalty = 2
+        self._bad_behavior_penalty = 1
 
     def perform(self, step, other_controllers):
         action = np.argmax(self._q_table[self._state])
