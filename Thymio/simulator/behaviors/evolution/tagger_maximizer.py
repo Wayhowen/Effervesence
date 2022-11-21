@@ -1,5 +1,5 @@
 import random
-from collections import Counter
+from typing import List, Dict
 
 import numpy as np
 
@@ -10,14 +10,17 @@ class TaggerMaximizer(Behavior):
     def __init__(self, simulator, controller, q_table, total_steps):
         super().__init__(simulator, controller)
         self.states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "LINE", "BEHIND", "TOOCLOSE")
-        self.actions = ("GOFORWARDS", "GOLEFT", "GORIGHT", "REVERSE", "RANDOM")
+        self.actions = (
+            "GOFORWARDS", "GOLEFT", "GORIGHT", "REVERSE", "RANDOM", "LEAN_LEFT", "LEAN_RIGHT", "BACKWARDS_LEFT",
+            "BACKWARDS_RIGHT"
+        )
 
         self._q_table = q_table
         self._total_steps = total_steps
         self._state = self.states.index("NOTHING")
         self._fitness = 1
         self._color = self._colors["safe_seeking"]
-        self._bad_behavior_penalty = 200
+        self._bad_behavior_penalty = 2
 
     def perform(self, step, other_controllers):
         action = np.argmax(self._q_table[self._state])
@@ -49,32 +52,42 @@ class TaggerMaximizer(Behavior):
             self.controller.drive(-7.41, -7.41)
         elif action == 4:
             self.controller.drive(random.uniform(5, 11.976), random.uniform(0.01, 11.976))
+        elif action == 5:
+            self.controller.drive(3.7, 7.41)
+        elif action == 6:
+            self.controller.drive(7.41, 3.7)
+        elif action == 7:
+            self.controller.drive(-3.7, -7.41)
+        elif action == 8:
+            self.controller.drive(-7.41, -3.7)
 
-    def get_next_state(self, on_line, distances_to_objects, other_robot_camera_positions):
+    def get_next_state(self, on_line, closest_reading, other_robot_camera_positions: Dict[str, Behavior]):
         #Get the closest reading of those returned
-        closest_reading = min([(x, sum(x)) for x in distances_to_objects], key=lambda reading: reading[1])[0]
-        other_robot_counted_positions = Counter(other_robot_camera_positions)
 
         if on_line:
             return self.states.index("LINE")
         elif any(reading < 0.04 for reading in closest_reading):
             return self.states.index("TOOCLOSE")
-        elif other_robot_counted_positions["m"] > 0:
+        elif other_robot_camera_positions["m"] and not other_robot_camera_positions["m"].is_tagged:
             return self.states.index("INFRONT")
-        elif other_robot_counted_positions["l"] > 0:
+        elif other_robot_camera_positions["l"] and not other_robot_camera_positions["l"].is_tagged:
             return self.states.index("LEFT")
-        elif other_robot_counted_positions["r"] > 0:
+        elif other_robot_camera_positions["r"] and not other_robot_camera_positions["r"].is_tagged:
             return self.states.index("RIGHT")
         elif closest_reading[5] < 0.09:
             return self.states.index("BEHIND")
         else:
             return self.states.index("NOTHING")
 
-    def callback(self, step, other_robots):
+    def callback(self, step, other_robots: List[Behavior]):
         distances_to_objects = [self.controller.distances_to_objects(robot.controller.body) for robot in other_robots]
+        closest_reading = min([(x, sum(x)) for x in distances_to_objects], key=lambda reading: reading[1])[0]
+
         on_line = self.controller.on_the_line(self.simulator.world, self.simulator.bounds)
-        other_robot_camera_positions = self.controller.robots_relative_positions_from_camera([body.controller.body for body in other_robots])
-        self._state = self.get_next_state(on_line, distances_to_objects, other_robot_camera_positions)
+        other_robot_camera_positions = self.controller.robots_relative_positions_from_camera(
+            other_robots
+        )
+        self._state = self.get_next_state(on_line, closest_reading, other_robot_camera_positions)
 
         score_form_tagging = self.tag_other_robots(step, other_robots)
 

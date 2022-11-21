@@ -69,7 +69,7 @@ class Evolve:
             offspring_with_fitness = {offspring: self._compute_fitness(offspring) for offspring in new_offspring}
             self.best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
             print(f"Sorted scores are : {list(self.best)}")
-            print("Best table this gen:", self.best[0].get_table())
+            print("Best table this gen:", repr(self.best[0].get_table()))
             print("Score:", self.best[1])
             self.save_stats()
 
@@ -112,7 +112,9 @@ class Evolve:
 
     def _compute_fitness(self, offspring: Chromosome) -> float:
         print("Evaluating...")
-        return self.evaluator.eval(self.get_maximizer(offspring.get_table()))
+        fit = self.evaluator.eval(self.get_maximizer(offspring.get_table()))
+        print(fit)
+        return fit
 
     def _is_converged(self, offspring_with_fitness: Dict[Chromosome, float]) -> bool:
         current_fitness_score = sum(offspring_with_fitness.values()) / len(offspring_with_fitness)
@@ -141,7 +143,7 @@ if __name__ == "__main__":
         print("Training Started...")
         result = e.work()
         print("Training Complete")
-        print("Best table:", result[0].get_table())
+        print("Best table:", repr(result[0].get_table()))
         
         print("Score:", result[1])
         end = time.time()
