@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import List
 
 from numpy import cos, sin
 
@@ -68,6 +69,6 @@ class Behavior:
     def is_tagged(self) -> bool:
         return self._tagged
 
-    def robot_relative_positions_from_camera(self, robots):
+    def robot_relative_positions_from_camera(self, robots: List['Behavior']):
         return self.controller.robots_relative_positions_from_camera(robots)
 

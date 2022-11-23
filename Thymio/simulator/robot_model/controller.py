@@ -1,10 +1,12 @@
 from random import random
+from typing import List
 
 from shapely.geometry import Point, Polygon
 
 from .bottom_sensor import BottomSensor
 from .camera import Camera
 from .side_sensor import SideSensor
+from ..behaviors.behavior import Behavior
 
 
 class Controller:
@@ -43,8 +45,8 @@ class Controller:
         pos = Point(self.x, self.y)
         return self.bottom_sensor.is_on_the_line(self.x, self.y, bounds) and not Polygon(world).covers(pos)
 
-    def robots_relative_positions_from_camera(self, robots):
-        return [self.camera.robot_relative_position(self.x, self.y, self.q, robot) for robot in robots]
+    def robots_relative_positions_from_camera(self, robots: List[Behavior]):
+        return self.camera.robot_relative_position(self.x, self.y, self.q, robots)
 
     def in_the_safezone(self, world, safezone):
         return self.bottom_sensor.is_on_the_line(self.x, self.y, safezone)
