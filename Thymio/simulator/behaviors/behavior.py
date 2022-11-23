@@ -12,7 +12,7 @@ class Behavior:
         # used for speed measurment
         self.distances = []
         self._score = 0
-        self._tagged = False
+        self.tagged = False
 
         # uninitialized is jellow
         self._color = "#EFFF00"
@@ -57,7 +57,7 @@ class Behavior:
 
     def try_tagging(self, other_robot: 'Behavior') -> bool:
         if not other_robot.is_tagged and not other_robot.is_in_safezone:
-            other_robot._tagged = True
+            other_robot.tagged = True
             return True
         return False
 
@@ -67,7 +67,7 @@ class Behavior:
 
     @property
     def is_tagged(self) -> bool:
-        return self._tagged
+        return self.tagged
 
     def robot_relative_positions_from_camera(self, robots: List['Behavior']):
         return self.controller.robots_relative_positions_from_camera(robots)

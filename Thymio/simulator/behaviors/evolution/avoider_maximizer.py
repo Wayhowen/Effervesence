@@ -8,15 +8,15 @@ from simulator.behaviors.behavior import Behavior
 class AvoiderMaximizer(Behavior):
     def __init__(self, simulator, controller, q_table, total_steps):
         super().__init__(simulator, controller)
-        self._states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "LINE", "BEHIND", "SAFE")
-        self._actions = (
+        self.states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "LINE", "BEHIND", "SAFE")
+        self.actions = (
             "GOFORWARDS", "GOLEFT", "GORIGHT", "SLOW_BACKWARDS_LEFT", "SLOW_BACKWARDS_RIGHT", "LEAN_LEFT",
             "LEAN_RIGHT", "SLOW_FORWARDS_LEFT", "SLOW_FORWARDS_RIGHT", "SLOW_FORWARDS", "STOP"
         )
 
         self._q_table = q_table
         self._total_steps = total_steps
-        self._state = self._states.index("EXPLORE")
+        self._state = self.states.index("NOTHING")
         self._fitness = 1
         self._color = self._colors["avoiding"]
         self._bad_behavior_penalty = 1
@@ -58,19 +58,19 @@ class AvoiderMaximizer(Behavior):
 
     def get_next_state(self, on_line, closest_reading, other_robot_camera_positions: Dict[str, Behavior]):
         if on_line:
-            return self._states.index("LINE")
+            return self.states.index("LINE")
         elif self.is_in_safezone:
-            return self._states.index("SAFE")
+            return self.states.index("SAFE")
         elif other_robot_camera_positions["l"]:
-            return self._states.index("LEFT")
+            return self.states.index("LEFT")
         elif other_robot_camera_positions["m"]:
-            return self._states.index("INFRONT")
+            return self.states.index("INFRONT")
         elif other_robot_camera_positions["r"]:
-            return self._states.index("RIGHT")
+            return self.states.index("RIGHT")
         elif closest_reading[5] < 0.09:
-            return self._states.index("BEHIND")
+            return self.states.index("BEHIND")
         else:
-            return self._states.index("NOTHING")
+            return self.states.index("NOTHING")
 
     def callback(self, step, other_robots):
         distances_to_objects = [self.controller.distances_to_objects(robot.controller.body) for robot in
@@ -85,7 +85,7 @@ class AvoiderMaximizer(Behavior):
         self.manage_rewards(self._state)
 
     def manage_rewards(self, state: int):
-        if state == self._states.index("SAFE"):
+        if state == self.states.index("SAFE"):
             self._fitness += 1
         if not self.is_tagged:
             self._fitness += 1

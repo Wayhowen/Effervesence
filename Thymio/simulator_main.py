@@ -1,3 +1,4 @@
+import copy
 import os
 from typing import List
 
@@ -67,22 +68,43 @@ class Main:
          10.11465738,  -2.34801744,  16.75501476, -13.87101205,
           1.73595421]])
 
-        w = self.simulator.W - 0.1
-        h = self.simulator.H - 0.1
+        self.w = self.simulator.W - 0.1
+        self.h = self.simulator.H - 0.1
         self.robots: List[Behavior] = [
             # RotationMeasurment(self.simulator,  Controller(self.simulator.W, self.simulator.H, 0, 0, 0))
             TaggerMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0, 0), qt,
                             self.number_of_steps),
             # QAvoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, w / 2, h / 2, 4)),
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, self.w / 2, self.h / 2, 4)),
             # # Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, w / 2, -h / 2, 2.5)),
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -w / 2, -h / 2, 1)),
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -w / 2, h / 2, 5.2))
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, self.w / 2, -self.h / 2, 2.5)),
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -self.w / 2, -self.h / 2, 1)),
+            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -self.w / 2, self.h / 2, 5.2))
         ]
 
         # used for speed measurment
         self.distances = []
+
+    def _reset_robots(self):
+        self.robots[1].controller.x = self.w / 2
+        self.robots[1].controller.y = self.h / 2
+        self.robots[1].controller.q = 4
+        self.robots[1].tagged = False
+
+        self.robots[2].controller.x = self.w / 2
+        self.robots[2].controller.y = -self.h / 2
+        self.robots[2].controller.q = 2.5
+        self.robots[2].tagged = False
+
+        self.robots[3].controller.x = -self.w / 2
+        self.robots[3].controller.y = -self.h / 2
+        self.robots[3].controller.q = 1
+        self.robots[3].tagged = False
+
+        self.robots[4].controller.x = -self.w / 2
+        self.robots[4].controller.y = self.h / 2
+        self.robots[4].controller.q = 5.2
+        self.robots[4].tagged = False
 
     def _delete_previous_records(self):
         dir_name = "animator/"
@@ -119,6 +141,7 @@ class Main:
 
     # for running simulation with predefined controllers
     def run(self, save_data=True):
+        self._reset_robots()
         if save_data:
             self.save_positions()
         for cnt in range(self.number_of_steps):
@@ -143,12 +166,27 @@ class Main:
             self.save_behavioral_data()
 
     # this is to be used as the evaluator
-    def eval(self, maximizer):
-        self.robots[0] = maximizer
+    def eval(self, maximizer: Behavior, competitive_maximizer: Behavior):
+        if isinstance(maximizer, TaggerMaximizer):
+            self.robots[0] = maximizer
+            if competitive_maximizer:
+                self.robots[1] = copy.deepcopy(competitive_maximizer)
+                self.robots[2] = copy.deepcopy(competitive_maximizer)
+                self.robots[3] = copy.deepcopy(competitive_maximizer)
+                self.robots[4] = copy.deepcopy(competitive_maximizer)
+        else:
+            self.robots[0] = competitive_maximizer
+            if competitive_maximizer:
+                self.robots[1] = copy.deepcopy(maximizer)
+                self.robots[2] = copy.deepcopy(maximizer)
+                self.robots[3] = copy.deepcopy(maximizer)
+                self.robots[4] = copy.deepcopy(maximizer)
 
         self.run(False)
-
-        return self.robots[0].get_score()
+        if isinstance(maximizer, TaggerMaximizer):
+            return self.robots[0].get_score()
+        else:
+            return sorted(self.robots[1:], key=lambda robot: robot.get_score(), reverse=True)[0].get_score()
 
 
 if __name__ == '__main__':
