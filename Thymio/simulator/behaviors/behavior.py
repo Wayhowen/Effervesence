@@ -63,7 +63,7 @@ class Behavior:
 
     @property
     def is_in_safezone(self):
-        return self.controller.in_the_safezone(self.simulator.world, self.simulator.safezone)
+        return self.controller.in_the_safezone(self.simulator.safezone)
 
     @property
     def is_tagged(self) -> bool:

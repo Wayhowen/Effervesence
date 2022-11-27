@@ -10,4 +10,4 @@ class Node:
         self.f = 0
 
     def __eq__(self, other):
-        return self.position == other.position
+        return self.position == other._position_getter

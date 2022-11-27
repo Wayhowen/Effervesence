@@ -1,3 +1,6 @@
+from abc import abstractmethod
+from typing import Tuple
+
 from numpy import sin, cos, sqrt
 from shapely.geometry import LineString, MultiPoint, Polygon
 
@@ -15,16 +18,21 @@ sensor_values = {
 }
 
 
-class SideSensor:
-    def __init__(self, W, H, offset: float):
+class Sensor:
+    def __init__(self, W, H, offset: float, position_getter):
         self.W = W
         self.H = H
         self.offset = offset  # offset of sensor from the middle in radians
         self.receiving_fov = 2.8  # 160 deg
         self.receiving_distance = 0.09
+        self._position_getter = position_getter
 
-    def real_world_sensor_value(self, x, y, q, world):
-        distance_to_wall = self.distance_to_wall(x, y, q, world)
+    @abstractmethod
+    def _sensor_position(self) -> Tuple[float, float, float]:
+        pass
+
+    def real_world_sensor_value(self, world):
+        distance_to_wall = self.distance_to_wall(world)
         distance_to_wall_3_numbers = float(str(distance_to_wall)[:4])
         if distance_to_wall_3_numbers > 0.09:
             return 0
@@ -42,20 +50,22 @@ class SideSensor:
         return res
 
     """very precise simulator distance"""
-    def distance_to_wall(self, x, y, q, world):
+    def distance_to_wall(self, world):
+        x, y, q = self._sensor_position()
         ray = LineString(
             [
                 (x, y),
-                (x + cos(q + self.offset) * 2 * (self.W + self.H), (y + sin(q + self.offset) * 2 * (self.W + self.H)))
+                (x + cos(q) * 2 * (self.W + self.H), (y + sin(q) * 2 * (self.W + self.H)))
             ])  # a line from robot to a point outside arena in direction of q
         s = world.intersection(ray)
         return sqrt((s.x - x) ** 2 + (s.y - y) ** 2)  # distance to wall
 
-    def distance_to_object(self, x, y, q, other_object):
+    def distance_to_object(self, other_object):
+        x, y, q = self._sensor_position()
         ray = LineString(
             [
                 (x, y),
-                (x + cos(q + self.offset) * 2 * (self.W + self.H), (y + sin(q + self.offset) * 2 * (self.W + self.H)))
+                (x + cos(q) * 2 * (self.W + self.H), (y + sin(q) * 2 * (self.W + self.H)))
             ])  # a line from robot to a point outside arena in direction of q
         s = other_object.intersection(ray)
         if s.is_empty:
@@ -67,7 +77,8 @@ class SideSensor:
             closest_side = list(s.coords)[0]
         return sqrt((closest_side[0] - x) ** 2 + (closest_side[1] - y) ** 2)  # distance to wall
 
-    def can_receive(self, x, y, q, other_robot):
+    def can_receive(self, other_robot):
+        x, y, q = self._sensor_position()
         sensor_vision = Polygon(
             [
                 (x, y),
