@@ -1,16 +1,5 @@
 from numpy import sin, cos, sqrt
-from shapely.geometry import LineString, MultiPoint
-
-# sensor_values = {
-#     "8.2": 1080,
-#     "8": 1280,
-#     "7.8": 1390,
-#     "7.6": 1420,
-#     "7.2": 1560,
-#     "7": 1630,
-#     "0": 4800
-#
-# }
+from shapely.geometry import LineString, MultiPoint, Polygon
 
 sensor_values = {
     "9": 1200,
@@ -31,6 +20,8 @@ class SideSensor:
         self.W = W
         self.H = H
         self.offset = offset  # offset of sensor from the middle in radians
+        self.receiving_fov = 2.8  # 160 deg
+        self.receiving_distance = 0.09
 
     def real_world_sensor_value(self, x, y, q, world):
         distance_to_wall = self.distance_to_wall(x, y, q, world)
@@ -49,7 +40,6 @@ class SideSensor:
         percentage_of_higher_value = (float(f"0.0{distance_cm + 1}") - distance_to_wall) / float(f"0.0{distance_cm + 1}")
         res = table_cm_lookup + (percentage_of_higher_value * difference)
         return res
-
 
     """very precise simulator distance"""
     def distance_to_wall(self, x, y, q, world):
@@ -76,3 +66,12 @@ class SideSensor:
         else:
             closest_side = list(s.coords)[0]
         return sqrt((closest_side[0] - x) ** 2 + (closest_side[1] - y) ** 2)  # distance to wall
+
+    def can_receive(self, x, y, q, other_robot):
+        sensor_vision = Polygon(
+            [
+                (x, y),
+                (x + cos(q + self.receiving_fov / 2) * self.receiving_distance, (y + sin(q + self.receiving_fov / 2) * self.receiving_distance)),
+                (x + cos(q + -self.receiving_fov / 2) * self.receiving_distance, (y + sin(q + -self.receiving_fov / 2) * self.receiving_distance))
+            ])
+        return sensor_vision.covers(other_robot)

@@ -60,3 +60,6 @@ class Controller:
 
     def get_camera_range(self):
         return self.camera.camera_range(self.x, self.y, self.q)
+
+    def can_be_tagged(self, other_body: Point):
+        return any(s.can_receive(self.x, self.y, self.q, other_body) for s in self.sensors)

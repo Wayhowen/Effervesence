@@ -56,7 +56,7 @@ class Behavior:
         return self.controller.get_camera_range()
 
     def try_tagging(self, other_robot: 'Behavior') -> bool:
-        if not other_robot.is_tagged and not other_robot.is_in_safezone:
+        if not other_robot.is_tagged and not other_robot.is_in_safezone and other_robot.can_be_tagged(self.controller.body):
             other_robot.tagged = True
             return True
         return False
@@ -71,4 +71,7 @@ class Behavior:
 
     def robot_relative_positions_from_camera(self, robots: List['Behavior']):
         return self.controller.robots_relative_positions_from_camera(robots)
+
+    def can_be_tagged(self, other_body):
+        return self.controller.can_be_tagged(other_body)
 
