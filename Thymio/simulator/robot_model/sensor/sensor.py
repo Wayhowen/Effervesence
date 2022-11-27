@@ -55,10 +55,17 @@ class Sensor:
         ray = LineString(
             [
                 (x, y),
-                (x + cos(q) * 2 * (self.W + self.H), (y + sin(q) * 2 * (self.W + self.H)))
+                (x + cos(q) * 4 * (self.W + self.H), (y + sin(q) * 4 * (self.W + self.H)))
             ])  # a line from robot to a point outside arena in direction of q
         s = world.intersection(ray)
-        return sqrt((s.x - x) ** 2 + (s.y - y) ** 2)  # distance to wall
+        if s.is_empty:
+            return float('inf')
+        if type(s) is MultiPoint:
+            mult = list(s.geoms)
+            closest_side = list(mult[0].coords)[0]
+        else:
+            closest_side = list(s.coords)[0]
+        return sqrt((closest_side[0] - x) ** 2 + (closest_side[1] - y) ** 2)  # distance to wall
 
     def distance_to_object(self, other_object):
         x, y, q = self._sensor_position()

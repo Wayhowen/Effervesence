@@ -1,5 +1,6 @@
 import copy
 import os
+import traceback
 from typing import List
 
 from simulator.behaviors.avoider import Avoider
@@ -68,8 +69,8 @@ class Main:
          -3.9853573 ,  -0.62173293,  15.08684138,  -0.06108088,
           9.93598199]])
 
-        self.w = self.simulator.W - 0.1
-        self.h = self.simulator.H - 0.1
+        self.w = self.simulator.W - 0.2
+        self.h = self.simulator.H - 0.2
         self.robots: List[Behavior] = [
             # RotationMeasurment(self.simulator,  Controller(self.simulator.W, self.simulator.H, 0, 0, 0))
             TaggerMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0, 0), qt,
@@ -156,7 +157,7 @@ class Main:
                     self.save_positions()
                     self.save_behavioral_data()
                 print("out of bounds on step", cnt)
-                print(e)
+                traceback.print_exc()
                 break
             if all(robot.is_tagged for robot in self.robots):
                 if save_data:
