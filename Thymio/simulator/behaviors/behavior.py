@@ -1,7 +1,10 @@
 from abc import abstractmethod
-from typing import List
+from typing import List, Tuple
 
 from numpy import cos, sin
+from shapely.geometry import Point
+
+from simulator.robot_model.sensor.sensor import Sensor
 
 
 class Behavior:
@@ -13,6 +16,7 @@ class Behavior:
         self.distances = []
         self._score = 0
         self.tagged = False
+        self.forced_out_of_safezone = 0
 
         # uninitialized is jellow
         self._color = "#EFFF00"
@@ -55,11 +59,17 @@ class Behavior:
     def camera_range(self):
         return self.controller.get_camera_range()
 
-    def try_tagging(self, other_robot: 'Behavior') -> bool:
-        if not other_robot.is_tagged and not other_robot.is_in_safezone and other_robot.can_be_tagged(self.controller.body):
+    def try_tagging(self, other_robot: 'Behavior', sensor_indexes: List[int]) -> bool:
+        sensors_positions = [self.controller.sensors[i].sensor_position() for i in sensor_indexes]
+        if not other_robot.is_tagged and not other_robot.is_in_safezone and other_robot.can_receive(sensors_positions):
             other_robot.tagged = True
             return True
         return False
+
+    def try_forcing_out_of_safezone(self, other_robot, sensor_indexes: List[int], step: int):
+        sensors_positions = [self.controller.sensors[i].sensor_position() for i in sensor_indexes]
+        if other_robot.is_in_safezone and other_robot.can_receive(sensors_positions):
+            other_robot.forced_out_of_safezone = step
 
     @property
     def is_in_safezone(self):
@@ -72,6 +82,6 @@ class Behavior:
     def robot_relative_positions_from_camera(self, robots: List['Behavior']):
         return self.controller.robots_relative_positions_from_camera(robots)
 
-    def can_be_tagged(self, other_body):
-        return self.controller.can_be_tagged(other_body)
+    def can_receive(self, sensors: List[Tuple[float, float, float]]):
+        return any(self.controller.can_receive(Point(position[0], position[1])) for position in sensors)
 

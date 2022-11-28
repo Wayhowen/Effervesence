@@ -10,7 +10,7 @@ class BackSensor(Sensor):
         self._side_offset_cm = side_offset_cm
         self._side_offset_radians = side_offset_radians
 
-    def _sensor_position(self):
+    def sensor_position(self):
         x, y, q = self._position_getter()
         offset_q = q + self.offset
 

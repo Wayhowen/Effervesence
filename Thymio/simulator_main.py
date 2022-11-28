@@ -77,7 +77,6 @@ class Main:
                             self.number_of_steps),
             # QAvoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, self.w / 2, self.h / 2, 4)),
-            # # Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, self.w / 2, -self.h / 2, 2.5)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -self.w / 2, -self.h / 2, 1)),
             Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -self.w / 2, self.h / 2, 5.2))

@@ -8,7 +8,7 @@ class SideSensor(Sensor):
         super().__init__(W, H, offset, position_getter)
         self._sensor_forward_offset = sensor_forward_offset
 
-    def _sensor_position(self):
+    def sensor_position(self):
         x, y, q = self._position_getter()
         offset_q = q + self.offset
         x = x + cos(offset_q) * self._sensor_forward_offset

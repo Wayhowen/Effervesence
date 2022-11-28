@@ -59,7 +59,8 @@ class Controller:
 
     def on_the_line(self, world, bounds) -> bool:
         pos = Point(self.x, self.y)
-        return self.bottom_sensor_left.is_on_the_line(bounds) and not Polygon(world).covers(pos)
+        return self.bottom_sensor_left.is_on_the_line(bounds) or self.bottom_sensor_right.is_on_the_line(bounds) \
+               and not Polygon(world).covers(pos)
 
     def robots_relative_positions_from_camera(self, robots: List[Behavior]):
         return self.camera.robot_relative_position(self.x, self.y, self.q, robots)
@@ -77,5 +78,5 @@ class Controller:
     def get_camera_range(self):
         return self.camera.camera_range(self.x, self.y, self.q)
 
-    def can_be_tagged(self, other_body: Point):
-        return any(s.can_receive(other_body) for s in self.sensors)
+    def can_receive(self, sensor_point: Point):
+        return any(s.can_receive(sensor_point) for s in self.sensors)

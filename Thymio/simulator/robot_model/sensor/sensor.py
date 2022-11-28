@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import Tuple
 
 from numpy import sin, cos, sqrt
-from shapely.geometry import LineString, MultiPoint, Polygon
+from shapely.geometry import LineString, MultiPoint, Polygon, Point
 
 sensor_values = {
     "9": 1200,
@@ -28,7 +28,7 @@ class Sensor:
         self._position_getter = position_getter
 
     @abstractmethod
-    def _sensor_position(self) -> Tuple[float, float, float]:
+    def sensor_position(self) -> Tuple[float, float, float]:
         pass
 
     def real_world_sensor_value(self, world):
@@ -51,7 +51,7 @@ class Sensor:
 
     """very precise simulator distance"""
     def distance_to_wall(self, world):
-        x, y, q = self._sensor_position()
+        x, y, q = self.sensor_position()
         ray = LineString(
             [
                 (x, y),
@@ -68,7 +68,7 @@ class Sensor:
         return sqrt((closest_side[0] - x) ** 2 + (closest_side[1] - y) ** 2)  # distance to wall
 
     def distance_to_object(self, other_object):
-        x, y, q = self._sensor_position()
+        x, y, q = self.sensor_position()
         ray = LineString(
             [
                 (x, y),
@@ -84,12 +84,12 @@ class Sensor:
             closest_side = list(s.coords)[0]
         return sqrt((closest_side[0] - x) ** 2 + (closest_side[1] - y) ** 2)  # distance to wall
 
-    def can_receive(self, other_robot):
-        x, y, q = self._sensor_position()
+    def can_receive(self, sensor_point: Point):
+        x, y, q = self.sensor_position()
         sensor_vision = Polygon(
             [
                 (x, y),
                 (x + cos(q + self.receiving_fov / 2) * self.receiving_distance, (y + sin(q + self.receiving_fov / 2) * self.receiving_distance)),
                 (x + cos(q + -self.receiving_fov / 2) * self.receiving_distance, (y + sin(q + -self.receiving_fov / 2) * self.receiving_distance))
             ])
-        return sensor_vision.covers(other_robot)
+        return sensor_vision.covers(sensor_point)
