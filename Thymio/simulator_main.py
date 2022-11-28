@@ -161,7 +161,7 @@ class Main:
                 break
             robots_caught = Counter(list(robot.is_tagged for robot in self.robots[1:]))
             if robots_caught[True] == 4 or \
-                    (robots_caught[True] > 3 and any(robot.is_in_safezone for robot in self.robots[1:])):
+                    (robots_caught[True] >= 3 and any(robot.is_in_safezone for robot in self.robots[1:])):
                 if save_data:
                     self.save_positions()
                 break
