@@ -27,7 +27,7 @@ class AvoiderMaximizer(Behavior):
 
         # move out of safezone
         if how_long_ago <= self._safezone_forward_steps:
-            return self._q_table["GOFORWARDS"]
+            return self._q_table[self.actions.index("GOFORWARDS")]
         return None
 
     def perform_next_action(self, action):

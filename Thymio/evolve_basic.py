@@ -21,9 +21,10 @@ class Evolve:
         self.date_time = datetime.now().strftime("%m%d%Y_%H%M%S")
         self.n = 0
 
-        self._last_fitness_score = 0
+        self._last_tagger_fitness_score = 0
+        self._last_avoider_fitness_score = 0
 
-        self.evaluator = Main(number_of_robots=5, frequency_of_saves=50, number_of_steps=5000)
+        self.evaluator = Main(number_of_robots=5, frequency_of_saves=50, number_of_steps=1800)
         self.mock_tagger = self.get_tagger([])
         self.mock_avoider = self.get_avoider([])
         self.best_avoider = (Chromosome(len(self.mock_tagger.states), len(self.mock_tagger.actions)), 0.0)
@@ -112,11 +113,15 @@ class Evolve:
         self.save_table("avoider")
 
         # while not converged
-        while not (self._is_converged(tagger_offspring) and self._is_converged(avoider_offspring)):
+        while not (self._is_converged(tagger_offspring, "tagger") and self._is_converged(avoider_offspring, "avoider")):
+            print(f"tagger off {self._is_converged(tagger_offspring, 'tagger')}")
+            print(f"avoider off {self._is_converged(avoider_offspring, 'avoider')}")
             self.n += 1
             print("Run:", self.n)
             current_offspring = tagger_offspring if self.n % 1 == 0 else avoider_offspring
             competitive = self.get_tagger(self.best_tagger[0].get_table()) if self.n % 1 == 1 else self.get_avoider(self.best_avoider[0].get_table())
+            print(current_offspring)
+            print(competitive)
 
             new_offspring: List[Chromosome] = []
 
@@ -197,12 +202,18 @@ class Evolve:
         print(fit)
         return fit
 
-    def _is_converged(self, offspring_with_fitness: Dict[Chromosome, float]) -> bool:
+    def _is_converged(self, offspring_with_fitness: Dict[Chromosome, float], population_type: str) -> bool:
         current_fitness_score = sum(offspring_with_fitness.values()) / len(offspring_with_fitness)
-        if self._last_fitness_score == 0:
-            self._last_fitness_score = current_fitness_score
-            return False 
-        return abs(current_fitness_score - self._last_fitness_score) < self.statistical_significance
+        if population_type == "tagger":
+            if self._last_tagger_fitness_score == 0:
+                self._last_tagger_fitness_score = current_fitness_score
+                return False
+            return abs(current_fitness_score - self._last_tagger_fitness_score) < self.statistical_significance
+        elif population_type == "avoider":
+            if self._last_avoider_fitness_score == 0:
+                self._last_avoider_fitness_score = current_fitness_score
+                return False
+            return abs(current_fitness_score - self._last_avoider_fitness_score) < self.statistical_significance
 
     def save_table(self, behavior_type: str):
         to_save = self.best_avoider[0].get_table() if behavior_type == "avoider" else self.best_tagger[0].get_table()
