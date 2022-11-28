@@ -3,6 +3,8 @@ from datetime import datetime
 import numpy as np
 import random
 
+from simulator.behaviors.behavior import Behavior
+from simulator.behaviors.evolution.avoider_maximizer import AvoiderMaximizer
 from simulator.behaviors.evolution.tagger_maximizer import TaggerMaximizer
 from simulator.robot_model.controller import Controller
 from simulator_main import Main
@@ -19,17 +21,23 @@ class Evolve:
         self.date_time = datetime.now().strftime("%m%d%Y_%H%M%S")
         self.n = 0
 
-        # change this to maximize different behavior
-        self._maximizer_to_use = TaggerMaximizer
-
         self._last_fitness_score = 0
 
         self.evaluator = Main(number_of_robots=5, frequency_of_saves=50, number_of_steps=5000)
-        self.mock_maximizer = self.get_maximizer([])
-        self.best = (Chromosome(len(self.mock_maximizer.states), len(self.mock_maximizer.actions)), 0.0)
+        self.mock_tagger = self.get_tagger([])
+        self.mock_avoider = self.get_avoider([])
+        self.best_avoider = (Chromosome(len(self.mock_tagger.states), len(self.mock_tagger.actions)), 0.0)
+        self.best_avoider = (Chromosome(len(self.mock_avoider.states), len(self.mock_avoider.actions)), 0.0)
 
-    def get_maximizer(self, q_table):
-        return self._maximizer_to_use(
+    def get_tagger(self, q_table):
+        return TaggerMaximizer(
+            self.evaluator.simulator,
+            Controller(self.evaluator.simulator.W, self.evaluator.simulator.H), q_table,
+            self.evaluator.number_of_steps
+        )
+
+    def get_avoider(self, q_table):
+        return AvoiderMaximizer(
             self.evaluator.simulator,
             Controller(self.evaluator.simulator.W, self.evaluator.simulator.H), q_table,
             self.evaluator.number_of_steps
@@ -38,13 +46,15 @@ class Evolve:
     def work(self):
         # mock maximizer, useless
        
-        initial_population = self._generate_population(len(self.mock_maximizer.states), len(self.mock_maximizer.actions))
+        initial_population = self._generate_population(len(self.mock_tagger.states), len(self.mock_tagger.actions))
 
-        offspring_with_fitness = {offspring: self._compute_fitness(offspring) for offspring in initial_population}
-        self.best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
-        print(f"Sorted scores are : {list(self.best)}")
-        print("Best table this gen:", repr(self.best[0].get_table()))
-        print("Score:", self.best[1])
+        offspring_with_fitness = {offspring: self._compute_fitness(self.get_avoider(offspring.get_table())) for offspring in initial_population}
+        self.best_tagger = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
+        print(f"Sorted scores are : {list(self.best_tagger)}")
+        print("Best table this gen:", repr(self.best_tagger[0].get_table()))
+        print("Score:", self.best_tagger[1])
+        self.save_stats("tagger")
+        self.save_table("tagger")
 
         # while not converged
         while not self._is_converged(offspring_with_fitness):
@@ -66,14 +76,82 @@ class Evolve:
             new_offspring.extend(mutated_offspring)
             
             # compute fitness
-            offspring_with_fitness = {offspring: self._compute_fitness(offspring) for offspring in new_offspring}
-            self.best = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
-            print(f"Sorted scores are : {list(self.best)}")
-            print("Best table this gen:", repr(self.best[0].get_table()))
-            print("Score:", self.best[1])
-            self.save_stats()
+            offspring_with_fitness = {offspring: self._compute_fitness(self.get_avoider(offspring.get_table())) for offspring in new_offspring}
+            self.best_tagger = sorted(offspring_with_fitness.items(), key=lambda offspring: offspring[1], reverse=True)[0]
+            print(f"Sorted scores are : {list(self.best_avoider)}")
+            print("Best table this gen:", repr(self.best_avoider[0].get_table()))
+            print("Score:", self.best_avoider[1])
+            self.save_stats("tagger")
+            self.save_table("tagger")
 
-        return self.best
+        return self.best_avoider
+
+    def work_dual(self):
+        # initial populations
+        init_tag_pop = self._generate_population(
+            len(self.mock_tagger.states), len(self.mock_tagger.actions)
+        )
+        init_avoid_pop = self._generate_population(
+            len(self.mock_avoider.states), len(self.mock_avoider.actions)
+        )
+
+        tagger_offspring = {offspring: self._compute_fitness(self.get_tagger(offspring.get_table())) for offspring in init_tag_pop}
+        self.best_tagger = sorted(tagger_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[0]
+        print(f"Sorted scores are : {list(self.best_tagger)}")
+        print("Best tagger table this gen:", repr(self.best_tagger[0].get_table()))
+        print("Tagger score:", self.best_tagger[1])
+        self.save_stats("tagger")
+        self.save_table("tagger")
+
+        avoider_offspring = {offspring: self._compute_fitness(self.get_avoider(offspring.get_table()), self.get_tagger(self.best_tagger[0].get_table())) for offspring in init_avoid_pop}
+        self.best_avoider = sorted(avoider_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[0]
+        print(f"Sorted scores are : {list(self.best_tagger)}")
+        print("Best avoider table this gen:", repr(self.best_avoider[0].get_table()))
+        print("Tagger score:", self.best_avoider[1])
+        self.save_stats("avoider")
+        self.save_table("avoider")
+
+        # while not converged
+        while not (self._is_converged(tagger_offspring) and self._is_converged(avoider_offspring)):
+            self.n += 1
+            print("Run:", self.n)
+            current_offspring = tagger_offspring if self.n % 1 == 0 else avoider_offspring
+            competitive = self.get_tagger(self.best_tagger[0].get_table()) if self.n % 1 == 1 else self.get_avoider(self.best_avoider[0].get_table())
+
+            new_offspring: List[Chromosome] = []
+
+            # select
+            selected_offspring = self._select_offspring(current_offspring)
+            new_offspring.extend(selected_offspring)
+
+            # crossover
+            crossed_over_offspring = self._crossover(selected_offspring)
+            new_offspring.extend(crossed_over_offspring)
+
+            # mutate
+            mutated_offspring = self._mutate(new_offspring)
+            new_offspring.extend(mutated_offspring)
+
+            # compute fitness
+            if self.n % 1 == 0:
+                tagger_offspring = {offspring: self._compute_fitness(self.get_tagger(offspring.get_table()), competitive) for offspring in new_offspring}
+                self.best_tagger = sorted(tagger_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[
+                    0]
+                print(f"Sorted scores are : {list(self.best_tagger)}")
+                print("Best table this gen:", repr(self.best_tagger[0].get_table()))
+                print("Score:", self.best_tagger[1])
+                self.save_stats("tagger")
+                self.save_table("tagger")
+            else:
+                avoider_offspring = {offspring: self._compute_fitness(self.get_avoider(offspring.get_table()), competitive) for offspring in new_offspring}
+                self.best_avoider = sorted(avoider_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[0]
+                print(f"Sorted scores are : {list(self.best_avoider)}")
+                print("Best table this gen:", repr(self.best_avoider[0].get_table()))
+                print("Score:", self.best_avoider[1])
+                self.save_stats("avoider")
+                self.save_table("avoider")
+
+        return self.best_tagger, self.best_avoider
 
     def _generate_population(self, x, y) -> List[Chromosome]:
         return [Chromosome(x=x, y=y) for _ in range(self.population_size)]
@@ -110,9 +188,12 @@ class Evolve:
             new_offspring.append(Chromosome(masked_q_table))
         return new_offspring
 
-    def _compute_fitness(self, offspring: Chromosome) -> float:
+    def _compute_fitness(self, maximizer: Behavior, competitive_behavior: Behavior = None) -> float:
         print("Evaluating...")
-        fit = self.evaluator.eval(self.get_maximizer(offspring.get_table()))
+        fit = self.evaluator.eval(
+            maximizer,
+            competitive_behavior
+        )
         print(fit)
         return fit
 
@@ -123,14 +204,15 @@ class Evolve:
             return False 
         return abs(current_fitness_score - self._last_fitness_score) < self.statistical_significance
 
-    def save_table(self):
-        with open(f"data/tables/Q_table_{self.date_time}.txt", "wb") as file:
-                np.save(file, self.best[0].get_table(), allow_pickle=True)
+    def save_table(self, behavior_type: str):
+        to_save = self.best_avoider[0].get_table() if behavior_type == "avoider" else self.best_tagger[0].get_table()
+        with open(f"data/tables/Q_table_{self.date_time}_{behavior_type}.txt", "ab") as file:
+                np.save(file, to_save, allow_pickle=True)
     
-    def save_stats(self):
-        with open(f"data/stats/Stats_{self.date_time}.txt", "w") as file:
-                stats = f"generation {self.n} best score: {self.best[1]}\n"
-                file.write(stats)
+    def save_stats(self, behavior_type: str):
+        to_use = f"{self.best_avoider[1] if behavior_type == 'avoider' else self.best_tagger[1]}"
+        with open(f"data/stats/Stats_{self.date_time}_{behavior_type}.txt", "a") as file:
+                file.write(to_use)
 
 if __name__ == "__main__":
     print("Setup...")
@@ -150,5 +232,5 @@ if __name__ == "__main__":
         print("Time training:", end - start)
     finally:
         print("Saving...")
-        e.save_table()
-        e.save_stats()
+        e.save_table("tagger")
+        e.save_stats("tagger")

@@ -36,8 +36,9 @@ class TaggerMaximizer(Behavior):
         fitness_to_add = 0
         for robot in other_controllers:
             distances_to_objects = self.controller.distances_to_objects(robot.controller.body)
-            if any(d and d < 0.09 for d in distances_to_objects):
-                if self.try_tagging(robot):
+            distances_matched = [index for index, val in enumerate(distances_to_objects) if val < 0.09]
+            if any(distances_matched):
+                if self.try_tagging(robot, distances_matched):
                     fitness_to_add += self._total_steps - step
         return fitness_to_add
 
