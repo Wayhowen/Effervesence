@@ -1,15 +1,23 @@
-import cv2
 import cv2 as cv
 import numpy as np
 from picamera import PiCamera
 
-#Red
-#LOWER_YELLOW = (0, 40, 230)
-#UPPER_YELLOW = (30, 255, 255)
-#Blue
-LOWER_YELLOW = (120, 40, 230)
-UPPER_YELLOW = (150, 255, 255)
-
+width = 640
+height = 480
+COLORS = [
+    ((0, 15, 190),
+    (20, 255, 255),
+    "Orangered"),
+    ((90, 15, 200),
+    (115, 255, 255),
+    "Blue"),
+    ((45, 15, 200),
+    (90, 255, 255),
+    "Green"),
+    ((135, 15, 200),
+    (170, 255, 255),
+    "Purple"),
+]
 PREV_CIRCLE = None
 PREV_FRAME = None
 
@@ -18,60 +26,95 @@ PREV_FRAME = None
 
 class Scope:
     # TODO: might be useful https://mattmaulion.medium.com/color-image-segmentation-image-processing-4a04eca25c0
-    def hsv(self, f):
-        hsv = cv2.cvtColor(f, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv, LOWER_YELLOW, UPPER_YELLOW)
-        thresholded_img = cv2.bitwise_and(f, f, mask=mask)
+    def get_quadrant(self, pos):
+        if (pos > width/3):
+            return "l"
+        elif (pos > width/2*3):
+            return "m"
+        else:
+            return "r"
+    
+    def hsv(self, f, lower, upper):
+        hsv = cv.cvtColor(f, cv.COLOR_BGR2HSV)
+        mask = cv.inRange(hsv, lower, upper)
+        thresholded_img = cv.bitwise_and(f, f, mask=mask)
 
         # erosion
         kernel = np.ones((3, 3), np.uint8)
-        binary_img = cv2.erode(thresholded_img, kernel, iterations=1)
+        binary_img = cv.erode(thresholded_img, kernel, iterations=1)
 
         return binary_img
 
     def edge_detection(self, img):
         # Convert to graycsale
-        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         # Blur the image for better edge detection
-        img_blur = cv2.GaussianBlur(img_gray, (3,3), 0) 
+        img_blur = cv.GaussianBlur(img_gray, (3,3), 0) 
 
         # Canny Edge Detection
-        edges = cv2.Canny(image=img_blur, threshold1=100, threshold2=200)
+        edges = cv.Canny(image=img_blur, threshold1=100, threshold2=200)
         return edges
     
     def movement_detection(self, frame):
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (21, 21), 0)
-        ret,gray = cv2.threshold(gray,200,255,0)
+        gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        gray = cv.GaussianBlur(gray, (21, 21), 0)
+        ret,gray = cv.threshold(gray,200,255,0)
         
         # if the first frame is None, initialize it
         global PREV_FRAME
         posX = None
         if PREV_FRAME is not None:
-            frameDelta = cv2.absdiff(PREV_FRAME, gray)
-            thresh = cv2.threshold(frameDelta, 15, 255, cv2.THRESH_BINARY)[1]
+            frameDelta = cv.absdiff(PREV_FRAME, gray)
+            thresh = cv.threshold(frameDelta, 15, 255, cv.THRESH_BINARY)[1]
             # dilate the thresholded image to fill in holes, then find contours
             # on thresholded image
-            thresh = cv2.dilate(thresh, None, iterations=2)
-            cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
-                cv2.CHAIN_APPROX_SIMPLE)
-            contours_sizes = [(cv2.contourArea(cnt), cnt) for cnt in cnts]
+            thresh = cv.dilate(thresh, None, iterations=2)
+            cnts, _ = cv.findContours(thresh.copy(), cv.RETR_EXTERNAL,
+                cv.CHAIN_APPROX_SIMPLE)
+            contours_sizes = [(cv.contourArea(cnt), cnt) for cnt in cnts]
             if contours_sizes:
                 c = max(contours_sizes, key=lambda x: x[0])[1]
            
                 # if the contour is too small, ignore it
-                if cv2.contourArea(c) > 500:
+                if cv.contourArea(c) > 500:
                     
                     # compute the bounding box for the contour, draw it on the frame,
                     # and update the text
-                    (x, y, w, h) = cv2.boundingRect(c)
+                    (x, y, w, h) = cv.boundingRect(c)
                     #print(x+w/2, y+h/2)
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                     posX = (x+w/2)
         
         PREV_FRAME = gray
-        return posX
+        return (self.get_quadrant(posX), None)
 
+    def find_color(self, frame):
+        biggest = None
+        b_area = 0
+        col = None
+        for c in COLORS:
+            res = s.hsv(frame, c[0], c[1])
+            res = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
+            contours,_ = cv.findContours(res, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+            if len(contours)>0:
+                cont = max(contours, key = cv.contourArea)
+                ar = cv.contourArea(cont)
+                if ar < 100:
+                    continue
+
+                if ar > b_area:
+                    biggest = cont
+                    b_area = ar
+                    col = c[2]
+                    
+        if b_area > 0:
+            x,y,w,h = cv.boundingRect(biggest)
+            cv.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+            print(col)
+            posX = (x+w/2)
+            return (self.get_quadrant(posX), col)
+
+        return None
 
     def find_circles(self, bf, f):
         global PREV_CIRCLE
@@ -96,7 +139,7 @@ class Scope:
 
 
 if __name__ == "__main__":
-    #video_capture = cv.VideoCapture(0)
+    video_capture = cv.VideoCapture(0)
     camera = PiCamera()
 
     prev_circle = None
@@ -105,40 +148,36 @@ if __name__ == "__main__":
     s = Scope()
     print("Starting capture")
     while True:
-        width = 640
-        height = 480
 
         camera.resolution = (width,height)
         camera.framerate = 24
         image = np.empty((height,width,3), dtype=np.uint8)
         camera.capture(image,'bgr')
-        frame = cv2.rotate(image, cv2.ROTATE_180)
+        frame = cv.rotate(image, cv.ROTATE_180)
         #ret, frame = video_capture.read()
         #if not ret:
         #    break
         
-        pos = s.movement_detection(frame)
-
+        #pos = s.movement_detection(frame)
+        s.find_color(frame)
         #cv.imshow("frame", frame)
-
-        if pos:
-            print(pos)
+        
+        #if pos:
+        #    print(pos)
         
         #gray_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         #blur_frame = cv.GaussianBlur(gray_frame, (17, 17), 0) # larger numbers in tuple (has to be odd) - more blur
         #cv.imshow('blur_frame', blur_frame)
         
-
-        #res = s.hsv(frame)
         #s.find_circles(res, frame)
 
         #gray_frame = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
         #blur_frame = cv.GaussianBlur(gray_frame, (17, 17), 0)  # larger numbers in tuple (has to be odd) - more blur
         #s.find_circles(blur_frame, blur_frame)
 
-        #cv2.imshow("res", gray_frame)
+        #cv.imshow("res", res)
 
         if cv.waitKey(1) & 0xFF == ord("q"):
             break
     #video_capture.release()
-    cv2.destroyAllWindows()
+    cv.destroyAllWindows()
