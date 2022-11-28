@@ -16,7 +16,11 @@ class Behavior:
         self.distances = []
         self._score = 0
         self.tagged = False
+
         self.forced_out_of_safezone = 0
+        self._safezone_out_steps = 50
+        self._safezone_forward_steps = 10
+        self._allowed_to_force_others_out = True
 
         # uninitialized is jellow
         self._color = "#EFFF00"
@@ -70,6 +74,8 @@ class Behavior:
         sensors_positions = [self.controller.sensors[i].sensor_position() for i in sensor_indexes]
         if other_robot.is_in_safezone and other_robot.can_receive(sensors_positions):
             other_robot.forced_out_of_safezone = step
+            return True
+        return False
 
     @property
     def is_in_safezone(self):

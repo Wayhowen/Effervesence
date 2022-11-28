@@ -1,6 +1,7 @@
 import copy
 import os
 import traceback
+from collections import Counter
 from typing import List
 
 from simulator.behaviors.avoider import Avoider
@@ -158,7 +159,9 @@ class Main:
                 print("out of bounds on step", cnt)
                 traceback.print_exc()
                 break
-            if all(robot.is_tagged for robot in self.robots):
+            robots_caught = Counter(list(robot.is_tagged for robot in self.robots[1:]))
+            if robots_caught[True] == 4 or \
+                    (robots_caught[True] > 3 and any(robot.is_in_safezone for robot in self.robots[1:])):
                 if save_data:
                     self.save_positions()
                 break
