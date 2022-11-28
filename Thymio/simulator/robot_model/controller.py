@@ -1,5 +1,5 @@
 from random import random
-from typing import List
+from typing import List, Tuple
 
 from shapely.geometry import Point, Polygon
 
@@ -57,10 +57,13 @@ class Controller:
     def values_of_sensors(self, world):
         return [sensor.real_world_sensor_value(world) for sensor in self.sensors]
 
-    def on_the_line(self, world, bounds) -> bool:
+    def on_the_line(self, world, bounds) -> Tuple[bool, bool]:
         pos = Point(self.x, self.y)
-        return self.bottom_sensor_left.is_on_the_line(bounds) or self.bottom_sensor_right.is_on_the_line(bounds) \
-               and not Polygon(world).covers(pos)
+        left_on_line = self.bottom_sensor_left.is_on_the_line(bounds)
+        right_on_line = self.bottom_sensor_right.is_on_the_line(bounds)
+        is_in_the_inner_circle = Polygon(world).covers(pos)
+
+        return left_on_line and not is_in_the_inner_circle, right_on_line and not is_in_the_inner_circle
 
     def robots_relative_positions_from_camera(self, robots: List[Behavior]):
         return self.camera.robot_relative_position(self.x, self.y, self.q, robots)

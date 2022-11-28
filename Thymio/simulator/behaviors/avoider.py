@@ -5,7 +5,7 @@ from simulator.behaviors.behavior import Behavior
 
 class Avoider(Behavior):
     def __init__(self, simulator, controller):
-        super().__init__(simulator, controller)
+        super().__init__(simulator, controller, [])
 
         # used for speed measurment
         self.distances = []

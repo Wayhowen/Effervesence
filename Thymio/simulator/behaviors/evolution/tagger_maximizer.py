@@ -1,30 +1,23 @@
 import random
 from typing import List, Dict
 
-import numpy as np
-
 from simulator.behaviors.behavior import Behavior
 
 
 class TaggerMaximizer(Behavior):
     def __init__(self, simulator, controller, q_table, total_steps):
-        super().__init__(simulator, controller)
-        self.states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "LINE", "BEHIND", "TOOCLOSE")
+        super().__init__(simulator, controller, q_table)
+        self.states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "BEHIND")
         self.actions = (
             "GOFORWARDS", "GOLEFT", "GORIGHT", "RANDOM", "LEAN_LEFT", "LEAN_RIGHT", "SLOW_FORWARDS_LEFT",
             "SLOW_FORWARDS_RIGHT", "SLOW_FORWARDS"
         )
 
-        self._q_table = q_table
         self._total_steps = total_steps
         self._state = self.states.index("NOTHING")
         self._fitness = 1
         self._color = self._colors["safe_seeking"]
         self._bad_behavior_penalty = 1
-
-    def perform(self, step, other_controllers):
-        action = np.argmax(self._q_table[self._state])
-        self.perform_next_action(action)
 
     def _choose_color(self):
         if self.is_in_safezone:
@@ -62,12 +55,8 @@ class TaggerMaximizer(Behavior):
         elif action == 8:
             self.controller.drive(3.7, 3.7)
 
-    def get_next_state(self, on_line, closest_reading, other_robot_camera_positions: Dict[str, Behavior]):
-        if on_line:
-            return self.states.index("LINE")
-        elif any(reading < 0.04 for reading in closest_reading):
-            return self.states.index("TOOCLOSE")
-        elif other_robot_camera_positions["m"] and not other_robot_camera_positions["m"].is_tagged:
+    def get_next_state(self, closest_reading, other_robot_camera_positions: Dict[str, Behavior]):
+        if other_robot_camera_positions["m"] and not other_robot_camera_positions["m"].is_tagged:
             return self.states.index("INFRONT")
         elif other_robot_camera_positions["l"] and not other_robot_camera_positions["l"].is_tagged:
             return self.states.index("LEFT")
@@ -80,24 +69,17 @@ class TaggerMaximizer(Behavior):
 
     def callback(self, step, other_robots: List[Behavior]):
         distances_to_objects = [self.controller.distances_to_objects(robot.controller.body) for robot in other_robots]
-        closest_reading = min([(x, sum(x)) for x in distances_to_objects], key=lambda reading: reading[1])[0]
-
-        on_line = self.controller.on_the_line(self.simulator.world, self.simulator.bounds)
+        self.last_closest_readings = min([(x, sum(x)) for x in distances_to_objects], key=lambda reading: reading[1])[0]
         other_robot_camera_positions = self.controller.robots_relative_positions_from_camera(
             other_robots
         )
-        self._state = self.get_next_state(on_line, closest_reading, other_robot_camera_positions)
-
+        self._state = self.get_next_state(self.last_closest_readings, other_robot_camera_positions)
         score_form_tagging = self.tag_other_robots(step, other_robots)
 
         self.manage_rewards(score_form_tagging)
 
     def manage_rewards(self, score_form_tagging: int):
         self._fitness += score_form_tagging
-        if self._state == self.states.index("LINE"):
-            self._fitness -= self._bad_behavior_penalty
-        if self._state == self.states.index("TOOCLOSE"):
-            self._fitness -= self._bad_behavior_penalty
 
     def save(self):
         pass
