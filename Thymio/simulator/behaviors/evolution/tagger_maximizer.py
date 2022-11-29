@@ -1,5 +1,5 @@
 import random
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from simulator.behaviors.behavior import Behavior
 
@@ -18,6 +18,9 @@ class TaggerMaximizer(Behavior):
         self._fitness = 1
         self._color = self._colors["safe_seeking"]
         self._bad_behavior_penalty = 1
+
+    def behavior_specific_set_behaviors(self, step) -> Optional[int]:
+        return None
 
     def _choose_color(self):
         if self.is_in_safezone:

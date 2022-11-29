@@ -84,3 +84,63 @@ class AsebaHandler:
         rx = self.aseba.GetVariable("thymio-II", "prox.comm.rx")
         if rx[0] != 0:
             print(rx[0])
+
+    def light_red(self):
+        self.aseba.SendEventName("leds.top", [32, 0, 0])
+        self.aseba.SendEventName("leds.bottom.left", [32, 0, 0])
+        self.aseba.SendEventName("leds.bottom.right", [32, 0, 0])
+        self.aseba.SendEventName("leds.prox.h", [32, 32, 32, 32, 32, 32, 32, 32])
+        self.aseba.SendEventName("leds.prox.v", [32, 32])
+        self.aseba.SendEventName("leds.buttons", [32, 32, 32, 32])
+        self.aseba.SendEventName("leds.rc", [32])
+        self.aseba.SendEventName("leds.temperature", [32, 0])
+        self.aseba.SendEventName("leds.sound", [0])
+        self.aseba.SendEventName("leds.circle", [0, 0, 0, 0, 0, 0, 0, 0])
+
+    def light_blue(self):
+        self.aseba.SendEventName("leds.top", [0, 0, 32])
+        self.aseba.SendEventName("leds.bottom.left", [0, 0, 32])
+        self.aseba.SendEventName("leds.bottom.right", [0, 0, 32])
+        self.aseba.SendEventName("leds.prox.h", [0, 0, 0, 0, 0, 0, 0, 0])
+        self.aseba.SendEventName("leds.prox.v", [0, 0])
+        self.aseba.SendEventName("leds.buttons", [0, 0, 0, 0])
+        self.aseba.SendEventName("leds.rc", [0])
+        self.aseba.SendEventName("leds.temperature", [0, 32])
+        self.aseba.SendEventName("leds.sound", [32])
+        self.aseba.SendEventName("leds.circle", [0, 0, 0, 0, 0, 0, 0, 0])
+
+    def light_green(self):
+        self.aseba.SendEventName("leds.top", [0, 32, 0])
+        self.aseba.SendEventName("leds.bottom.left", [0, 32, 0])
+        self.aseba.SendEventName("leds.bottom.right", [0, 32, 0])
+        self.aseba.SendEventName("leds.prox.h", [0, 0, 0, 0, 0, 0, 0, 0])
+        self.aseba.SendEventName("leds.prox.v", [0, 0])
+        self.aseba.SendEventName("leds.buttons", [0, 0, 0, 0])
+        self.aseba.SendEventName("leds.rc", [0])
+        self.aseba.SendEventName("leds.temperature", [0, 0])
+        self.aseba.SendEventName("leds.sound", [0])
+        self.aseba.SendEventName("leds.circle", [0, 0, 0, 0, 0, 0, 0, 0])
+
+    def light_purple(self):
+        self.aseba.SendEventName("leds.top", [32, 0, 32])
+        self.aseba.SendEventName("leds.bottom.left", [32, 0, 32])
+        self.aseba.SendEventName("leds.bottom.right", [32, 0, 32])
+        self.aseba.SendEventName("leds.prox.h", [0, 0, 0, 0, 0, 0, 0, 0])
+        self.aseba.SendEventName("leds.prox.v", [0, 0])
+        self.aseba.SendEventName("leds.buttons", [0, 0, 0, 0])
+        self.aseba.SendEventName("leds.rc", [0])
+        self.aseba.SendEventName("leds.temperature", [0, 0])  # Changed
+        self.aseba.SendEventName("leds.sound", [0])
+        self.aseba.SendEventName("leds.circle", [0, 0, 0, 0, 0, 0, 0, 0])
+
+    def light_orange(self):
+        self.aseba.SendEventName("leds.top", [32, 8, 0])
+        self.aseba.SendEventName("leds.bottom.left", [32, 8, 0])
+        self.aseba.SendEventName("leds.bottom.right", [32, 8, 0])
+        self.aseba.SendEventName("leds.prox.h", [0, 0, 0, 0, 0, 0, 0, 0])
+        self.aseba.SendEventName("leds.prox.v", [0, 0])
+        self.aseba.SendEventName("leds.buttons", [0, 0, 0, 0])
+        self.aseba.SendEventName("leds.rc", [0])
+        self.aseba.SendEventName("leds.temperature", [0, 0])
+        self.aseba.SendEventName("leds.sound", [0])
+        self.aseba.SendEventName("leds.circle", [32, 32, 32, 32, 32, 32, 32, 32])

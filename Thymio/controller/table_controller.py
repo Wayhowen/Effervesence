@@ -1,52 +1,46 @@
+from typing import List, Tuple
+
 from controller.modules.aseba_handler import AsebaHandler
 
-import numpy as np
-from time import sleep
 
-
-class TableController:
-    def __init__(self, actions, states, state, q_table):
-        self.actions = actions
-        self.states = states
-        self.state = state
-        self.q_table = q_table
-
+class Controller:
+    def __init__(self, safezone_reading, line_reading):
         self._aseba_handler = AsebaHandler()
+        self.safezone_reading = safezone_reading
+        self.line_reading = line_reading
 
     def kill(self):
         self._aseba_handler.stop()
         self._aseba_handler.stopAsebamedulla()
 
-    def detect(self):
-        distance = self._aseba_handler.get_proximity_sensor_values()
-        if distance[2] > 1500:
-            print("Something infront")
-            return self.states.index("INFRONT")
-        elif distance[0] > 1500 or distance[1] > 1500:
-            print("Something on left")
-            return self.states.index("RIGHT")
-        elif distance[3] > 1500 or distance[4] > 1500:
-            print("Something on right")
-            return self.states.index("LEFT")
-        else:
-            return self.states.index("EXPLORE")
+    def get_proximity_sensor_values(self) -> List[int]:
+        return self._aseba_handler.get_proximity_sensor_values()
 
-    def step_function(self, action):
-        if action == 0:
-            self._aseba_handler.drive(100, 100)
-        elif action == 1:
-            self._aseba_handler.drive(-200, 200)
-        elif action == 2:
-            self._aseba_handler.drive(200, -200)
+    # TODO: this might not work
+    def on_the_line(self) -> Tuple[bool, bool]:
+        readings = self._aseba_handler.get_ground_sensor_values()
+        return readings[0] > self.line_reading, readings[1] > self.line_reading
 
-        # time step
-        sleep(0.2)
+    def drive(self, left_wheel_value, right_wheel_value):
+        self._aseba_handler.drive(left_wheel_value, right_wheel_value)
 
-        return self.detect()
+    def tag_others(self):
+        self._aseba_handler.send_information(1)
 
-    def run(self, steps=1800):
-        for cnt in range(steps):
-            action = np.argmax(self.q_table[self.state])
-            next_state = self.step_function(action)
-            self.state = next_state
+    def receive_information(self) -> List[int]:
+        return self._aseba_handler.receive_information()
 
+    def light_red(self):
+        self._aseba_handler.light_red()
+
+    def light_blue(self):
+        self._aseba_handler.light_blue()
+
+    def light_green(self):
+        self._aseba_handler.light_green()
+
+    def light_purple(self):
+        self._aseba_handler.light_purple()
+
+    def light_orange(self):
+        self._aseba_handler.light_orange()
