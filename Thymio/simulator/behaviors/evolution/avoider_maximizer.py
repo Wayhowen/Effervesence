@@ -77,14 +77,15 @@ class AvoiderMaximizer(Behavior):
                     fitness_to_add += 100
         return fitness_to_add
 
+    # TODO: discuss with Osmanito
     def get_next_state(self, closest_reading, other_robot_camera_positions: Dict[str, Behavior]):
         if self.is_in_safezone:
             return self.states.index("SAFE")
-        elif other_robot_camera_positions["l"]:
+        elif other_robot_camera_positions["l"] and other_robot_camera_positions["l"].color in ["seeking", "safe_seeking"]:
             return self.states.index("LEFT")
-        elif other_robot_camera_positions["m"]:
+        elif other_robot_camera_positions["m"] and other_robot_camera_positions["m"].color in ["seeking", "safe_seeking"]:
             return self.states.index("INFRONT")
-        elif other_robot_camera_positions["r"]:
+        elif other_robot_camera_positions["r"] and other_robot_camera_positions["r"].color in ["seeking", "safe_seeking"]:
             return self.states.index("RIGHT")
         elif closest_reading[5] < 0.09:
             return self.states.index("BEHIND")

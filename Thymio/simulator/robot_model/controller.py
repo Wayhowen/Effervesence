@@ -1,5 +1,5 @@
 from random import random
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 from shapely.geometry import Point, Polygon
 
@@ -65,7 +65,7 @@ class Controller:
 
         return left_on_line and not is_in_the_inner_circle, right_on_line and not is_in_the_inner_circle
 
-    def robots_relative_positions_from_camera(self, robots: List[Behavior]):
+    def robots_relative_positions_from_camera(self, robots: List[Behavior]) -> Dict[str, Behavior]:
         return self.camera.robot_relative_position(self.x, self.y, self.q, robots)
 
     def in_the_safezone(self, safezone):
