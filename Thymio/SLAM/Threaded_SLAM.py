@@ -151,6 +151,6 @@ if __name__ == "__main__":
         lidar.stop()
         lidar.disconnect()
         robot.stop()
-        robot.stopAsebamedulla()
+        robot.kill()
         print("asebamodulla killed")
         exit(0)
