@@ -58,7 +58,7 @@ class Evolve:
         self.save_table("tagger")
 
         # while not converged
-        while not self._is_converged(offspring_with_fitness):
+        while not self._update_and_check_convergence(offspring_with_fitness):
             print("Gen:", self.n)
             self.n += 1
 
@@ -98,7 +98,7 @@ class Evolve:
 
         tagger_offspring = {offspring: self._compute_fitness(self.get_tagger(offspring.get_table())) for offspring in init_tag_pop}
         self.best_tagger = sorted(tagger_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[0]
-        print(f"Sorted scores are : {list(self.best_tagger)}")
+        #print(f"Sorted scores are : {list(self.best_tagger)}")
         print("Best tagger table this gen:", repr(self.best_tagger[0].get_table()))
         print("Tagger score:", self.best_tagger[1])
         self.save_stats("tagger")
@@ -106,18 +106,26 @@ class Evolve:
 
         avoider_offspring = {offspring: self._compute_fitness(self.get_avoider(offspring.get_table()), self.get_tagger(self.best_tagger[0].get_table())) for offspring in init_avoid_pop}
         self.best_avoider = sorted(avoider_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[0]
-        print(f"Sorted scores are : {list(self.best_tagger)}")
+        #print(f"Sorted scores are : {list(self.best_tagger)}")
         print("Best avoider table this gen:", repr(self.best_avoider[0].get_table()))
-        print("Tagger score:", self.best_avoider[1])
+        print("Avoider score:", self.best_avoider[1])
         self.save_stats("avoider")
         self.save_table("avoider")
 
+        print("Setup finished")
+
+        
         # while not converged
-        while not (self._is_converged(tagger_offspring, "tagger") and self._is_converged(avoider_offspring, "avoider")):
-            print(f"tagger off {self._is_converged(tagger_offspring, 'tagger')}")
-            print(f"avoider off {self._is_converged(avoider_offspring, 'avoider')}")
+        t_convergence = False
+        a_convergence = False
+        while not (t_convergence and a_convergence):
             self.n += 1
             print("Run:", self.n)
+
+            t_convergence = self._update_and_check_convergence(tagger_offspring, "tagger")
+            a_convergence = self._update_and_check_convergence(avoider_offspring, "avoider")
+            print(f"tagger off {t_convergence}")
+            print(f"avoider off {a_convergence}")
             current_offspring = tagger_offspring if self.n % 1 == 0 else avoider_offspring
             competitive = self.get_tagger(self.best_tagger[0].get_table()) if self.n % 1 == 1 else self.get_avoider(self.best_avoider[0].get_table())
             print(current_offspring)
@@ -138,19 +146,19 @@ class Evolve:
             new_offspring.extend(mutated_offspring)
 
             # compute fitness
-            if self.n % 1 == 0:
+            if self.n % 1 == 0 and not t_convergence:
                 tagger_offspring = {offspring: self._compute_fitness(self.get_tagger(offspring.get_table()), competitive) for offspring in new_offspring}
                 self.best_tagger = sorted(tagger_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[
                     0]
-                print(f"Sorted scores are : {list(self.best_tagger)}")
+                #print(f"Sorted scores are : {list(self.best_tagger)}")
                 print("Best table this gen:", repr(self.best_tagger[0].get_table()))
                 print("Score:", self.best_tagger[1])
                 self.save_stats("tagger")
                 self.save_table("tagger")
-            else:
+            elif not a_convergence:
                 avoider_offspring = {offspring: self._compute_fitness(self.get_avoider(offspring.get_table()), competitive) for offspring in new_offspring}
                 self.best_avoider = sorted(avoider_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[0]
-                print(f"Sorted scores are : {list(self.best_avoider)}")
+                #print(f"Sorted scores are : {list(self.best_avoider)}")
                 print("Best table this gen:", repr(self.best_avoider[0].get_table()))
                 print("Score:", self.best_avoider[1])
                 self.save_stats("avoider")
@@ -202,18 +210,26 @@ class Evolve:
         print(fit)
         return fit
 
-    def _is_converged(self, offspring_with_fitness: Dict[Chromosome, float], population_type: str) -> bool:
+    def _update_and_check_convergence(self, offspring_with_fitness: Dict[Chromosome, float], population_type: str) -> bool:
         current_fitness_score = sum(offspring_with_fitness.values()) / len(offspring_with_fitness)
+        print("Generation average:", current_fitness_score)
+        
         if population_type == "tagger":
             if self._last_tagger_fitness_score == 0:
                 self._last_tagger_fitness_score = current_fitness_score
                 return False
-            return abs(current_fitness_score - self._last_tagger_fitness_score) < self.statistical_significance
-        elif population_type == "avoider":
+            change = abs(current_fitness_score - self._last_tagger_fitness_score)
+            print("Significance of tagger generation:", change)
+            self._last_tagger_fitness_score == current_fitness_score
+            return change < self.statistical_significance
+        else:
             if self._last_avoider_fitness_score == 0:
                 self._last_avoider_fitness_score = current_fitness_score
                 return False
-            return abs(current_fitness_score - self._last_avoider_fitness_score) < self.statistical_significance
+            change = abs(current_fitness_score - self._last_avoider_fitness_score)
+            print("Significance of avoider generation:", change)
+            self._last_avoider_fitness_score = current_fitness_score
+            return change < self.statistical_significance
 
     def save_table(self, behavior_type: str):
         to_save = self.best_avoider[0].get_table() if behavior_type == "avoider" else self.best_tagger[0].get_table()
