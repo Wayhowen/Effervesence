@@ -9,7 +9,7 @@ from simulator.behaviors.behavior import Behavior
 class TaggerMaximizer(Behavior):
     def __init__(self, simulator, controller, q_table, total_steps):
         super().__init__(simulator, controller)
-        self.states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "LINE", "BEHIND", "TOOCLOSE")
+        self.states = ("AllFRONT", "INFRONT", "LEFT", "RIGHT", "LEFTFRONT", "RIGHTFRONT", "LEFTRIGHT", "NOTHING", "LINE", "BEHIND", "TOOCLOSE")
         self.actions = (
             "GOFORWARDS", "GOLEFT", "GORIGHT", "RANDOM", "LEAN_LEFT", "LEAN_RIGHT", "SLOW_FORWARDS_LEFT",
             "SLOW_FORWARDS_RIGHT", "SLOW_FORWARDS"
@@ -67,6 +67,14 @@ class TaggerMaximizer(Behavior):
             return self.states.index("LINE")
         elif any(reading < 0.04 for reading in closest_reading):
             return self.states.index("TOOCLOSE")
+        elif all(k in other_robot_camera_positions for k in ("l","m","r")) and all(not other_robot_camera_positions[k].istagged for k in ("l","m","r")):
+            return self.states.index("ALLFRONT")
+        elif all(k in other_robot_camera_positions for k in ("l","m")) and all(not other_robot_camera_positions[k].istagged for k in ("l","m")):
+            return self.states.index("LEFTFRONT")
+        elif all(k in other_robot_camera_positions for k in ("m", "r")) and all(not other_robot_camera_positions[k].istagged for k in ("m","r")):
+            return self.states.index("RIGHTFRONT")
+        elif all(k in other_robot_camera_positions for k in ("l", "r")) and all(not other_robot_camera_positions[k].istagged for k in ("l","r")):
+            return self.states.index("LEFTRIGHT")
         elif other_robot_camera_positions["m"] and not other_robot_camera_positions["m"].is_tagged:
             return self.states.index("INFRONT")
         elif other_robot_camera_positions["l"] and not other_robot_camera_positions["l"].is_tagged:
