@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # this shit library has to be installed weirdly
 from breezyslam.algorithms import RMHC_SLAM
 from breezyslam.sensors import RPLidarA1 as LaserModel

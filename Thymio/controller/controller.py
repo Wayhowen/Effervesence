@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from typing import List, Tuple
 
 from controller.modules.aseba_handler import AsebaHandler

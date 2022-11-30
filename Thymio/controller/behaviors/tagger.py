@@ -1,10 +1,10 @@
+#!/usr/bin/python3
 import random
 from typing import Optional, Dict
 
 import numpy as np
 
 from controller.behaviors.behavior import Behavior
-from controller.controller import Controller
 
 
 class Tagger(Behavior):

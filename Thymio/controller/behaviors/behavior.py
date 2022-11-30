@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from abc import abstractmethod
 from typing import Optional, Dict
 
@@ -86,7 +87,7 @@ class Behavior:
         return None
 
     @abstractmethod
-    def perform_next_action(self, actiom):
+    def perform_next_action(self, action):
         pass
 
     def post_move_calculations(self):

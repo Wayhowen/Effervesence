@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import traceback
 
 from controller.behaviors.tagger import Tagger

@@ -1,9 +1,9 @@
+#!/usr/bin/python3
 from typing import Dict, Optional
 
 import numpy as np
 
 from controller.behaviors.behavior import Behavior
-from controller.controller import Controller
 
 
 class Avoider(Behavior):
