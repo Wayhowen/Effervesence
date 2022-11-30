@@ -84,13 +84,13 @@ class AvoiderMaximizer(Behavior):
     def get_next_state(self, closest_reading, other_robot_camera_positions: Dict[str, Behavior]):
         if self.is_in_safezone:
             return self.states.index("SAFE")
-        elif all(k in other_robot_camera_positions for k in ("l","m","r")) and all(not other_robot_camera_positions[k].istagged for k in ("l","m","r")):
+        elif all(k in other_robot_camera_positions and other_robot_camera_positions[k].color in ["seeking", "safe_seeking"] for k in ["l","m","r"]):
             return self.states.index("ALLFRONT")
-        elif all(k in other_robot_camera_positions for k in ("l","m")) and all(not other_robot_camera_positions[k].istagged for k in ("l","m")):
+        elif all(k in other_robot_camera_positions and other_robot_camera_positions[k].color in ["seeking", "safe_seeking"] for k in ["l","m"]):
             return self.states.index("LEFTFRONT")
-        elif all(k in other_robot_camera_positions for k in ("m", "r")) and all(not other_robot_camera_positions[k].istagged for k in ("m","r")):
+        elif all(k in other_robot_camera_positions and other_robot_camera_positions[k].color in ["seeking", "safe_seeking"] for k in ["m","r"]):
             return self.states.index("RIGHTFRONT")
-        elif all(k in other_robot_camera_positions for k in ("l", "r")) and all(not other_robot_camera_positions[k].istagged for k in ("l","r")):
+        elif all(k in other_robot_camera_positions and other_robot_camera_positions[k].color in ["seeking", "safe_seeking"] for k in ["l","r"]):
             return self.states.index("LEFTRIGHT")
         elif other_robot_camera_positions["l"] and other_robot_camera_positions["l"].color in ["seeking", "safe_seeking"]:
             return self.states.index("LEFT")
