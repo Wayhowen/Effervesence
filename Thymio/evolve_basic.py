@@ -146,7 +146,7 @@ class Evolve:
             new_offspring.extend(mutated_offspring)
 
             # compute fitness
-            if self.n % 1 == 0 and not t_convergence:
+            if self.n % 2 != 0:
                 tagger_offspring = {offspring: self._compute_fitness(self.get_tagger(offspring.get_table()), competitive) for offspring in new_offspring}
                 self.best_tagger = sorted(tagger_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[
                     0]
@@ -155,7 +155,7 @@ class Evolve:
                 print("Score:", self.best_tagger[1])
                 self.save_stats("tagger")
                 self.save_table("tagger")
-            elif not a_convergence:
+            else:
                 avoider_offspring = {offspring: self._compute_fitness(self.get_avoider(offspring.get_table()), competitive) for offspring in new_offspring}
                 self.best_avoider = sorted(avoider_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[0]
                 #print(f"Sorted scores are : {list(self.best_avoider)}")
