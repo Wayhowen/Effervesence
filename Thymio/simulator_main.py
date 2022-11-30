@@ -114,11 +114,9 @@ class Main:
             if item.endswith(".dat"):
                 os.remove(os.path.join(dir_name, item))
 
-    def step(self, cnt):
+    def step(self):
         for robot in self.robots:
             robot.step()
-        if cnt % self._frequency_of_saves == 0:
-            self.save_positions()
 
     def perform(self, step: int):
         robots = self.robots[:self._number_of_robots]
@@ -131,6 +129,7 @@ class Main:
             robot.callback(step, list(filter(lambda x: robot is not x, robots)))
 
     def save_positions(self):
+        print("saving")
         robots = self.robots[:self._number_of_robots]
         for index, robot in enumerate(robots):
             with open(f"animator/trajectory_{index + 1}.dat", "a") as file:
@@ -150,10 +149,12 @@ class Main:
             try:
                 # step simulation
                 self.perform(cnt)
-                self.step(cnt)
+                self.step()
+                if save_data and cnt % self._frequency_of_saves == 0:
+                    self.save_positions()
                 self.finalize_calculations(cnt)
             except AttributeError as e:
-                if save_data:
+                if save_data :
                     self.save_positions()
                     self.save_behavioral_data()
                 print("out of bounds on step", cnt)

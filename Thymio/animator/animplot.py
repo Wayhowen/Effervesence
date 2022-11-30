@@ -123,6 +123,7 @@ def rotate_lines(x1, y1, x2, y2, deg):
 ani = FuncAnimation(fig, animate, frames=row,
                     interval=500, repeat=False)
 
+#plt.show()
 plt.close()
 
 # Save the animation as an animated GIF

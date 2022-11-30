@@ -6,8 +6,8 @@ if __name__ == "__main__":
     print("Setup...")
     start = time.time()
     # this for better pcs
-    # e = Evolve(15, 4, 2, 1000)
-    e = Evolve(10, 4, 2, 1000)
+    e = Evolve(4, 2, 1, 1000)
+    #e = Evolve(10, 4, 2, 1000)
 
     try:
         print("Training Started...")

@@ -1,21 +1,30 @@
 from abc import abstractmethod
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
+import numpy as np
 from numpy import cos, sin
 from shapely.geometry import Point
 
-from simulator.robot_model.sensor.sensor import Sensor
-
 
 class Behavior:
-    def __init__(self, simulator, controller):
+    def __init__(self, simulator, controller, q_table):
         self.simulator = simulator
         self.controller = controller
+        self._q_table = q_table
+
+        # mock, has to be set in each behavior
+        self.states = ()
+        self.actions = ()
+        self._state = 0
 
         # used for speed measurment
         self.distances = []
         self._score = 0
         self.tagged = False
+        self.last_closest_readings = [float('inf')] * len(self.controller.sensors)
+
+        self._avoidance_action = 0
+        self._avoidance_steps_left = 0
 
         self.forced_out_of_safezone = 0
         self._safezone_out_steps = 50
@@ -39,8 +48,63 @@ class Behavior:
     def step(self):
         self.simulator.step(self.controller)
 
-    @abstractmethod
     def perform(self, step, other_controllers):
+        # move out of safezone
+        action = self.check_set_behaviors(step)
+        if action:
+            self.perform_next_action(action)
+            return
+        action = np.argmax(self._q_table[self._state])
+        self.perform_next_action(action)
+
+    def check_set_behaviors(self, step: int):
+        behavior_specific_action = self.behavior_specific_set_behaviors(step)
+        if behavior_specific_action:
+            return behavior_specific_action
+        return self.common_set_behaviors(step)
+
+    @abstractmethod
+    def behavior_specific_set_behaviors(self, step) -> Optional[int]:
+        pass
+
+    def common_set_behaviors(self, step) -> Optional[int]:
+        # line turn behavior
+        left_on_line, right_on_line = self.controller.on_the_line(self.simulator.world, self.simulator.bounds)
+        if right_on_line:
+            return self.actions.index("GOLEFT")
+        elif left_on_line:
+            return self.actions.index("GORIGHT")
+        # avoidance behavior -- basically turn for a bit
+        if self._avoidance_steps_left:
+            self._avoidance_steps_left -= 1
+            return self._avoidance_action
+        if self.last_closest_readings:
+            if self.last_closest_readings[4] < 0.05:
+                self._avoidance_steps_left = 4
+                self._avoidance_action = self.actions.index("GOLEFT")
+                return self.actions.index("GOLEFT")
+            elif self.last_closest_readings[3] < 0.05:
+                self._avoidance_steps_left = 5
+                self._avoidance_action = self.actions.index("GOLEFT")
+                return self.actions.index("GOLEFT")
+            elif self.last_closest_readings[2] < 0.05:
+                self._avoidance_steps_left = 6
+                self._avoidance_action = self.actions.index("GOLEFT")
+                return self.actions.index("GOLEFT")
+            elif self.last_closest_readings[1] < 0.05:
+                self._avoidance_steps_left = 7
+                self._avoidance_action = self.actions.index("GOLEFT")
+                return self.actions.index("GOLEFT")
+            elif self.last_closest_readings[0] < 0.05:
+                self._avoidance_steps_left = 8
+                # this has to use action that we have set on both controllers
+                self._avoidance_action = self.actions.index("GOLEFT")
+                return self.actions.index("GOLEFT")
+        return None
+
+
+    @abstractmethod
+    def perform_next_action(self, action):
         pass
 
     @abstractmethod
