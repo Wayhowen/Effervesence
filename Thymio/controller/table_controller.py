@@ -21,10 +21,14 @@ class Controller:
         readings = self._aseba_handler.get_ground_sensor_values()
         return readings[0] > self.line_reading, readings[1] > self.line_reading
 
+    def in_the_safezone(self) -> bool:
+        readings = self._aseba_handler.get_ground_sensor_values()
+        return all(self.line_reading > reading > self.safezone_reading for reading in readings)
+
     def drive(self, left_wheel_value, right_wheel_value):
         self._aseba_handler.drive(left_wheel_value, right_wheel_value)
 
-    def tag_others(self):
+    def start_tagging_other(self):
         self._aseba_handler.send_information(1)
 
     def receive_information(self) -> List[int]:

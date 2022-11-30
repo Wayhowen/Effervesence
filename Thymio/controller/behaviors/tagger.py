@@ -7,8 +7,13 @@ from controller.table_controller import Controller
 
 
 class Tagger:
-    def __init__(self, safezone_reading, line_reading):
+    def __init__(self, safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed):
         self.controller = Controller(safezone_reading, line_reading)
+        self.five_cm_reading = five_cm_reading
+        self.nine_cm_reading = nine_cm_reading
+        self.max_speed = max_speed
+        self.half_speed = max_speed / 2
+        self.quarter_speed = max_speed / 4
         self.states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "BEHIND")
         self.state = self.states.index("NOTHING")
         self.actions = (
@@ -48,29 +53,35 @@ class Tagger:
         self._avoidance_action = None
         self.last_closest_readings = [float('inf')] * 7
 
+        self.controller.start_tagging_other()
+
     def _choose_color(self, color: str):
         self._colors[color]()
         return color
 
-    def perform(self, step):
-        # move out of safezone
-        action = self.check_set_behaviors(step)
+    def perform(self):
+        action = self.check_set_behaviors()
         if action:
             self.perform_next_action(action)
             return
         action = np.argmax(self.q_table[self.state])
         self.perform_next_action(action)
 
-    def check_set_behaviors(self, step: int):
-        behavior_specific_action = self.behavior_specific_set_behaviors(step)
+    def check_set_behaviors(self):
+        behavior_specific_action = self.behavior_specific_set_behaviors()
         if behavior_specific_action:
             return behavior_specific_action
-        return self.common_set_behaviors(step)
+        return self.common_set_behaviors()
 
-    def behavior_specific_set_behaviors(self, step) -> Optional[int]:
+    def behavior_specific_set_behaviors(self) -> Optional[int]:
+        # actions not taking a lot of time
+        if self.controller.in_the_safezone() and self._color != "safe_seeking":
+            self._choose_color("safe_seeking")
+        elif self._color != "seeking":
+            self._choose_color("safe_seeking")
         return None
 
-    def common_set_behaviors(self, step) -> Optional[int]:
+    def common_set_behaviors(self) -> Optional[int]:
         # line turn behavior
         left_on_line, right_on_line = self.controller.on_the_line()
         if right_on_line:
@@ -82,23 +93,23 @@ class Tagger:
             self._avoidance_steps_left -= 1
             return self._avoidance_action
         if self.last_closest_readings:
-            if self.last_closest_readings[4] < 0.05:
+            if self.last_closest_readings[4] >= self.five_cm_reading:
                 self._avoidance_steps_left = 4
                 self._avoidance_action = self.actions.index("GOLEFT")
                 return self.actions.index("GOLEFT")
-            elif self.last_closest_readings[3] < 0.05:
+            elif self.last_closest_readings[3] >= self.five_cm_reading:
                 self._avoidance_steps_left = 5
                 self._avoidance_action = self.actions.index("GOLEFT")
                 return self.actions.index("GOLEFT")
-            elif self.last_closest_readings[2] < 0.05:
+            elif self.last_closest_readings[2] >= self.five_cm_reading:
                 self._avoidance_steps_left = 6
                 self._avoidance_action = self.actions.index("GOLEFT")
                 return self.actions.index("GOLEFT")
-            elif self.last_closest_readings[1] < 0.05:
+            elif self.last_closest_readings[1] >= self.five_cm_reading:
                 self._avoidance_steps_left = 7
                 self._avoidance_action = self.actions.index("GOLEFT")
                 return self.actions.index("GOLEFT")
-            elif self.last_closest_readings[0] < 0.05:
+            elif self.last_closest_readings[0] >= self.five_cm_reading:
                 self._avoidance_steps_left = 8
                 # this has to use action that we have set on both controllers
                 self._avoidance_action = self.actions.index("GOLEFT")
@@ -108,33 +119,32 @@ class Tagger:
     # TODO: adjust speeds
     def perform_next_action(self, action):
         if action == 0:
-            self.controller.drive(7.41, 7.41)
+            self.controller.drive(self.max_speed, self.max_speed)
         elif action == 1:
-            self.controller.drive(-11.976, 11.976)
+            self.controller.drive(-self.max_speed, self.max_speed)
         elif action == 2:
-            self.controller.drive(11.976, -11.976)
+            self.controller.drive(self.max_speed, -self.max_speed)
         elif action == 3:
-            self.controller.drive(random.uniform(5, 11.976), random.uniform(0.01, 11.976))
+            self.controller.drive(
+                random.uniform(self.quarter_speed, self.max_speed),
+                random.uniform(self.quarter_speed, self.max_speed)
+            )
         elif action == 4:
-            self.controller.drive(3.7, 7.41)
+            self.controller.drive(self.half_speed, self.max_speed)
         elif action == 5:
-            self.controller.drive(7.41, 3.7)
+            self.controller.drive(self.max_speed, self.half_speed)
         elif action == 6:
-            self.controller.drive(1.85, 3.7)
+            self.controller.drive(self.quarter_speed, self.half_speed)
         elif action == 7:
-            self.controller.drive(3.7, 1.85)
+            self.controller.drive(self.half_speed, self.quarter_speed)
         elif action == 8:
-            self.controller.drive(3.7, 3.7)
+            self.controller.drive(self.half_speed, self.half_speed)
 
     def post_move_calculations(self, step):
         self.last_closest_readings = self.controller.get_proximity_sensor_values()
         # TODO: add this
-        other_robot_camera_positions = []
+        other_robot_camera_positions = {}
         self._state = self.get_next_state(self.last_closest_readings, other_robot_camera_positions)
-        self.tag_other_robots()
-
-    def tag_other_robots(self):
-        self.controller.tag_others()
 
     # TODO: work on this
     def get_next_state(self, closest_reading, other_robot_camera_positions: Dict[str, str]):
@@ -144,14 +154,14 @@ class Tagger:
             return self.states.index("LEFT")
         elif other_robot_camera_positions["r"] and not other_robot_camera_positions["r"] == "blue":
             return self.states.index("RIGHT")
-        elif closest_reading[5] < 0.09:
+        elif closest_reading[5] >= self.nine_cm_reading:
             return self.states.index("BEHIND")
         else:
             return self.states.index("NOTHING")
 
     def run(self, steps=1800):
         for cnt in range(steps):
-            self.perform(cnt)
+            self.perform()
 
     def kill(self):
         self.controller.kill()
