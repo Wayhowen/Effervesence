@@ -1,3 +1,5 @@
+import traceback
+
 from controller.behaviors.tagger import Tagger
 
 
@@ -8,4 +10,5 @@ if __name__ == '__main__':
         behavior.run(steps=1800)
 
     except Exception as e:
+        traceback.print_exc()
         behavior.kill()
