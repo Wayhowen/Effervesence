@@ -6,8 +6,11 @@ from simulator.behaviors.behavior import Behavior
 
 class TaggerMaximizer(Behavior):
     def __init__(self, simulator, controller, q_table, total_steps):
-        super().__init__(simulator, controller, q_table)
-        self.states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "BEHIND")
+        super().__init__(simulator, controller)
+        self.states = (
+            "AllFRONT", "INFRONT", "LEFT", "RIGHT", "LEFTFRONT",
+            "RIGHTFRONT", "LEFTRIGHT", "NOTHING", "BEHIND"
+        )
         self.actions = (
             "GOFORWARDS", "GOLEFT", "GORIGHT", "RANDOM", "LEAN_LEFT", "LEAN_RIGHT", "SLOW_FORWARDS_LEFT",
             "SLOW_FORWARDS_RIGHT", "SLOW_FORWARDS"
@@ -58,8 +61,16 @@ class TaggerMaximizer(Behavior):
         elif action == 8:
             self.controller.drive(3.7, 3.7)
 
-    def get_next_state(self, closest_reading, other_robot_camera_positions: Dict[str, Behavior]):
-        if other_robot_camera_positions["m"] and not other_robot_camera_positions["m"].is_tagged:
+    def get_next_state(self, on_line, closest_reading, other_robot_camera_positions: Dict[str, Behavior]):
+        if all(k in other_robot_camera_positions for k in ("l","m","r")) and all(not other_robot_camera_positions[k].istagged for k in ("l","m","r")):
+            return self.states.index("ALLFRONT")
+        elif all(k in other_robot_camera_positions for k in ("l","m")) and all(not other_robot_camera_positions[k].istagged for k in ("l","m")):
+            return self.states.index("LEFTFRONT")
+        elif all(k in other_robot_camera_positions for k in ("m", "r")) and all(not other_robot_camera_positions[k].istagged for k in ("m","r")):
+            return self.states.index("RIGHTFRONT")
+        elif all(k in other_robot_camera_positions for k in ("l", "r")) and all(not other_robot_camera_positions[k].istagged for k in ("l","r")):
+            return self.states.index("LEFTRIGHT")
+        elif other_robot_camera_positions["m"] and not other_robot_camera_positions["m"].is_tagged:
             return self.states.index("INFRONT")
         elif other_robot_camera_positions["l"] and not other_robot_camera_positions["l"].is_tagged:
             return self.states.index("LEFT")

@@ -89,32 +89,35 @@ class Scope:
         return (self.get_quadrant(posX), None)
 
     def find_color(self, frame):
-        biggest = None
-        b_area = 0
-        col = None
+        biggest = {
+            "l": (0, None),
+            "m": (0, None),
+            "r": (0, None)
+        }
+        
         for c in COLORS:
             res = s.hsv(frame, c[0], c[1])
             res = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
-            contours,_ = cv.findContours(res, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
-            if len(contours)>0:
-                cont = max(contours, key = cv.contourArea)
-                ar = cv.contourArea(cont)
-                if ar < 100:
-                    continue
+            
+            width = res.shape[1]
+            l_border = int(width*1/3)
+            r_border = int(width*2/3)
 
-                if ar > b_area:
-                    biggest = cont
-                    b_area = ar
-                    col = c[2]
+            l_contours,_ = cv.findContours(res[:,0:l_border], cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+            m_contours,_ = cv.findContours(res[:,l_border:r_border], cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+            r_contours,_ = cv.findContours(res[:,r_border:width], cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+
+            for key, contours in [("l", l_contours),("m", m_contours),("r", r_contours)]:
+                if len(contours)>0:
+                    cont = max(contours, key = cv.contourArea)
+                    ar = cv.contourArea(cont)
+                    if ar < 100:
+                        continue
+
+                    if ar > biggest[key][0]:
+                        biggest[key] = (ar ,c[2])
                     
-        if b_area > 0:
-            x,y,w,h = cv.boundingRect(biggest)
-            cv.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
-            print(col)
-            posX = (x+w/2)
-            return (self.get_quadrant(posX), col)
-
-        return None
+        return {k: elem[1] for k, elem in biggest.items()}
 
     def find_circles(self, bf, f):
         global PREV_CIRCLE
@@ -139,7 +142,7 @@ class Scope:
 
 
 if __name__ == "__main__":
-    video_capture = cv.VideoCapture(0)
+    #video_capture = cv.VideoCapture(0)
     camera = PiCamera()
 
     prev_circle = None
@@ -159,8 +162,8 @@ if __name__ == "__main__":
         #    break
         
         #pos = s.movement_detection(frame)
-        s.find_color(frame)
-        #cv.imshow("frame", frame)
+        print(s.find_color(frame))
+        cv.imshow("frame", frame)
         
         #if pos:
         #    print(pos)
