@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 import numpy as np
 import random
+from itertools import combinations
 
 from simulator.behaviors.behavior import Behavior
 from simulator.behaviors.evolution.avoider_maximizer import AvoiderMaximizer
@@ -186,15 +187,15 @@ class Evolve:
 
     def _crossover(self, selected_offspring: List[Chromosome]) -> List[Chromosome]:
         new_offspring: List[Chromosome] = []
-        pairs = [[x, y] for x in selected_offspring for y in selected_offspring]
+        pairs = [comb for comb in combinations(selected_offspring, 2)]
         for pair in pairs:
             new_offspring.append(Chromosome((pair[0].q_table + pair[1].q_table) / 2))
-        return new_offspring
+        return list(random.sample(new_offspring, int((self.population_size-len(selected_offspring))/2)))
 
     def _mutate(self, offspring: List[Chromosome]) -> List[Chromosome]:
         new_offspring: List[Chromosome] = []
         for _ in range(self.population_size - len(offspring)):
-            random_chromosome = np.random.choice(new_offspring)
+            random_chromosome = np.random.choice(offspring)
             random_mask = np.stack([np.random.choice(a=[0, 1], size=random_chromosome.q_table.shape[1], p=[0.25, 0.75]) for _ in range(random_chromosome.q_table.shape[0])])
             masked_q_table = random_chromosome.q_table * random_mask
             masked_q_table[masked_q_table == 0] = random.uniform(np.min(masked_q_table), np.max(masked_q_table))
