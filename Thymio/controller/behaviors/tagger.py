@@ -3,7 +3,7 @@ from typing import Optional, Dict
 
 import numpy as np
 
-from controller.table_controller import Controller
+from controller.controller import Controller
 
 
 class Tagger:
@@ -42,11 +42,11 @@ class Tagger:
                                   -3.9853573, -0.62173293, 15.08684138, -0.06108088,
                                   9.93598199]])
 
-        self._color = self._choose_color("safe_seeking")
         self._colors = {
             "seeking": self.controller.light_red,
             "safe_seeking": self.controller.light_orange,
         }
+        self._color = self._choose_color("safe_seeking")
 
         self._sleepy_time = 0.1  # same as in simulator
         self._avoidance_steps_left = 0

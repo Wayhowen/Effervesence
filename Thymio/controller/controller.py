@@ -19,7 +19,7 @@ class Controller:
     # TODO: this might not work
     def on_the_line(self) -> Tuple[bool, bool]:
         readings = self._aseba_handler.get_ground_sensor_values()
-        return readings[0] > self.line_reading, readings[1] > self.line_reading
+        return readings[0] < self.line_reading, readings[1] < self.line_reading
 
     def in_the_safezone(self) -> bool:
         readings = self._aseba_handler.get_ground_sensor_values()
@@ -30,6 +30,12 @@ class Controller:
 
     def start_tagging_other(self):
         self._aseba_handler.send_information(1)
+
+    def start_forcing_others_out_of_safezone(self):
+        self._aseba_handler.send_information(2)
+
+    def start_transmitting_bs(self):
+        self._aseba_handler.send_information(69)
 
     def receive_information(self) -> List[int]:
         return self._aseba_handler.receive_information()
