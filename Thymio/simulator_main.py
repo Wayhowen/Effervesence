@@ -7,6 +7,7 @@ from typing import List
 from simulator.behaviors.avoider import Avoider
 from simulator.behaviors.behavior import Behavior
 from simulator.behaviors.evolution.tagger_maximizer import TaggerMaximizer
+from simulator.behaviors.evolution.avoider_maximizer import AvoiderMaximizer
 from simulator.behaviors.q_learning.avoider import Avoider as QAvoider
 from simulator.behaviors.rotation_measurment import RotationMeasurment
 from simulator.behaviors.speed_measurment import SpeedMeasurment
@@ -48,39 +49,76 @@ class Main:
         #                [1., 0., 0., 0.],
         #                [0., 0., 0., 1.]])
         # This one we could use for future generations
-        qt = np.array([[-18.39622168,  -7.98813007,   1.33527662, -16.7623304 ,
-         -1.25806826,  -7.67294367,   2.02490175,   5.86654672,
-         15.76081346],
-       [ -2.55914533,  10.59513545,  -5.74456466,  11.79953737,
-         -4.44529443,   1.19901548,  -7.81497779,   3.69952752,
-         15.1749446 ],
-       [ -0.08614815,  -8.33813305,   9.05659117,   5.8274651 ,
-         -5.07227584,  13.32168184,  -9.89262203, -12.40337217,
-         -6.85871112],
-       [ -5.43198225,   8.58656425,  -0.49740548,  -2.48752895,
-         -0.68999991,   3.05050637,   3.43709043,  -6.20555478,
-        -11.06319357],
-       [ 12.21282762,  -5.77456683,  -8.16263591,   4.58758243,
-         16.13215604, -10.50367914,   8.16699934,   2.51367282,
-          8.62164963],
-       [-14.96731633,   3.07800442,  -5.31802538,  -4.4475438 ,
-         12.55831699,  -8.67629336,  13.16530316,   0.31691875,
-         -9.86918747],
-       [ 10.78827761,   0.61713685,  17.02510233,   6.03111262,
-         -3.9853573 ,  -0.62173293,  15.08684138,  -0.06108088,
-          9.93598199]])
+        tagger_qt = np.array([[  7.57721796,   7.57721796,  -3.25910776,  -1.20982259,
+         -3.12011823, -15.88580319,  -3.56932733,  -0.58697487,
+          7.57721796],
+       [ 17.36960666,   1.40779578,   7.16809468,  12.04310912,
+          0.91266769, -13.03920876,  14.93839489,  16.78919572,
+          8.24674813],
+       [  7.57721796,   7.57721796,   7.57721796, -13.65074803,
+         -1.93892875,  -5.78162467,  -3.69753777,   1.34185808,
+          2.6392372 ],
+       [  7.57721796,   7.57721796,   3.54519478, -11.68858698,
+        -13.68173249,  -3.99931209,   6.82349099,   7.57721796,
+          7.57721796],
+       [  7.57721796,   7.57721796,  -8.26299228,  -2.14778526,
+          7.57721796, -12.06664052,   0.95340262,   5.95320416,
+         12.37354091],
+       [  9.6005366 ,  -4.46416056,   7.57721796,   6.01119972,
+         10.22730673, -15.64242658,   2.95564354,  -8.71897764,
+          1.03666878],
+       [  1.5526293 ,   7.57721796,  -4.16117815,   6.11462049,
+          7.57721796,  -2.1071922 ,  -5.68443954,  12.10236683,
+        -17.1587734 ],
+       [  4.51025985,   7.57721796,   7.57721796,  -8.44201904,
+         15.90791517,   7.57721796,  -2.84356647,   9.06266343,
+         -1.4699734 ],
+       [ 10.06469994,  -7.34888093,   9.35453572,  -6.85002791,
+         -9.19300134,   7.57721796,   7.57721796, -10.68929462,
+         10.2516297 ]])
+
+        avoider_qt = np.array([[  4.70106709,  -5.33667302,  13.6439214 ,  10.9758712 ,
+          9.20787715,   3.6445551 ,  13.6439214 ,  13.6439214 ,
+          5.77920462, -11.0239956 ,  13.6439214 ],
+       [  6.21385072,  -3.57623965,   6.41520309,  -3.78762405,
+         -1.75707959,   4.52427251,  13.6439214 ,  15.38178462,
+         -4.28120695,  14.79543013,  13.6439214 ],
+       [  1.67525629,  -9.77503348,  13.6439214 ,  -0.79279579,
+         13.6439214 ,  -2.31381983,   2.43524143,  -3.78762405,
+         13.6439214 , -11.39248002,   7.08732981],
+       [ 13.6439214 ,   0.13008544,   3.70070875,  -0.81261741,
+        -14.03832434,   4.99102294,   8.84767887,   5.63519018,
+         -3.78762405,  -3.61941745,   9.01429953],
+       [ 12.00348924,  -3.78762405,  13.6439214 ,  -3.78762405,
+         13.6439214 ,  13.6439214 ,   0.08644038,  13.6439214 ,
+         -5.79065097,  13.6439214 ,   8.54960262],
+       [  3.3491366 ,  13.6439214 ,  13.6439214 ,   5.2188861 ,
+         13.6439214 ,  -2.13824699, -14.49671495,   4.29960987,
+          4.1654641 ,  -7.16516109,  13.6439214 ],
+       [ -3.23036316,  11.9122925 ,  -2.75999968, -15.51303004,
+         -6.4344585 ,  13.6439214 ,  10.91660862,   6.78290083,
+         13.6439214 ,  13.6439214 ,   1.5984953 ],
+       [ 13.6439214 ,  -3.04102144,  13.6439214 ,  -3.78762405,
+        -12.90135363,  13.6439214 ,  -1.01237154,  13.6439214 ,
+         -6.53529709,  13.6439214 ,  13.6439214 ],
+       [  9.78086563, -11.88578745,   8.03205226,   4.71607745,
+         -2.67092032, -11.61828562,  13.6439214 ,   8.69330604,
+         -7.38308518,   4.7470431 ,  -1.32011737],
+       [  1.53856321,  -1.94932013,   4.27403389,  13.6439214 ,
+          8.74799704,  -3.78762405,  -3.78762405,  15.0242162 ,
+          7.61529838,   5.69426831,   2.81185051]])
 
         self.w = self.simulator.W - 0.2
         self.h = self.simulator.H - 0.2
         self.robots: List[Behavior] = [
             # RotationMeasurment(self.simulator,  Controller(self.simulator.W, self.simulator.H, 0, 0, 0))
-            TaggerMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0, 0), qt,
+            TaggerMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0, 0), tagger_qt,
                             self.number_of_steps),
             # QAvoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, self.w / 2, self.h / 2, 4)),
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, self.w / 2, -self.h / 2, 2.5)),
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -self.w / 2, -self.h / 2, 1)),
-            Avoider(self.simulator, Controller(self.simulator.W, self.simulator.H, -self.w / 2, self.h / 2, 5.2))
+            AvoiderMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, self.w / 2, self.h / 2, 4), avoider_qt, self.number_of_steps),
+            AvoiderMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, self.w / 2, -self.h / 2, 2.5), avoider_qt, self.number_of_steps),
+            AvoiderMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, -self.w / 2, -self.h / 2, 1), avoider_qt, self.number_of_steps),
+            AvoiderMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, -self.w / 2, self.h / 2, 5.2), avoider_qt, self.number_of_steps)
         ]
 
         # used for speed measurment
