@@ -127,10 +127,10 @@ class Evolve:
             a_convergence = self._update_and_check_convergence(avoider_offspring, "avoider")
             print(f"tagger off {t_convergence}")
             print(f"avoider off {a_convergence}")
-            current_offspring = tagger_offspring if self.n % 1 == 0 else avoider_offspring
-            competitive = self.get_tagger(self.best_tagger[0].get_table()) if self.n % 1 == 1 else self.get_avoider(self.best_avoider[0].get_table())
+            current_offspring = tagger_offspring if self.n % 2 != 0 else avoider_offspring
+            competitive = self.get_tagger(self.best_tagger[0].get_table()) if self.n % 2 != 0 else self.get_avoider(self.best_avoider[0].get_table())
             print(current_offspring)
-            print(competitive)
+            #print(competitive)
 
             new_offspring: List[Chromosome] = []
 
@@ -148,6 +148,7 @@ class Evolve:
 
             # compute fitness
             if self.n % 2 != 0:
+                print("Training tagger")
                 tagger_offspring = {offspring: self._compute_fitness(self.get_tagger(offspring.get_table()), competitive) for offspring in new_offspring}
                 self.best_tagger = sorted(tagger_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[
                     0]
@@ -157,6 +158,7 @@ class Evolve:
                 self.save_stats("tagger")
                 self.save_table("tagger")
             else:
+                print("Training avoider")
                 avoider_offspring = {offspring: self._compute_fitness(self.get_avoider(offspring.get_table()), competitive) for offspring in new_offspring}
                 self.best_avoider = sorted(avoider_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[0]
                 #print(f"Sorted scores are : {list(self.best_avoider)}")
