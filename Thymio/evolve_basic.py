@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 import numpy as np
 import random
+from itertools import combinations
 
 from simulator.behaviors.behavior import Behavior
 from simulator.behaviors.evolution.avoider_maximizer import AvoiderMaximizer
@@ -126,10 +127,10 @@ class Evolve:
             a_convergence = self._update_and_check_convergence(avoider_offspring, "avoider")
             print(f"tagger off {t_convergence}")
             print(f"avoider off {a_convergence}")
-            current_offspring = tagger_offspring if self.n % 1 == 0 else avoider_offspring
-            competitive = self.get_tagger(self.best_tagger[0].get_table()) if self.n % 1 == 1 else self.get_avoider(self.best_avoider[0].get_table())
+            current_offspring = tagger_offspring if self.n % 2 != 0 else avoider_offspring
+            competitive = self.get_tagger(self.best_tagger[0].get_table()) if self.n % 2 != 0 else self.get_avoider(self.best_avoider[0].get_table())
             print(current_offspring)
-            print(competitive)
+            #print(competitive)
 
             new_offspring: List[Chromosome] = []
 
@@ -146,7 +147,8 @@ class Evolve:
             new_offspring.extend(mutated_offspring)
 
             # compute fitness
-            if self.n % 1 == 0 and not t_convergence:
+            if self.n % 2 != 0:
+                print("Training tagger")
                 tagger_offspring = {offspring: self._compute_fitness(self.get_tagger(offspring.get_table()), competitive) for offspring in new_offspring}
                 self.best_tagger = sorted(tagger_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[
                     0]
@@ -155,7 +157,8 @@ class Evolve:
                 print("Score:", self.best_tagger[1])
                 self.save_stats("tagger")
                 self.save_table("tagger")
-            elif not a_convergence:
+            else:
+                print("Training avoider")
                 avoider_offspring = {offspring: self._compute_fitness(self.get_avoider(offspring.get_table()), competitive) for offspring in new_offspring}
                 self.best_avoider = sorted(avoider_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[0]
                 #print(f"Sorted scores are : {list(self.best_avoider)}")
@@ -186,15 +189,15 @@ class Evolve:
 
     def _crossover(self, selected_offspring: List[Chromosome]) -> List[Chromosome]:
         new_offspring: List[Chromosome] = []
-        pairs = [[x, y] for x in selected_offspring for y in selected_offspring]
+        pairs = [comb for comb in combinations(selected_offspring, 2)]
         for pair in pairs:
             new_offspring.append(Chromosome((pair[0].q_table + pair[1].q_table) / 2))
-        return new_offspring
+        return list(random.sample(new_offspring, int((self.population_size-len(selected_offspring))/2)))
 
     def _mutate(self, offspring: List[Chromosome]) -> List[Chromosome]:
         new_offspring: List[Chromosome] = []
         for _ in range(self.population_size - len(offspring)):
-            random_chromosome = np.random.choice(new_offspring)
+            random_chromosome = np.random.choice(offspring)
             random_mask = np.stack([np.random.choice(a=[0, 1], size=random_chromosome.q_table.shape[1], p=[0.25, 0.75]) for _ in range(random_chromosome.q_table.shape[0])])
             masked_q_table = random_chromosome.q_table * random_mask
             masked_q_table[masked_q_table == 0] = random.uniform(np.min(masked_q_table), np.max(masked_q_table))

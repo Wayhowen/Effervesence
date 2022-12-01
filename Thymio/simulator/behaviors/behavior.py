@@ -59,7 +59,7 @@ class Behavior:
 
     def check_set_behaviors(self, step: int):
         behavior_specific_action = self.behavior_specific_set_behaviors(step)
-        if behavior_specific_action:
+        if behavior_specific_action != None:
             return behavior_specific_action
         return self.common_set_behaviors(step)
 
