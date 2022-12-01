@@ -5,11 +5,13 @@ from typing import Optional, Dict
 import numpy as np
 
 from controller.controller import Controller
+from controller.modules.camera.camera import Camera
 
 
 class Behavior:
     def __init__(self, safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed):
         self.controller = Controller(safezone_reading, line_reading)
+        self._camera = Camera()
         self.five_cm_reading = five_cm_reading
         self.nine_cm_reading = nine_cm_reading
         self.max_speed = max_speed
@@ -92,7 +94,7 @@ class Behavior:
 
     def post_move_calculations(self):
         self.last_closest_readings = self.controller.get_proximity_sensor_values()
-        other_robot_camera_positions = {}
+        other_robot_camera_positions = self._camera.get_other_robot_camera_positions()
         self._state = self.get_next_state(self.last_closest_readings, other_robot_camera_positions)
 
     @abstractmethod
