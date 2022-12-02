@@ -18,7 +18,7 @@ class Behavior:
         self.max_speed = max_speed
         self.half_speed = max_speed / 2
         self.quarter_speed = max_speed / 4
-        
+
         self._avoidance_boundary = 0
         self._sleepy_time = 0.1  # same as in simulator
         self._avoidance_steps_left = 0
@@ -39,6 +39,7 @@ class Behavior:
         return color
 
     def perform(self, step):
+        print(self.state)
         action = self.check_set_behaviors(step)
         if action:
             self.perform_next_action(action)
@@ -113,6 +114,7 @@ class Behavior:
     def run(self, steps=1800):
         for cnt in range(steps):
             self.perform(cnt)
+            self.post_move_calculations()
             time.sleep(self._sleepy_time)
 
     def kill(self):
