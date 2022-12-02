@@ -18,7 +18,8 @@ class Behavior:
         self.max_speed = max_speed
         self.half_speed = max_speed / 2
         self.quarter_speed = max_speed / 4
-
+        
+        self._avoidance_boundary = 0
         self._sleepy_time = 0.1  # same as in simulator
         self._avoidance_steps_left = 0
         self._avoidance_action = None
@@ -58,6 +59,12 @@ class Behavior:
     def common_set_behaviors(self) -> Optional[int]:
         # line turn behavior
         left_on_line, right_on_line = self.controller.on_the_line()
+        if self._avoidance_boundary:
+            self._avoidance_boundary -= 1
+            if self._avoidance_boundary > 1:
+                return self.actions.index("GORIGHT")
+            else:
+                return self.actions.index("GOFORWARDS")
         if right_on_line:
             return self.actions.index("GOLEFT")
         elif left_on_line:
