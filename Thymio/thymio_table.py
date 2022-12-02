@@ -10,9 +10,10 @@ from controller.behaviors.avoider import Avoider
 def tagged_checker(avoider: Avoider):
     tagged = False
     while not tagged:
-        tagged = avoider.is_tagged
-        time.sleep(0.1)
-    avoider.tagged_callback()
+        tagged = avoider.is_tagged()
+        time.sleep(0.05)
+    if avoider._alive:
+        avoider.tagged_callback()
 
 
 if __name__ == '__main__':
@@ -20,7 +21,8 @@ if __name__ == '__main__':
         # TODO: choose the values
         behavior = Avoider(line_reading=300, safezone_reading=850, five_cm_reading=2500, nine_cm_reading=1200, max_speed=500)
 
-        if behavior is isinstance(behavior, Avoider):
+        if isinstance(behavior, Avoider):
+            print("starting threading")
             t1 = threading.Thread(target=tagged_checker, args=(behavior,))
             t1.daemon = True
             t1.start()
@@ -29,4 +31,5 @@ if __name__ == '__main__':
 
     except Exception as e:
         traceback.print_exc()
+    finally:
         behavior.kill()

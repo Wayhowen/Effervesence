@@ -38,7 +38,7 @@ class Controller:
     def start_transmitting_bs(self):
         self._aseba_handler.send_information(69)
 
-    def receive_information(self) -> List[int]:
+    def receive_information(self) -> int:
         return self._aseba_handler.receive_information()
 
     def light_red(self):

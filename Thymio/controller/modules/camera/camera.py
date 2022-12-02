@@ -93,7 +93,7 @@ class Camera:
         return (self.get_quadrant(posX), None)
 
     # TODO: Is the returned val a color?
-    def find_color(self, frame) -> Dict[str, int, str]:
+    def find_color(self, frame) -> Dict[str, str]:
         biggest = {
             "l": (0, None),
             "m": (0, None),

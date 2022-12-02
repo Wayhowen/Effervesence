@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import time
 from abc import abstractmethod
 from typing import Optional, Dict
 
@@ -30,6 +31,7 @@ class Behavior:
         self.q_table = np.array([[]])
         self._colors = {}
         self._color = None
+        self._alive = True
 
     def _choose_color(self, color: str):
         self._colors[color]()
@@ -103,8 +105,9 @@ class Behavior:
 
     def run(self, steps=1800):
         for cnt in range(steps):
-            print(cnt)
             self.perform(cnt)
+            time.sleep(self._sleepy_time)
 
     def kill(self):
+        self._alive = False
         self.controller.kill()
