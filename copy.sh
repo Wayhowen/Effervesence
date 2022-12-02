@@ -11,5 +11,5 @@ fi
 if [ "$HOSTNAME" = Sowsterpad ]; then
     sshpass -p 'asdasdasd' rm -rf /home/pi/Thymio & scp -r /mnt/c/users/jakub/desktop/ITU\ sem\ 3/Advanced\ robotics/Effervesence/Thymio/ pi@192.168.4.1:/home/pi/Thymio
 else
-    sshpass -p 'asdasdasd' rm -rf /home/pi/Thymio & scp -r /mnt/c/users/osman/Documents/github/Effervesence/Thymio pi@192.168.4.1:/home/pi/Thymio
+    sshpass -p 'asdasdasd' rm -rf /home/pi/Thymio & scp -r /mnt/c/users/osman/Documents/github/Effervesence/Thymio/ pi@192.168.4.1:/home/pi/Thymio
 fi

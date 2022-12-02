@@ -52,8 +52,8 @@ class Avoider(Behavior):
 
         # add coroutine to set tagged color
         self._colors = {
-            "avoiding": self.controller.light_red,
-            "safe_avoiding": self.controller.light_orange,
+            "avoiding": self.controller.light_blue,
+            "safe_avoiding": self.controller.light_green,
             "tagged": self.controller.light_purple
         }
         self._color = self._choose_color("avoiding")
