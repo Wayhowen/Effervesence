@@ -12,17 +12,17 @@ def tagged_checker(avoider: Avoider):
     while not tagged:
         tagged = avoider.is_tagged()
         time.sleep(0.05)
-    if avoider._alive:
-        avoider.tagged_callback()
+    lock = threading.Lock()
+    with lock:
+        avoider.set_alive(False)
 
 
 if __name__ == '__main__':
     try:
         # TODO: choose the values
-        behavior = Avoider(line_reading=600, safezone_reading=700, five_cm_reading=2500, nine_cm_reading=1200, max_speed=500)
+        behavior = Avoider(line_reading=350, safezone_reading=700, five_cm_reading=2500, nine_cm_reading=1200, max_speed=500)
 
         if isinstance(behavior, Avoider):
-            print("starting threading")
             t1 = threading.Thread(target=tagged_checker, args=(behavior,))
             t1.daemon = True
             t1.start()
@@ -31,5 +31,4 @@ if __name__ == '__main__':
 
     except Exception as e:
         traceback.print_exc()
-    finally:
         behavior.kill()

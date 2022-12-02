@@ -22,10 +22,12 @@ class Controller:
         readings = self._aseba_handler.get_ground_sensor_values()
         return readings[0] < self.line_reading, readings[1] < self.line_reading
 
+    # TODO: fix this to only happen in safezone
     def in_the_safezone(self) -> bool:
+        # here we throw away right sensor info cuz its fucked up for the gray lines
         readings = self._aseba_handler.get_ground_sensor_values()
-        print(readings)
-        return all(self.line_reading > reading > self.safezone_reading for reading in readings)
+        print(readings[0], readings[1])
+        return self.line_reading < readings[0] < self.safezone_reading and readings[1] > 850
 
     def drive(self, left_wheel_value, right_wheel_value):
         self._aseba_handler.drive(left_wheel_value, right_wheel_value)
@@ -40,7 +42,9 @@ class Controller:
         self._aseba_handler.send_information(69)
 
     def receive_information(self) -> int:
-        return self._aseba_handler.receive_information()
+        info = self._aseba_handler.receive_information()
+        print(info)
+        return info
 
     def light_red(self):
         self._aseba_handler.light_red()

@@ -114,6 +114,20 @@ class Behavior:
         for cnt in range(steps):
             self.perform(cnt)
             time.sleep(self._sleepy_time)
+            if not self._alive:
+                self.tagged_callback()
+                break
+        if self._alive:
+            self.kill()
+
+    def set_alive(self, alive: bool):
+        self._alive = alive
+
+    def tagged_callback(self):
+        print("Getting killed")
+        self._choose_color("tagged")
+        self.controller.drive(0, 0)
+        self.kill()
 
     def kill(self):
         self._alive = False

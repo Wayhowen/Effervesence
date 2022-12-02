@@ -71,9 +71,9 @@ class Avoider(Behavior):
             how_long_ago = (step - self.forced_out_of_safezone)
         elif self.controller.in_the_safezone():
             self._choose_color("safe_avoiding")
-            self.controller.drive(0, 0)
+            return self.actions.index("STOP")
         else:
-            self._choose_color("safe_avoiding")
+            self._choose_color("avoiding")
         if how_long_ago <= self._safezone_out_steps:
             self.controller.start_transmitting_bs()
 
@@ -133,9 +133,3 @@ class Avoider(Behavior):
         if not self._alive:
             return True
         return self.controller.receive_information() == 1
-
-    def tagged_callback(self):
-        print("Getting killed")
-        self._choose_color("tagged")
-        self.controller.drive(0, 0)
-        self.kill()
