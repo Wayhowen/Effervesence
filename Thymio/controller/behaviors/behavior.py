@@ -103,6 +103,7 @@ class Behavior:
 
     def run(self, steps=1800):
         for cnt in range(steps):
+            print(cnt)
             self.perform(cnt)
 
     def kill(self):

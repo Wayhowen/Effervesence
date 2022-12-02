@@ -107,3 +107,13 @@ class Avoider(Behavior):
             return self.states.index("BEHIND")
         else:
             return self.states.index("NOTHING")
+
+    def is_tagged(self):
+        print("checking tagged")
+        return self.controller.receive_information() == [1]
+
+    def tagged_callback(self):
+        print("Getting killed")
+        self._choose_color("tagged")
+        self.controller.drive(0, 0)
+        self.kill()

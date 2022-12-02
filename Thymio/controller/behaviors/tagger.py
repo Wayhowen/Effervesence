@@ -92,4 +92,4 @@ class Tagger(Behavior):
 
     def run(self, steps=1800):
         for cnt in range(steps):
-            self.perform()
+            self.perform(cnt)
