@@ -151,8 +151,7 @@ class Camera:
         image = np.empty((height, width, 3), dtype=np.uint8)
         camera.capture(image, 'bgr')
         frame = cv.rotate(image, cv.ROTATE_180)
-        self.find_color(frame)
-        return {}
+        return self.find_color(frame)
 
 
 if __name__ == "__main__":

@@ -10,33 +10,42 @@ from controller.behaviors.behavior import Behavior
 class Tagger(Behavior):
     def __init__(self, safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed):
         super().__init__(safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed)
-        self.states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "BEHIND")
+        self.states = (
+            "AllFRONT", "INFRONT", "LEFT", "RIGHT", "LEFTFRONT",
+            "RIGHTFRONT", "LEFTRIGHT", "NOTHING", "BEHIND"
+        )
         self.state = self.states.index("NOTHING")
         self.actions = (
             "GOFORWARDS", "GOLEFT", "GORIGHT", "RANDOM", "LEAN_LEFT", "LEAN_RIGHT", "SLOW_FORWARDS_LEFT",
             "SLOW_FORWARDS_RIGHT", "SLOW_FORWARDS"
         )
-        self.q_table = np.array([[-18.39622168, -7.98813007, 1.33527662, -16.7623304,
-                                  -1.25806826, -7.67294367, 2.02490175, 5.86654672,
-                                  15.76081346],
-                                 [-2.55914533, 10.59513545, -5.74456466, 11.79953737,
-                                  -4.44529443, 1.19901548, -7.81497779, 3.69952752,
-                                  15.1749446],
-                                 [-0.08614815, -8.33813305, 9.05659117, 5.8274651,
-                                  -5.07227584, 13.32168184, -9.89262203, -12.40337217,
-                                  -6.85871112],
-                                 [-5.43198225, 8.58656425, -0.49740548, -2.48752895,
-                                  -0.68999991, 3.05050637, 3.43709043, -6.20555478,
-                                  -11.06319357],
-                                 [12.21282762, -5.77456683, -8.16263591, 4.58758243,
-                                  16.13215604, -10.50367914, 8.16699934, 2.51367282,
-                                  8.62164963],
-                                 [-14.96731633, 3.07800442, -5.31802538, -4.4475438,
-                                  12.55831699, -8.67629336, 13.16530316, 0.31691875,
-                                  -9.86918747],
-                                 [10.78827761, 0.61713685, 17.02510233, 6.03111262,
-                                  -3.9853573, -0.62173293, 15.08684138, -0.06108088,
-                                  9.93598199]])
+        self.q_table = np.array([[  7.57721796,   7.57721796,  -3.25910776,  -1.20982259,
+         -3.12011823, -15.88580319,  -3.56932733,  -0.58697487,
+          7.57721796],
+       [ 17.36960666,   1.40779578,   7.16809468,  12.04310912,
+          0.91266769, -13.03920876,  14.93839489,  16.78919572,
+          8.24674813],
+       [  7.57721796,   7.57721796,   7.57721796, -13.65074803,
+         -1.93892875,  -5.78162467,  -3.69753777,   1.34185808,
+          2.6392372 ],
+       [  7.57721796,   7.57721796,   3.54519478, -11.68858698,
+        -13.68173249,  -3.99931209,   6.82349099,   7.57721796,
+          7.57721796],
+       [  7.57721796,   7.57721796,  -8.26299228,  -2.14778526,
+          7.57721796, -12.06664052,   0.95340262,   5.95320416,
+         12.37354091],
+       [  9.6005366 ,  -4.46416056,   7.57721796,   6.01119972,
+         10.22730673, -15.64242658,   2.95564354,  -8.71897764,
+          1.03666878],
+       [  1.5526293 ,   7.57721796,  -4.16117815,   6.11462049,
+          7.57721796,  -2.1071922 ,  -5.68443954,  12.10236683,
+        -17.1587734 ],
+       [  4.51025985,   7.57721796,   7.57721796,  -8.44201904,
+         15.90791517,   7.57721796,  -2.84356647,   9.06266343,
+         -1.4699734 ],
+       [ 10.06469994,  -7.34888093,   9.35453572,  -6.85002791,
+         -9.19300134,   7.57721796,   7.57721796, -10.68929462,
+         10.2516297 ]])
 
         self._colors = {
             "seeking": self.controller.light_red,
@@ -79,7 +88,15 @@ class Tagger(Behavior):
 
     # TODO: work on this
     def get_next_state(self, closest_reading, other_robot_camera_positions: Dict[str, str]):
-        if other_robot_camera_positions["m"] and not other_robot_camera_positions["m"] == "blue":
+        if all(other_robot_camera_positions[k] and not other_robot_camera_positions[k] == "blue" for k in ["l","m","r"]):
+                return self.states.index("ALLFRONT")
+        elif all(other_robot_camera_positions[k] and not other_robot_camera_positions[k] == "blue" for k in ["l","m"]):
+            return self.states.index("LEFTFRONT")
+        elif all(other_robot_camera_positions[k] and not other_robot_camera_positions[k] == "blue" for k in ["m","r"]):
+            return self.states.index("RIGHTFRONT")
+        elif all(other_robot_camera_positions[k] and not other_robot_camera_positions[k] == "blue" for k in ["l","r"]):
+            return self.states.index("LEFTRIGHT")
+        elif other_robot_camera_positions["m"] and not other_robot_camera_positions["m"] == "blue":
             return self.states.index("INFRONT")
         elif other_robot_camera_positions["l"] and not other_robot_camera_positions["l"] == "blue":
             return self.states.index("LEFT")
