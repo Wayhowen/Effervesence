@@ -23,6 +23,7 @@ class Behavior:
         self.tagged = False
         self.last_closest_readings = [float('inf')] * len(self.controller.sensors)
 
+        self._avoidance_boundary = 0
         self._avoidance_action = 0
         self._avoidance_steps_left = 0
 
@@ -70,9 +71,17 @@ class Behavior:
     def common_set_behaviors(self, step) -> Optional[int]:
         # line turn behavior
         left_on_line, right_on_line = self.controller.on_the_line(self.simulator.world, self.simulator.bounds)
+        if self._avoidance_boundary:
+            self._avoidance_boundary -= 1
+            if self._avoidance_boundary > 1:
+                return self.actions.index("GORIGHT")
+            else:
+                return self.actions.index("GOFORWARDS")
         if right_on_line:
-            return self.actions.index("GOLEFT")
+            self._avoidance_boundary += 6
+            return self.actions.index("GORIGHT")
         elif left_on_line:
+            self._avoidance_boundary += 6
             return self.actions.index("GORIGHT")
         # avoidance behavior -- basically turn for a bit
         if self._avoidance_steps_left:

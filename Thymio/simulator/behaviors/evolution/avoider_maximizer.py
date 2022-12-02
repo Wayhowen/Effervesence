@@ -28,6 +28,9 @@ class AvoiderMaximizer(Behavior):
         if how_long_ago <= self._safezone_out_steps:
             self._allowed_to_force_others_out = False
 
+        #stop moving if tagged
+        if self.is_tagged:
+            return self.actions.index("STOP")
         # move out of safezone
         if how_long_ago <= self._safezone_forward_steps:
             return self._q_table[self.actions.index("GOFORWARDS")]
@@ -106,9 +109,10 @@ class AvoiderMaximizer(Behavior):
     def _choose_color(self, step):
         if self.is_in_safezone and not (step - self.forced_out_of_safezone) <= self._safezone_forward_steps:
             self._color = self._colors["safe_avoiding"]
-            return
         elif self.is_tagged:
             self._color = self._colors["tagged"]
+        else:
+            self._color = self._colors["avoiding"]
 
     def manage_rewards(self, state: int, score_from_forcing_out: int):
         if state == self.states.index("SAFE"):
