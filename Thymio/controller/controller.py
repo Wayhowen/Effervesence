@@ -24,6 +24,7 @@ class Controller:
 
     def in_the_safezone(self) -> bool:
         readings = self._aseba_handler.get_ground_sensor_values()
+        print(readings)
         return all(self.line_reading > reading > self.safezone_reading for reading in readings)
 
     def drive(self, left_wheel_value, right_wheel_value):
