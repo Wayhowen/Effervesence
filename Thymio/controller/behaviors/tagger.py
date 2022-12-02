@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import random
+import time
 from typing import Optional, Dict
 
 import numpy as np
@@ -11,7 +12,7 @@ class Tagger(Behavior):
     def __init__(self, safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed):
         super().__init__(safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed)
         self.states = (
-            "AllFRONT", "INFRONT", "LEFT", "RIGHT", "LEFTFRONT",
+            "ALLFRONT", "INFRONT", "LEFT", "RIGHT", "LEFTFRONT",
             "RIGHTFRONT", "LEFTRIGHT", "NOTHING", "BEHIND"
         )
         self.state = self.states.index("NOTHING")
@@ -110,3 +111,5 @@ class Tagger(Behavior):
     def run(self, steps=1800):
         for cnt in range(steps):
             self.perform(cnt)
+            self.post_move_calculations()
+            time.sleep(self._sleepy_time)
