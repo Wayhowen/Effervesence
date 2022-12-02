@@ -30,6 +30,9 @@ PREV_FRAME = None
 
 
 class Camera:
+    def __init__(self):
+        self.camera = PiCamera()
+    
     # TODO: might be useful https://mattmaulion.medium.com/color-image-segmentation-image-processing-4a04eca25c0
     def get_quadrant(self, pos):
         if (pos > width / 3):
@@ -101,7 +104,7 @@ class Camera:
         }
 
         for c in COLORS:
-            res = s.hsv(frame, c[0], c[1])
+            res = self.hsv(frame, c[0], c[1])
             res = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
 
             width = res.shape[1]
@@ -121,8 +124,9 @@ class Camera:
 
                     if ar > biggest[key][0]:
                         biggest[key] = (ar, c[2])
-
-        return {k: elem[1] for k, elem in biggest.items()}
+        result = {k: elem[1] for k, elem in biggest.items()}
+        print(result)
+        return result
 
     def find_circles(self, bf, f):
         global PREV_CIRCLE
@@ -146,25 +150,25 @@ class Camera:
         # cv.imshow("circles", f)
 
     def get_other_robot_camera_positions(self) -> Dict[str, str]:
-        camera = PiCamera()
-        camera.framerate = 24
+        self.camera.resolution = (width, height)
+        self.camera.framerate = 24
         image = np.empty((height, width, 3), dtype=np.uint8)
-        camera.capture(image, 'bgr')
+        self.camera.capture(image, 'bgr')
         frame = cv.rotate(image, cv.ROTATE_180)
         return self.find_color(frame)
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
     # video_capture = cv.VideoCapture(0)
-    camera = PiCamera()
+    #camera = PiCamera()
 
-    prev_circle = None
-    dist = lambda x1, y1, x2, y2: (x1 - x2) ** 2 + (y1 - y2) ** 2
+    #prev_circle = None
+    #dist = lambda x1, y1, x2, y2: (x1 - x2) ** 2 + (y1 - y2) ** 2
 
-    s = Camera()
-    print("Starting capture")
-    while True:
-        s.get_other_robot_camera_positions()
+    #s = Camera()
+    #print("Starting capture")
+    #while True:
+        #s.get_other_robot_camera_positions()
 
         # camera.resolution = (width, height)
         # camera.framerate = 24
@@ -194,7 +198,7 @@ if __name__ == "__main__":
 
         # cv.imshow("res", res)
 
-        if cv.waitKey(1) & 0xFF == ord("q"):
-            break
+        #if cv.waitKey(1) & 0xFF == ord("q"):
+            #break
     # video_capture.release()
-    cv.destroyAllWindows()
+    #cv.destroyAllWindows()

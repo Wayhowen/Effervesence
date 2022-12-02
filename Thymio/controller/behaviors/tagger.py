@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import random
+import time
 from typing import Optional, Dict
 
 import numpy as np
@@ -11,7 +12,7 @@ class Tagger(Behavior):
     def __init__(self, safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed):
         super().__init__(safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed)
         self.states = (
-            "AllFRONT", "INFRONT", "LEFT", "RIGHT", "LEFTFRONT",
+            "ALLFRONT", "INFRONT", "LEFT", "RIGHT", "LEFTFRONT",
             "RIGHTFRONT", "LEFTRIGHT", "NOTHING", "BEHIND"
         )
         self.state = self.states.index("NOTHING")
@@ -88,19 +89,19 @@ class Tagger(Behavior):
 
     # TODO: work on this
     def get_next_state(self, closest_reading, other_robot_camera_positions: Dict[str, str]):
-        if all(other_robot_camera_positions[k] and not other_robot_camera_positions[k] == "blue" for k in ["l","m","r"]):
+        if all(other_robot_camera_positions[k] and not other_robot_camera_positions[k] == "purple" for k in ["l","m","r"]):
                 return self.states.index("ALLFRONT")
-        elif all(other_robot_camera_positions[k] and not other_robot_camera_positions[k] == "blue" for k in ["l","m"]):
+        elif all(other_robot_camera_positions[k] and not other_robot_camera_positions[k] == "purple" for k in ["l","m"]):
             return self.states.index("LEFTFRONT")
-        elif all(other_robot_camera_positions[k] and not other_robot_camera_positions[k] == "blue" for k in ["m","r"]):
+        elif all(other_robot_camera_positions[k] and not other_robot_camera_positions[k] == "purple" for k in ["m","r"]):
             return self.states.index("RIGHTFRONT")
-        elif all(other_robot_camera_positions[k] and not other_robot_camera_positions[k] == "blue" for k in ["l","r"]):
+        elif all(other_robot_camera_positions[k] and not other_robot_camera_positions[k] == "purple" for k in ["l","r"]):
             return self.states.index("LEFTRIGHT")
-        elif other_robot_camera_positions["m"] and not other_robot_camera_positions["m"] == "blue":
+        elif other_robot_camera_positions["m"] and not other_robot_camera_positions["m"] == "purple":
             return self.states.index("INFRONT")
-        elif other_robot_camera_positions["l"] and not other_robot_camera_positions["l"] == "blue":
+        elif other_robot_camera_positions["l"] and not other_robot_camera_positions["l"] == "purple":
             return self.states.index("LEFT")
-        elif other_robot_camera_positions["r"] and not other_robot_camera_positions["r"] == "blue":
+        elif other_robot_camera_positions["r"] and not other_robot_camera_positions["r"] == "purple":
             return self.states.index("RIGHT")
         elif closest_reading[5] >= self.nine_cm_reading:
             return self.states.index("BEHIND")
@@ -110,3 +111,5 @@ class Tagger(Behavior):
     def run(self, steps=1800):
         for cnt in range(steps):
             self.perform(cnt)
+            self.post_move_calculations()
+            time.sleep(self._sleepy_time)
