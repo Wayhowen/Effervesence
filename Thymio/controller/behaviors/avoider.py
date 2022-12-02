@@ -9,34 +9,46 @@ from controller.behaviors.behavior import Behavior
 class Avoider(Behavior):
     def __init__(self, safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed):
         super().__init__(safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed)
-        self.states = ("INFRONT", "LEFT", "RIGHT", "NOTHING", "BEHIND", "SAFE")
+        self.states = (
+            "AllFRONT", "INFRONT", "LEFT", "RIGHT", "LEFTFRONT",
+            "RIGHTFRONT", "LEFTRIGHT", "NOTHING", "BEHIND", "SAFE"
+        )
         self.state = self.states.index("NOTHING")
         self.actions = (
             "GOFORWARDS", "GOLEFT", "GORIGHT", "SLOW_BACKWARDS_LEFT", "SLOW_BACKWARDS_RIGHT", "LEAN_LEFT",
             "LEAN_RIGHT", "SLOW_FORWARDS_LEFT", "SLOW_FORWARDS_RIGHT", "SLOW_FORWARDS", "STOP"
         )
         # TODO: This is tagger array for now
-        self.q_table = np.array([[-18.39622168, -7.98813007, 1.33527662, -16.7623304,
-                                  -1.25806826, -7.67294367, 2.02490175, 5.86654672,
-                                  15.76081346],
-                                 [-2.55914533, 10.59513545, -5.74456466, 11.79953737,
-                                  -4.44529443, 1.19901548, -7.81497779, 3.69952752,
-                                  15.1749446],
-                                 [-0.08614815, -8.33813305, 9.05659117, 5.8274651,
-                                  -5.07227584, 13.32168184, -9.89262203, -12.40337217,
-                                  -6.85871112],
-                                 [-5.43198225, 8.58656425, -0.49740548, -2.48752895,
-                                  -0.68999991, 3.05050637, 3.43709043, -6.20555478,
-                                  -11.06319357],
-                                 [12.21282762, -5.77456683, -8.16263591, 4.58758243,
-                                  16.13215604, -10.50367914, 8.16699934, 2.51367282,
-                                  8.62164963],
-                                 [-14.96731633, 3.07800442, -5.31802538, -4.4475438,
-                                  12.55831699, -8.67629336, 13.16530316, 0.31691875,
-                                  -9.86918747],
-                                 [10.78827761, 0.61713685, 17.02510233, 6.03111262,
-                                  -3.9853573, -0.62173293, 15.08684138, -0.06108088,
-                                  9.93598199]])
+        self.q_table = np.array([[  4.70106709,  -5.33667302,  13.6439214 ,  10.9758712 ,
+          9.20787715,   3.6445551 ,  13.6439214 ,  13.6439214 ,
+          5.77920462, -11.0239956 ,  13.6439214 ],
+       [  6.21385072,  -3.57623965,   6.41520309,  -3.78762405,
+         -1.75707959,   4.52427251,  13.6439214 ,  15.38178462,
+         -4.28120695,  14.79543013,  13.6439214 ],
+       [  1.67525629,  -9.77503348,  13.6439214 ,  -0.79279579,
+         13.6439214 ,  -2.31381983,   2.43524143,  -3.78762405,
+         13.6439214 , -11.39248002,   7.08732981],
+       [ 13.6439214 ,   0.13008544,   3.70070875,  -0.81261741,
+        -14.03832434,   4.99102294,   8.84767887,   5.63519018,
+         -3.78762405,  -3.61941745,   9.01429953],
+       [ 12.00348924,  -3.78762405,  13.6439214 ,  -3.78762405,
+         13.6439214 ,  13.6439214 ,   0.08644038,  13.6439214 ,
+         -5.79065097,  13.6439214 ,   8.54960262],
+       [  3.3491366 ,  13.6439214 ,  13.6439214 ,   5.2188861 ,
+         13.6439214 ,  -2.13824699, -14.49671495,   4.29960987,
+          4.1654641 ,  -7.16516109,  13.6439214 ],
+       [ -3.23036316,  11.9122925 ,  -2.75999968, -15.51303004,
+         -6.4344585 ,  13.6439214 ,  10.91660862,   6.78290083,
+         13.6439214 ,  13.6439214 ,   1.5984953 ],
+       [ 13.6439214 ,  -3.04102144,  13.6439214 ,  -3.78762405,
+        -12.90135363,  13.6439214 ,  -1.01237154,  13.6439214 ,
+         -6.53529709,  13.6439214 ,  13.6439214 ],
+       [  9.78086563, -11.88578745,   8.03205226,   4.71607745,
+         -2.67092032, -11.61828562,  13.6439214 ,   8.69330604,
+         -7.38308518,   4.7470431 ,  -1.32011737],
+       [  1.53856321,  -1.94932013,   4.27403389,  13.6439214 ,
+          8.74799704,  -3.78762405,  -3.78762405,  15.0242162 ,
+          7.61529838,   5.69426831,   2.81185051]])
 
         # add coroutine to set tagged color
         self._colors = {
@@ -97,6 +109,14 @@ class Avoider(Behavior):
     def get_next_state(self, closest_reading, other_robot_camera_positions: Dict[str, str]):
         if self.controller.in_the_safezone():
             return self.states.index("SAFE")
+        elif all(other_robot_camera_positions[k] and other_robot_camera_positions[k] in ["seeking", "safe_seeking"] for k in ["l","m","r"]):
+            return self.states.index("ALLFRONT")
+        elif all(other_robot_camera_positions[k] and other_robot_camera_positions[k] in ["seeking", "safe_seeking"] for k in ["l","m"]):
+            return self.states.index("LEFTFRONT")
+        elif all(other_robot_camera_positions[k] and other_robot_camera_positions[k] in ["seeking", "safe_seeking"] for k in ["m","r"]):
+            return self.states.index("RIGHTFRONT")
+        elif all(other_robot_camera_positions[k] and other_robot_camera_positions[k] in ["seeking", "safe_seeking"] for k in ["l","r"]):
+            return self.states.index("LEFTRIGHT")
         elif other_robot_camera_positions["l"] and other_robot_camera_positions["l"] in ["seeking", "safe_seeking"]:
             return self.states.index("LEFT")
         elif other_robot_camera_positions["m"] and other_robot_camera_positions["m"] in ["seeking", "safe_seeking"]:
