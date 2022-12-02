@@ -88,14 +88,20 @@ class Evolve:
 
         return self.best_avoider
 
-    def work_dual(self):
+    def work_dual(self, tagger_q_table=None, avoider_q_table=None):
         # initial populations
-        init_tag_pop = self._generate_population(
-            len(self.mock_tagger.states), len(self.mock_tagger.actions)
-        )
-        init_avoid_pop = self._generate_population(
-            len(self.mock_avoider.states), len(self.mock_avoider.actions)
-        )
+        if tagger_q_table:
+            init_tag_pop = self._generate_population_based_on_table(tagger_q_table)
+        else:
+            init_tag_pop = self._generate_population(
+                len(self.mock_tagger.states), len(self.mock_tagger.actions)
+            )
+        if avoider_q_table:
+            init_avoid_pop = self._generate_population_based_on_table(avoider_q_table)
+        else:
+            init_avoid_pop = self._generate_population(
+                len(self.mock_avoider.states), len(self.mock_avoider.actions)
+            )
 
         tagger_offspring = {offspring: self._compute_fitness(self.get_tagger(offspring.get_table())) for offspring in init_tag_pop}
         self.best_tagger = sorted(tagger_offspring.items(), key=lambda offspring: offspring[1], reverse=True)[0]
@@ -172,6 +178,10 @@ class Evolve:
     def _generate_population(self, x, y) -> List[Chromosome]:
         return [Chromosome(x=x, y=y) for _ in range(self.population_size)]
 
+    def _generate_population_based_on_table(self, q_table: np.array):
+        return []
+
+
     """
     combination of truncation and roulette
     """
@@ -223,7 +233,7 @@ class Evolve:
                 return False
             change = abs(current_fitness_score - self._last_tagger_fitness_score)
             print("Significance of tagger generation:", change)
-            self._last_tagger_fitness_score == current_fitness_score
+            self._last_tagger_fitness_score = current_fitness_score
             return change < self.statistical_significance
         else:
             if self._last_avoider_fitness_score == 0:
