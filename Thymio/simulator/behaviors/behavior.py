@@ -52,7 +52,7 @@ class Behavior:
     def perform(self, step, other_controllers):
         # move out of safezone
         action = self.check_set_behaviors(step)
-        if action:
+        if action is not None:
             self.perform_next_action(action)
             return
         action = np.argmax(self._q_table[self._state])
@@ -60,7 +60,7 @@ class Behavior:
 
     def check_set_behaviors(self, step: int):
         behavior_specific_action = self.behavior_specific_set_behaviors(step)
-        if behavior_specific_action != None:
+        if behavior_specific_action is not None:
             return behavior_specific_action
         return self.common_set_behaviors(step)
 
