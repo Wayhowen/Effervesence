@@ -8,7 +8,7 @@ class TaggerMaximizer(Behavior):
     def __init__(self, simulator, controller, q_table, total_steps):
         super().__init__(simulator, controller, q_table)
         self.states = (
-            "AllFRONT", "INFRONT", "LEFT", "RIGHT", "LEFTFRONT",
+            "ALLFRONT", "INFRONT", "LEFT", "RIGHT", "LEFTFRONT",
             "RIGHTFRONT", "LEFTRIGHT", "NOTHING", "BEHIND"
         )
         self.actions = (
