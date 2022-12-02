@@ -71,6 +71,7 @@ class Avoider(Behavior):
             how_long_ago = (step - self.forced_out_of_safezone)
         elif self.controller.in_the_safezone():
             self._choose_color("safe_avoiding")
+            self.controller.drive(0, 0)
         else:
             self._choose_color("safe_avoiding")
         if how_long_ago <= self._safezone_out_steps:

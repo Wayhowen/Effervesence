@@ -19,7 +19,7 @@ def tagged_checker(avoider: Avoider):
 if __name__ == '__main__':
     try:
         # TODO: choose the values
-        behavior = Avoider(line_reading=300, safezone_reading=850, five_cm_reading=2500, nine_cm_reading=1200, max_speed=500)
+        behavior = Avoider(line_reading=600, safezone_reading=700, five_cm_reading=2500, nine_cm_reading=1200, max_speed=500)
 
         if isinstance(behavior, Avoider):
             print("starting threading")
