@@ -1,14 +1,16 @@
 #!/usr/bin/python3
+import time
 from typing import List, Tuple
 
 from controller.modules.aseba_handler import AsebaHandler
 
 
 class Controller:
-    def __init__(self, safezone_reading, line_reading):
+    def __init__(self, safezone_reading, left_line_reading, right_line_reading):
         self._aseba_handler = AsebaHandler()
         self.safezone_reading = safezone_reading
-        self.line_reading = line_reading
+        self.left_line_reading = left_line_reading
+        self.right_line_reading = right_line_reading
 
     def kill(self):
         self._aseba_handler.stop()
@@ -17,17 +19,26 @@ class Controller:
     def get_proximity_sensor_values(self) -> List[int]:
         return self._aseba_handler.get_proximity_sensor_values()
 
-    # TODO: this might not work
     def on_the_line(self) -> Tuple[bool, bool]:
         readings = self._aseba_handler.get_ground_sensor_values()
-        return readings[0] < self.line_reading, readings[1] < self.line_reading
+        print("====")
+        print(readings)
+        print(readings[0] < self.left_line_reading, readings[1] < self.right_line_reading)
+        print("====")
+        return readings[0] < self.left_line_reading, readings[1] < self.right_line_reading
 
     # TODO: fix this to only happen in safezone
     def in_the_safezone(self) -> bool:
         # here we throw away right sensor info cuz its fucked up for the gray lines
         readings = self._aseba_handler.get_ground_sensor_values()
-        print(readings[0], readings[1])
-        return self.line_reading < readings[0] < self.safezone_reading and readings[1] > 850
+        time.sleep(0.05)
+        second_readings = self._aseba_handler.get_ground_sensor_values()
+        print("----")
+        print(second_readings[0] - readings[0])
+        print("----")
+
+        return self.left_line_reading < readings[0] < self.safezone_reading \
+               and (second_readings[0] - readings[0]) < 50
 
     def drive(self, left_wheel_value, right_wheel_value):
         self._aseba_handler.drive(left_wheel_value, right_wheel_value)
@@ -43,7 +54,6 @@ class Controller:
 
     def receive_information(self) -> int:
         info = self._aseba_handler.receive_information()
-        print(info)
         return info
 
     def light_red(self):

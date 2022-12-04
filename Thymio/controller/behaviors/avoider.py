@@ -7,8 +7,8 @@ from controller.behaviors.behavior import Behavior
 
 
 class Avoider(Behavior):
-    def __init__(self, safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed):
-        super().__init__(safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed)
+    def __init__(self, safezone_reading, left_line_reading, right_line_reading, five_cm_reading, nine_cm_reading, max_speed):
+        super().__init__(safezone_reading, left_line_reading, right_line_reading, five_cm_reading, nine_cm_reading, max_speed)
         self.states = (
             "ALLFRONT", "INFRONT", "LEFT", "RIGHT", "LEFTFRONT",
             "RIGHTFRONT", "LEFTRIGHT", "NOTHING", "BEHIND", "SAFE"

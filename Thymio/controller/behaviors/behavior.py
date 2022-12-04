@@ -10,8 +10,8 @@ from controller.modules.camera.camera import Camera
 
 
 class Behavior:
-    def __init__(self, safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed):
-        self.controller = Controller(safezone_reading, line_reading)
+    def __init__(self, safezone_reading, left_line_reading, right_line_reading, five_cm_reading, nine_cm_reading, max_speed):
+        self.controller = Controller(safezone_reading, left_line_reading, right_line_reading)
         self._camera = Camera()
         self.five_cm_reading = five_cm_reading
         self.nine_cm_reading = nine_cm_reading
@@ -23,7 +23,7 @@ class Behavior:
         self._sleepy_time = 0.1  # same as in simulator
         self._avoidance_steps_left = 0
         self._avoidance_action = None
-        self.last_closest_readings = [float('inf')] * 7
+        self.last_closest_readings = [float('-inf')] * 7
 
         # to be declared on inheriting classes
         self.states = ()
@@ -42,16 +42,17 @@ class Behavior:
         print(self.states[self.state])
         action = self.check_set_behaviors(step)
         if action is not None:
-            print("set behavior:", action)
+            print("set behavior:", self.actions[action])
             self.perform_next_action(action)
             return
         action = np.argmax(self.q_table[self.state])
-        print("table behavior:", action)
+        print("table behavior:", self.actions[action])
         self.perform_next_action(action)
 
     def check_set_behaviors(self, step):
         behavior_specific_action = self.behavior_specific_set_behaviors(step)
         if behavior_specific_action:
+            print("behavior specific action ")
             return behavior_specific_action
         return self.common_set_behaviors()
 
@@ -77,6 +78,7 @@ class Behavior:
             self._avoidance_steps_left -= 1
             return self._avoidance_action
         if self.last_closest_readings:
+            print(list(r >= self.five_cm_reading for r in self.last_closest_readings))
             if self.last_closest_readings[4] >= self.five_cm_reading:
                 self._avoidance_steps_left = 4
                 self._avoidance_action = self.actions.index("GOLEFT")
@@ -106,7 +108,8 @@ class Behavior:
 
     def post_move_calculations(self):
         self.last_closest_readings = self.controller.get_proximity_sensor_values()
-        other_robot_camera_positions = self._camera.get_other_robot_camera_positions()
+        print(self.last_closest_readings)
+        other_robot_camera_positions = {"l": None, "m": None, "r": None}
         self._state = self.get_next_state(self.last_closest_readings, other_robot_camera_positions)
 
     @abstractmethod
@@ -117,7 +120,6 @@ class Behavior:
         for cnt in range(steps):
             self.perform(cnt)
             self.post_move_calculations()
-            time.sleep(self._sleepy_time)
             if not self._alive:
                 self.tagged_callback()
                 break
