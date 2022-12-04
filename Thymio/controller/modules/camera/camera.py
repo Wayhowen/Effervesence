@@ -24,6 +24,9 @@ ALL_COLORS = [
 ]
 
 AVOIDER_LOOKS_FOR = [
+    ((45, 50, 200),
+     (90, 255, 255),
+     "Green"),
     ((0, 75, 170),
      (20, 255, 255),
      "Orangered")
