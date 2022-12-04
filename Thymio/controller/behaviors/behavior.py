@@ -69,8 +69,10 @@ class Behavior:
             else:
                 return self.actions.index("GOFORWARDS")
         if right_on_line:
+            print("on line")
             return self.actions.index("GOLEFT")
         elif left_on_line:
+            print("on line")
             return self.actions.index("GORIGHT")
         # avoidance behavior -- basically turn for a bit
         if self._avoidance_steps_left:
@@ -80,23 +82,28 @@ class Behavior:
             if self.last_closest_readings[4] >= self.five_cm_reading:
                 self._avoidance_steps_left = 4
                 self._avoidance_action = self.actions.index("GOLEFT")
+                print("avoiding other robot")
                 return self.actions.index("GOLEFT")
             elif self.last_closest_readings[3] >= self.five_cm_reading:
                 self._avoidance_steps_left = 5
                 self._avoidance_action = self.actions.index("GOLEFT")
+                print("avoiding other robot")
                 return self.actions.index("GOLEFT")
             elif self.last_closest_readings[2] >= self.five_cm_reading:
                 self._avoidance_steps_left = 6
                 self._avoidance_action = self.actions.index("GOLEFT")
+                print("avoiding other robot")
                 return self.actions.index("GOLEFT")
             elif self.last_closest_readings[1] >= self.five_cm_reading:
                 self._avoidance_steps_left = 7
                 self._avoidance_action = self.actions.index("GOLEFT")
+                print("avoiding other robot")
                 return self.actions.index("GOLEFT")
             elif self.last_closest_readings[0] >= self.five_cm_reading:
                 self._avoidance_steps_left = 8
                 # this has to use action that we have set on both controllers
                 self._avoidance_action = self.actions.index("GOLEFT")
+                print("avoiding other robot")
                 return self.actions.index("GOLEFT")
         return None
 
@@ -107,7 +114,8 @@ class Behavior:
     def post_move_calculations(self):
         self.last_closest_readings = self.controller.get_proximity_sensor_values()
         other_robot_camera_positions = self._camera.get_other_robot_camera_positions()
-        self._state = self.get_next_state(self.last_closest_readings, other_robot_camera_positions)
+        self.state = self.get_next_state(self.last_closest_readings, other_robot_camera_positions)
+        print("New State:", self.state)
 
     @abstractmethod
     def get_next_state(self, closest_readings, other_robot_camera_positions: Dict[str, str]):
