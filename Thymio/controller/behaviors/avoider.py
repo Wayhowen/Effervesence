@@ -82,6 +82,9 @@ class Avoider(Behavior):
             return self.q_table[self.actions.index("GOFORWARDS")]
         return None
 
+    def behavior_type(self):
+        return "Avoider"
+
     def perform_next_action(self, action):
         if action == 0:
             self.controller.drive(self.max_speed, self.max_speed)

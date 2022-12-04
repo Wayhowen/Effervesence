@@ -12,7 +12,7 @@ from controller.modules.camera.camera import Camera
 class Behavior:
     def __init__(self, safezone_reading, line_reading, five_cm_reading, nine_cm_reading, max_speed):
         self.controller = Controller(safezone_reading, line_reading)
-        self._camera = Camera()
+        self._camera = Camera(self.behavior_type())
         self.five_cm_reading = five_cm_reading
         self.nine_cm_reading = nine_cm_reading
         self.max_speed = max_speed
@@ -20,7 +20,7 @@ class Behavior:
         self.quarter_speed = max_speed / 4
 
         self._avoidance_boundary = 0
-        self._sleepy_time = 0.1  # same as in simulator
+        self._sleepy_time = 0.2  # same as in simulator
         self._avoidance_steps_left = 0
         self._avoidance_action = None
         self.last_closest_readings = [float('inf')] * 7
@@ -42,11 +42,11 @@ class Behavior:
         print(self.states[self.state])
         action = self.check_set_behaviors(step)
         if action is not None:
-            print("set behavior:", action)
+            print("set behavior:", self.actions[action])
             self.perform_next_action(action)
             return
         action = np.argmax(self.q_table[self.state])
-        print("table behavior:", action)
+        print("table behavior:", self.actions[action])
         self.perform_next_action(action)
 
     def check_set_behaviors(self, step):
@@ -108,14 +108,20 @@ class Behavior:
         return None
 
     @abstractmethod
+    def behavior_type(self):
+        pass
+    
+    @abstractmethod
     def perform_next_action(self, action):
         pass
 
     def post_move_calculations(self):
+        #time.sleep(self._sleepy_time)   
+        #self.controller.drive(0,0)
         self.last_closest_readings = self.controller.get_proximity_sensor_values()
         other_robot_camera_positions = self._camera.get_other_robot_camera_positions()
         self.state = self.get_next_state(self.last_closest_readings, other_robot_camera_positions)
-        print("New State:", self.state)
+        
 
     @abstractmethod
     def get_next_state(self, closest_readings, other_robot_camera_positions: Dict[str, str]):
@@ -125,7 +131,6 @@ class Behavior:
         for cnt in range(steps):
             self.perform(cnt)
             self.post_move_calculations()
-            time.sleep(self._sleepy_time)
             if not self._alive:
                 self.tagged_callback()
                 break
