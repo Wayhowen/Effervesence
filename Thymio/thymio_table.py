@@ -20,7 +20,7 @@ def tagged_checker(avoider: Avoider):
 if __name__ == '__main__':
     try:
         # TODO: choose the values
-        behavior = Avoider(line_reading=350, safezone_reading=700, five_cm_reading=2500, nine_cm_reading=1200, max_speed=500)
+        behavior = Tagger(line_reading=350, safezone_reading=700, five_cm_reading=2500, nine_cm_reading=1200, max_speed=500)
 
         if isinstance(behavior, Avoider):
             t1 = threading.Thread(target=tagged_checker, args=(behavior,))
@@ -31,4 +31,6 @@ if __name__ == '__main__':
 
     except Exception as e:
         traceback.print_exc()
+    finally:
         behavior.kill()
+        print("Stopping robot")
