@@ -39,12 +39,14 @@ class Behavior:
         return color
 
     def perform(self, step):
-        print(self.state)
+        print(self.states[self.state])
         action = self.check_set_behaviors(step)
-        if action:
+        if action is not None:
+            print("set behavior:", action)
             self.perform_next_action(action)
             return
         action = np.argmax(self.q_table[self.state])
+        print("table behavior:", action)
         self.perform_next_action(action)
 
     def check_set_behaviors(self, step):
