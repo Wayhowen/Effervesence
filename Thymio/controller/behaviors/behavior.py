@@ -16,6 +16,7 @@ class Behavior:
         self.five_cm_reading = five_cm_reading
         self.nine_cm_reading = nine_cm_reading
         self.max_speed = max_speed
+        self.three_quarters_speed = max_speed * 3 / 4
         self.half_speed = max_speed / 2
         self.quarter_speed = max_speed / 4
 
@@ -57,7 +58,7 @@ class Behavior:
     def check_set_behaviors(self, step):
         behavior_specific_action = self.behavior_specific_set_behaviors(step)
         if behavior_specific_action:
-            print("behavior specific action ")
+            #print("behavior specific action ")
             return behavior_specific_action
         return self.common_set_behaviors()
 
@@ -70,15 +71,14 @@ class Behavior:
         left_on_line, right_on_line = self.controller.on_the_line()
         if self._avoidance_boundary:
             self._avoidance_boundary -= 1
-            if self._avoidance_boundary > 1:
-                return self.actions.index("GORIGHT")
-            else:
-                return self.actions.index("GOFORWARDS")
+            return self.actions.index("GORIGHT")
         if right_on_line:
             print("on line")
-            return self.actions.index("GOLEFT")
+            self._avoidance_boundary += 8
+            return self.actions.index("GORIGHT")
         elif left_on_line:
             print("on line")
+            self._avoidance_boundary += 8
             return self.actions.index("GORIGHT")
         # avoidance behavior -- basically turn for a bit
         if self._avoidance_steps_left:
@@ -124,7 +124,7 @@ class Behavior:
 
     def post_move_calculations(self):
         self.last_closest_readings = self.controller.get_proximity_sensor_values()
-        print(self.last_closest_readings)
+        #print(self.last_closest_readings)
         other_robot_camera_positions = self._camera.get_other_robot_camera_positions()
         self.state = self.get_next_state(self.last_closest_readings, other_robot_camera_positions)
 
