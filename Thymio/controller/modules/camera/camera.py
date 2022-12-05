@@ -3,24 +3,41 @@ from typing import Dict
 
 import cv2 as cv
 import numpy as np
+import time
 from picamera import PiCamera
 
 width = 640
 height = 480
-COLORS = [
-    ((0, 15, 190),
+ALL_COLORS = [
+    ((0, 75, 170),
      (20, 255, 255),
      "Orangered"),
-    ((90, 15, 200),
-     (115, 255, 255),
-     "Blue"),
-    ((45, 15, 200),
+    ((45, 50, 200),
      (90, 255, 255),
      "Green"),
-    ((135, 15, 200),
-     (170, 255, 255),
+    ((90, 50, 200),
+     (115, 255, 255),
+     "Blue"),
+    ((135, 50, 200),
+     (150, 255, 255),
      "Purple"),
 ]
+
+AVOIDER_LOOKS_FOR = [
+    ((45, 50, 200),
+     (90, 255, 255),
+     "Green"),
+    ((0, 75, 170),
+     (20, 255, 255),
+     "Orangered")
+]
+
+TAGGER_LOOKS_FOR = [
+    ((90, 50, 200),
+     (115, 255, 255),
+     "Blue")
+]
+
 PREV_CIRCLE = None
 PREV_FRAME = None
 
@@ -30,8 +47,12 @@ PREV_FRAME = None
 
 
 class Camera:
-    def __init__(self):
+    def __init__(self, behavior):
         self.camera = PiCamera()
+        self.Colors = TAGGER_LOOKS_FOR  if behavior == "Tagger" else AVOIDER_LOOKS_FOR
+        self.camera.resolution = (width, height)
+        self.camera.framerate = 24
+        self.image = np.empty((height, width, 3), dtype=np.uint8)
     
     # TODO: might be useful https://mattmaulion.medium.com/color-image-segmentation-image-processing-4a04eca25c0
     def get_quadrant(self, pos):
@@ -84,7 +105,7 @@ class Camera:
                 c = max(contours_sizes, key=lambda x: x[0])[1]
 
                 # if the contour is too small, ignore it
-                if cv.contourArea(c) > 500:
+                if cv.contourArea(c) > 200:
                     # compute the bounding box for the contour, draw it on the frame,
                     # and update the text
                     (x, y, w, h) = cv.boundingRect(c)
@@ -103,7 +124,7 @@ class Camera:
             "r": (0, None)
         }
 
-        for c in COLORS:
+        for c in self.Colors:
             res = self.hsv(frame, c[0], c[1])
             res = cv.cvtColor(res, cv.COLOR_BGR2GRAY)
 
@@ -150,16 +171,16 @@ class Camera:
         # cv.imshow("circles", f)
 
     def get_other_robot_camera_positions(self) -> Dict[str, str]:
-        self.camera.resolution = (width, height)
-        self.camera.framerate = 24
-        image = np.empty((height, width, 3), dtype=np.uint8)
-        self.camera.capture(image, 'bgr')
-        frame = cv.rotate(image, cv.ROTATE_180)
+        start = time.time()
+        self.camera.capture(self.image, 'bgr')
+        frame = cv.rotate(self.image, cv.ROTATE_180)
+        end = time.time()
+        print("Time for prep camera:",end-start)
         return self.find_color(frame)
 
 
 #if __name__ == "__main__":
-    # video_capture = cv.VideoCapture(0)
+    #video_capture = cv.VideoCapture(0)
     #camera = PiCamera()
 
     #prev_circle = None
@@ -175,13 +196,13 @@ class Camera:
         # image = np.empty((height, width, 3), dtype=np.uint8)
         # camera.capture(image, 'bgr')
         # frame = cv.rotate(image, cv.ROTATE_180)
-        # # ret, frame = video_capture.read()
+        #ret, frame = video_capture.read()
         # # if not ret:
         # #    break
         #
         # # pos = s.movement_detection(frame)
-        # print(s.find_color(frame))
-        # cv.imshow("frame", frame)
+        #print(s.find_color(frame))
+        #cv.imshow("frame", frame)
 
         # if pos:
         #    print(pos)
@@ -199,6 +220,6 @@ class Camera:
         # cv.imshow("res", res)
 
         #if cv.waitKey(1) & 0xFF == ord("q"):
-            #break
+        #    break
     # video_capture.release()
     #cv.destroyAllWindows()

@@ -12,7 +12,7 @@ from controller.modules.camera.camera import Camera
 class Behavior:
     def __init__(self, safezone_reading, left_line_reading, right_line_reading, five_cm_reading, nine_cm_reading, max_speed):
         self.controller = Controller(safezone_reading, left_line_reading, right_line_reading)
-        self._camera = Camera()
+        self._camera = Camera(self.behavior_type())
         self.five_cm_reading = five_cm_reading
         self.nine_cm_reading = nine_cm_reading
         self.max_speed = max_speed
@@ -20,7 +20,7 @@ class Behavior:
         self.quarter_speed = max_speed / 4
 
         self._avoidance_boundary = 0
-        self._sleepy_time = 0.1  # same as in simulator
+        self._sleepy_time = 0.2  # same as in simulator
         self._avoidance_steps_left = 0
         self._avoidance_action = None
         self.last_closest_readings = [float('-inf')] * 7
@@ -70,8 +70,10 @@ class Behavior:
             else:
                 return self.actions.index("GOFORWARDS")
         if right_on_line:
+            print("on line")
             return self.actions.index("GOLEFT")
         elif left_on_line:
+            print("on line")
             return self.actions.index("GORIGHT")
         # avoidance behavior -- basically turn for a bit
         if self._avoidance_steps_left:
@@ -82,26 +84,35 @@ class Behavior:
             if self.last_closest_readings[4] >= self.five_cm_reading:
                 self._avoidance_steps_left = 4
                 self._avoidance_action = self.actions.index("GOLEFT")
+                print("avoiding other robot")
                 return self.actions.index("GOLEFT")
             elif self.last_closest_readings[3] >= self.five_cm_reading:
                 self._avoidance_steps_left = 5
                 self._avoidance_action = self.actions.index("GOLEFT")
+                print("avoiding other robot")
                 return self.actions.index("GOLEFT")
             elif self.last_closest_readings[2] >= self.five_cm_reading:
                 self._avoidance_steps_left = 6
                 self._avoidance_action = self.actions.index("GOLEFT")
+                print("avoiding other robot")
                 return self.actions.index("GOLEFT")
             elif self.last_closest_readings[1] >= self.five_cm_reading:
                 self._avoidance_steps_left = 7
                 self._avoidance_action = self.actions.index("GOLEFT")
+                print("avoiding other robot")
                 return self.actions.index("GOLEFT")
             elif self.last_closest_readings[0] >= self.five_cm_reading:
                 self._avoidance_steps_left = 8
                 # this has to use action that we have set on both controllers
                 self._avoidance_action = self.actions.index("GOLEFT")
+                print("avoiding other robot")
                 return self.actions.index("GOLEFT")
         return None
 
+    @abstractmethod
+    def behavior_type(self):
+        pass
+    
     @abstractmethod
     def perform_next_action(self, action):
         pass
@@ -109,8 +120,8 @@ class Behavior:
     def post_move_calculations(self):
         self.last_closest_readings = self.controller.get_proximity_sensor_values()
         print(self.last_closest_readings)
-        other_robot_camera_positions = {"l": None, "m": None, "r": None}
-        self._state = self.get_next_state(self.last_closest_readings, other_robot_camera_positions)
+        other_robot_camera_positions = self._camera.get_other_robot_camera_positions()
+        self.state = self.get_next_state(self.last_closest_readings, other_robot_camera_positions)
 
     @abstractmethod
     def get_next_state(self, closest_readings, other_robot_camera_positions: Dict[str, str]):
