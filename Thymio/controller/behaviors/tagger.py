@@ -58,9 +58,9 @@ class Tagger(Behavior):
 
     def behavior_specific_set_behaviors(self, _) -> Optional[int]:
         # actions not taking a lot of time
-        if self.controller.in_the_safezone() and self._color != "safe_seeking":
+        if self.controller.in_the_safezone():
             self._choose_color("safe_seeking")
-        elif self._color != "seeking":
+        else:
             self._choose_color("seeking")
         return None
 
@@ -69,20 +69,20 @@ class Tagger(Behavior):
 
     def perform_next_action(self, action):
         if action == 0:
-            self.controller.drive(self.max_speed*2, self.max_speed*2)
+            self.controller.drive(self.max_speed, self.max_speed)
         elif action == 1:
-            self.controller.drive(-self.half_speed, self.half_speed)
+            self.controller.drive(-self.quarter_speed, self.quarter_speed)
         elif action == 2:
-            self.controller.drive(self.half_speed, -self.half_speed)
+            self.controller.drive(self.quarter_speed, -self.quarter_speed)
         elif action == 3:
             self.controller.drive(
                 random.uniform(self.quarter_speed, self.max_speed),
                 random.uniform(self.quarter_speed, self.max_speed)
             )
         elif action == 4:
-            self.controller.drive(self.half_speed, self.max_speed)
+            self.controller.drive(self.three_quarters_speed, self.max_speed)
         elif action == 5:
-            self.controller.drive(self.max_speed, self.half_speed)
+            self.controller.drive(self.max_speed, self.three_quarters_speed)
         elif action == 6:
             self.controller.drive(self.quarter_speed, self.half_speed)
         elif action == 7:
