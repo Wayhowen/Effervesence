@@ -34,6 +34,11 @@ class Behavior:
         self._color = None
         self._alive = True
 
+        self._current_step = 0
+        self.forced_out_of_safezone = 0
+        self._safezone_out_steps = 50
+        self._safezone_forward_steps = 10
+
     def _choose_color(self, color: str):
         self._colors[color]()
         return color
@@ -129,6 +134,7 @@ class Behavior:
 
     def run(self, steps=1800):
         for cnt in range(steps):
+            self._current_step = cnt
             self.perform(cnt)
             self.post_move_calculations()
             if not self._alive:
@@ -139,6 +145,9 @@ class Behavior:
 
     def set_alive(self, alive: bool):
         self._alive = alive
+
+    def set_forced_out_of_safezone(self):
+        self.forced_out_of_safezone = self._current_step
 
     def tagged_callback(self):
         print("Getting killed")

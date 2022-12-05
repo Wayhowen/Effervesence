@@ -11,6 +11,8 @@ def tagged_checker(avoider: Avoider):
     tagged = False
     while not tagged:
         tagged = avoider.is_tagged() and not avoider.controller.in_the_safezone()
+        if avoider.is_forced_out_of_safezone():
+            avoider.set_forced_out_of_safezone()
         time.sleep(0.1)
     lock = threading.Lock()
     with lock:

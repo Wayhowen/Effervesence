@@ -58,22 +58,21 @@ class Avoider(Behavior):
         }
         self._color = self._choose_color("avoiding")
 
-        self.forced_out_of_safezone = 0
-        self._safezone_out_steps = 50
-        self._safezone_forward_steps = 10
-
-        self.controller.start_transmitting_bs()
+        self.controller.start_forcing_others_out_of_safezone()
 
     def behavior_specific_set_behaviors(self, step) -> Optional[int]:
         how_long_ago = float('inf')
         if self.forced_out_of_safezone != 0:
             self._choose_color("avoiding")
             how_long_ago = (step - self.forced_out_of_safezone)
+            self.controller.start_forcing_others_out_of_safezone()
         elif self.controller.in_the_safezone():
             self._choose_color("safe_avoiding")
+            self.controller.start_transmitting_bs()
             return self.actions.index("STOP")
         else:
             self._choose_color("avoiding")
+            self.controller.start_forcing_others_out_of_safezone()
         if how_long_ago <= self._safezone_out_steps:
             self.controller.start_transmitting_bs()
 
@@ -136,3 +135,6 @@ class Avoider(Behavior):
         if not self._alive:
             return True
         return self.controller.receive_information() == 1
+
+    def is_forced_out_of_safezone(self) -> bool:
+        return self.controller.receive_information() == 2
