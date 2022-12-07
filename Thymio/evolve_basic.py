@@ -93,13 +93,13 @@ class Evolve:
 
     def work_dual(self, tagger_q_table=None, avoider_q_table=None):
         # initial populations
-        if tagger_q_table:
+        if tagger_q_table is not None:
             init_tag_pop = self._generate_population_based_on_table(tagger_q_table)
         else:
             init_tag_pop = self._generate_population(
                 len(self.mock_tagger.states), len(self.mock_tagger.actions)
             )
-        if avoider_q_table:
+        if avoider_q_table is not None:
             init_avoid_pop = self._generate_population_based_on_table(avoider_q_table)
         else:
             init_avoid_pop = self._generate_population(
@@ -191,7 +191,7 @@ class Evolve:
 
     def _generate_population_based_on_table(self, q_table: np.array):
         population = [Chromosome(q_table) for _ in range(self.population_size)]
-        population = self._mutate(population, probabilities=(0.75, 0.25))
+        population = self._mutate(population, probabilities=(0.75, 0.25), all_population=True)
 
         return population
 
@@ -219,14 +219,15 @@ class Evolve:
             new_offspring.append(Chromosome((pair[0].q_table + pair[1].q_table) / 2))
         return list(random.sample(new_offspring, int((self.population_size - len(selected_offspring)) / 2)))
 
-    def _mutate(self, offspring: List[Chromosome], probabilities: Tuple[float, float] = (0.25, 0.75)) -> List[
+    def _mutate(self, offspring: List[Chromosome], probabilities: Tuple[float, float] = (0.25, 0.75), all_population = False) -> List[
         Chromosome]:
         new_offspring: List[Chromosome] = []
-        for _ in range(self.population_size - len(offspring)):
+        size = self.population_size if all_population else self.population_size - len(offspring)
+        for _ in range(size):
             random_chromosome = np.random.choice(offspring)
-            random_mask = np.stack(
-                [np.random.choice(a=[0, 1], size=random_chromosome.q_table.shape[1], p=probabilities) for _ in
-                 range(random_chromosome.q_table.shape[0])])
+            mask_elems = [np.random.choice(a=[0, 1], size=random_chromosome.q_table.shape[1], p=probabilities) for _ in
+                 range(random_chromosome.q_table.shape[0])]
+            random_mask = np.stack(mask_elems)
             masked_q_table = random_chromosome.q_table * random_mask
             masked_q_table[masked_q_table == 0] = random.uniform(np.min(masked_q_table), np.max(masked_q_table))
             new_offspring.append(Chromosome(masked_q_table))
