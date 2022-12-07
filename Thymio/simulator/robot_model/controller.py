@@ -12,7 +12,7 @@ from ..behaviors.behavior import Behavior
 
 
 class Controller:
-    def __init__(self, W, H, x=0.0, y=0.0, q=0.0, robot_radius=0.0575):
+    def __init__(self, W, H, x=0.0, y=0.0, q=0.0, robot_radius=0.0575, reverse=False):
         self.left_wheel_velocity: float = random()  # robot left wheel velocity in radians/s
         self.right_wheel_velocity: float = random()  # robot right wheel velocity in radians/s
         self._robot_radius = robot_radius
@@ -39,7 +39,7 @@ class Controller:
         self.bottom_sensor_right = BottomSensor(
             W, H, self._position_getter, forward_offset_cm=0.075, side_offset_cm=0.011, side_offset_radians=1.57
         )
-        self.camera = Camera(W, H, 1.4, 1)
+        self.camera = Camera(W, H, 1.4, 1, reverse)
 
     @property
     def body(self):

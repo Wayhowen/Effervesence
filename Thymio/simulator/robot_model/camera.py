@@ -7,16 +7,19 @@ from simulator.behaviors.behavior import Behavior
 
 
 class Camera:
-    def __init__(self, W, H, fov, view_distance):
+    def __init__(self, W, H, fov, view_distance, reverse=False):
         self.W = W
         self.H = H
         self.fov = fov  # field of view in radians
         self.view_distance = view_distance
+        self._reverse = reverse
 
     def real_world_sensor_value(self, x, y, q, world):
         pass
 
     def robots_visible(self, x, y, q, objects):
+        if self._reverse:
+            q = -q
         camera_vision = Polygon(
             [
                 (x, y),
@@ -28,6 +31,8 @@ class Camera:
 
     # either return l - left, m - middle, r - right or None
     def robot_relative_position(self, x, y, q, robots: List[Behavior]) -> Dict[str, Behavior]:
+        if self._reverse:
+            q = -q
         robot_positions = {
             "l": [],
             "m": [],
@@ -70,6 +75,8 @@ class Camera:
         }
 
     def camera_range(self, x, y, q):
+        if self._reverse:
+            q = -q
         return f"{x + cos(q + self.fov / 2) * self.view_distance}, {x + cos(q + -self.fov / 2) * self.view_distance}, {y + sin(q + self.fov / 2) * self.view_distance}, {y + sin(q + -self.fov / 2) * self.view_distance}"
 
     # copied for now

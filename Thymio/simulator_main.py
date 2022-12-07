@@ -6,6 +6,7 @@ from typing import List
 
 from simulator.behaviors.avoider import Avoider
 from simulator.behaviors.behavior import Behavior
+from simulator.behaviors.evolution.reverse_avoider import ReverseAvoider
 from simulator.behaviors.evolution.tagger_maximizer import TaggerMaximizer
 from simulator.behaviors.evolution.avoider_maximizer import AvoiderMaximizer
 from simulator.behaviors.q_learning.avoider import Avoider as QAvoider
@@ -35,7 +36,7 @@ import numpy as np
 
 
 class Main:
-    def __init__(self, number_of_robots=1, frequency_of_saves=50, number_of_steps=1800):
+    def __init__(self, number_of_robots=1, frequency_of_saves=50, number_of_steps=1800, reverse=False):
         self._delete_previous_records()
 
         self._number_of_robots = number_of_robots
@@ -110,15 +111,16 @@ class Main:
 
         self.w = self.simulator.W - 0.2
         self.h = self.simulator.H - 0.2
+        maximizer = ReverseAvoider if reverse else AvoiderMaximizer
         self.robots: List[Behavior] = [
             # RotationMeasurment(self.simulator,  Controller(self.simulator.W, self.simulator.H, 0, 0, 0))
             TaggerMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, 0, 0, 0), tagger_qt,
                             self.number_of_steps),
             # QAvoider(self.simulator, Controller(self.simulator.W, self.simulator.H)),
-            AvoiderMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, self.w / 2, self.h / 2, 4), avoider_qt, self.number_of_steps),
-            AvoiderMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, self.w / 2, -self.h / 2, 2.5), avoider_qt, self.number_of_steps),
-            AvoiderMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, -self.w / 2, -self.h / 2, 1), avoider_qt, self.number_of_steps),
-            AvoiderMaximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, -self.w / 2, self.h / 2, 5.2), avoider_qt, self.number_of_steps)
+            maximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, self.w / 2, self.h / 2, 4, reverse), avoider_qt, self.number_of_steps),
+            maximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, self.w / 2, -self.h / 2, 2.5, reverse), avoider_qt, self.number_of_steps),
+            maximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, -self.w / 2, -self.h / 2, 1, reverse), avoider_qt, self.number_of_steps),
+            maximizer(self.simulator, Controller(self.simulator.W, self.simulator.H, -self.w / 2, self.h / 2, 5.2, reverse), avoider_qt, self.number_of_steps)
         ]
 
         # used for speed measurment
@@ -232,6 +234,6 @@ class Main:
 
 
 if __name__ == '__main__':
-    main = Main(number_of_robots=5, frequency_of_saves=10, number_of_steps=1800)
+    main = Main(number_of_robots=5, frequency_of_saves=10, number_of_steps=1800, reverse=True)
     # main.save_positions()
     main.run()

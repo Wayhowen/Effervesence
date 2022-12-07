@@ -6,6 +6,7 @@ from itertools import combinations
 
 from simulator.behaviors.behavior import Behavior
 from simulator.behaviors.evolution.avoider_maximizer import AvoiderMaximizer
+from simulator.behaviors.evolution.reverse_avoider import ReverseAvoider
 from simulator.behaviors.evolution.tagger_maximizer import TaggerMaximizer
 from simulator.robot_model.controller import Controller
 from simulator_main import Main
@@ -14,18 +15,19 @@ from typing import List, Dict, Tuple
 
 
 class Evolve:
-    def __init__(self, population_size, selection_size, truncation_size=4, statistical_significance=0.2) -> None:
+    def __init__(self, population_size, selection_size, truncation_size=4, statistical_significance=0.2, reverse=False) -> None:
         self.population_size = population_size
         self.selection_size = selection_size
         self.truncation_size = truncation_size
         self.statistical_significance = statistical_significance
+        self._reverse = reverse
         self.date_time = datetime.now().strftime("%m%d%Y_%H%M%S")
         self.n = 0
 
         self._last_tagger_fitness_score = 0
         self._last_avoider_fitness_score = 0
 
-        self.evaluator = Main(number_of_robots=5, frequency_of_saves=50, number_of_steps=1800)
+        self.evaluator = Main(number_of_robots=5, frequency_of_saves=50, number_of_steps=1800, reverse=reverse)
         self.mock_tagger = self.get_tagger([])
         self.mock_avoider = self.get_avoider([])
         self.best_avoider = (Chromosome(len(self.mock_tagger.states), len(self.mock_tagger.actions)), 0.0)
@@ -39,6 +41,12 @@ class Evolve:
         )
 
     def get_avoider(self, q_table):
+        if self._reverse:
+            return ReverseAvoider(
+                self.evaluator.simulator,
+                Controller(self.evaluator.simulator.W, self.evaluator.simulator.H, self._reverse), q_table,
+                self.evaluator.number_of_steps
+            )
         return AvoiderMaximizer(
             self.evaluator.simulator,
             Controller(self.evaluator.simulator.W, self.evaluator.simulator.H), q_table,
