@@ -57,7 +57,7 @@ class Behavior:
 
     def check_set_behaviors(self, step):
         behavior_specific_action = self.behavior_specific_set_behaviors(step)
-        if behavior_specific_action:
+        if behavior_specific_action is not None:
             #print("behavior specific action ")
             return behavior_specific_action
         return self.common_set_behaviors()
@@ -74,11 +74,11 @@ class Behavior:
             return self.actions.index("GORIGHT")
         if right_on_line:
             print("on line")
-            self._avoidance_boundary += 8
+            self._avoidance_boundary += 6
             return self.actions.index("GORIGHT")
         elif left_on_line:
             print("on line")
-            self._avoidance_boundary += 8
+            self._avoidance_boundary += 6
             return self.actions.index("GORIGHT")
         # avoidance behavior -- basically turn for a bit
         if self._avoidance_steps_left:
