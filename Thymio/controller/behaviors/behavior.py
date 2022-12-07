@@ -48,7 +48,7 @@ class Behavior:
         print(self.states[self.state])
         action = self.check_set_behaviors(step)
         if action is not None:
-            print("set behavior:", self.actions[action])
+            #print("set behavior:", self.actions[action])
             self.perform_next_action(action)
             return
         action = np.argmax(self.q_table[self.state])
@@ -88,30 +88,30 @@ class Behavior:
             print(list(r >= self.five_cm_reading for r in self.last_closest_readings))
             if self.last_closest_readings[4] >= self.five_cm_reading:
                 self._avoidance_steps_left = 4
-                self._avoidance_action = self.actions.index("GOLEFT")
+                self._avoidance_action = self.actions.index("GORIGHT")
                 print("avoiding other robot")
-                return self.actions.index("GOLEFT")
+                return self.actions.index("GORIGHT")
             elif self.last_closest_readings[3] >= self.five_cm_reading:
                 self._avoidance_steps_left = 5
-                self._avoidance_action = self.actions.index("GOLEFT")
+                self._avoidance_action = self.actions.index("GORIGHT")
                 print("avoiding other robot")
-                return self.actions.index("GOLEFT")
+                return self.actions.index("GORIGHT")
             elif self.last_closest_readings[2] >= self.five_cm_reading:
                 self._avoidance_steps_left = 6
-                self._avoidance_action = self.actions.index("GOLEFT")
+                self._avoidance_action = self.actions.index("GORIGHT")
                 print("avoiding other robot")
-                return self.actions.index("GOLEFT")
+                return self.actions.index("GORIGHT")
             elif self.last_closest_readings[1] >= self.five_cm_reading:
                 self._avoidance_steps_left = 7
-                self._avoidance_action = self.actions.index("GOLEFT")
+                self._avoidance_action = self.actions.index("GORIGHT")
                 print("avoiding other robot")
-                return self.actions.index("GOLEFT")
+                return self.actions.index("GORIGHT")
             elif self.last_closest_readings[0] >= self.five_cm_reading:
                 self._avoidance_steps_left = 8
                 # this has to use action that we have set on both controllers
-                self._avoidance_action = self.actions.index("GOLEFT")
+                self._avoidance_action = self.actions.index("GORIGHT")
                 print("avoiding other robot")
-                return self.actions.index("GOLEFT")
+                return self.actions.index("GORIGHT")
         return None
 
     @abstractmethod

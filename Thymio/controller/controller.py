@@ -21,10 +21,10 @@ class Controller:
 
     def on_the_line(self) -> Tuple[bool, bool]:
         readings = self._aseba_handler.get_ground_sensor_values()
-        print("====")
-        print(readings)
-        print(readings[0] < self.left_line_reading, readings[1] < self.right_line_reading)
-        print("====")
+        #print("====")
+        #print(readings)
+        #print(readings[0] < self.left_line_reading, readings[1] < self.right_line_reading)
+        #print("====")
         return readings[0] < self.left_line_reading, readings[1] < self.right_line_reading
 
     # TODO: fix this to only happen in safezone
@@ -33,9 +33,9 @@ class Controller:
         readings = self._aseba_handler.get_ground_sensor_values()
         time.sleep(0.05)
         second_readings = self._aseba_handler.get_ground_sensor_values()
-        print("----")
-        print(second_readings[0] - readings[0])
-        print("----")
+        #print("----")
+        #print(second_readings[0] - readings[0])
+        #print("----")
 
         return self.left_line_reading < readings[0] < self.safezone_reading \
                and (second_readings[0] - readings[0]) < 50
@@ -55,6 +55,9 @@ class Controller:
     def receive_information(self) -> int:
         info = self._aseba_handler.receive_information()
         return info
+
+    def reset_reading(self):
+        self._aseba_handler.reset_reading()
 
     def light_red(self):
         self._aseba_handler.light_red()

@@ -80,11 +80,14 @@ class AsebaHandler:
     def send_information(self, number):
         self.aseba.SendEventName("prox.comm.tx", [number])
 
-    def receive_information(self, debug=False) -> int:
+    def receive_information(self, debug=True) -> int:
         rx = self.aseba.GetVariable("thymio-II", "prox.comm.rx")
         if debug:
             print(rx[0])
         return rx[0]
+
+    def reset_reading(self, debug=True) -> int:
+        self.aseba.SetVariable("thymio-II", "prox.comm.rx", [0])
 
     def light_red(self):
         self.aseba.SendEventName("leds.top", [32, 0, 0])

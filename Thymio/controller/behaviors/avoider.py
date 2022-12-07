@@ -65,7 +65,6 @@ class Avoider(Behavior):
         if self.forced_out_of_safezone != 0:
             self._choose_color("avoiding")
             how_long_ago = (step - self.forced_out_of_safezone)
-            self.controller.start_forcing_others_out_of_safezone()
         elif self.controller.in_the_safezone():
             self._choose_color("safe_avoiding")
             self.controller.start_transmitting_bs()
@@ -78,7 +77,11 @@ class Avoider(Behavior):
 
         # move out of safezone
         if how_long_ago <= self._safezone_forward_steps:
-            return self.q_table[self.actions.index("GOFORWARDS")]
+            return self.actions.index("GOFORWARDS")
+        elif how_long_ago > self._safezone_forward_steps:
+            self.controller.reset_reading()
+            self.forced_out_of_safezone = 0
+            self.controller.start_forcing_others_out_of_safezone()
         return None
 
     def behavior_type(self):
