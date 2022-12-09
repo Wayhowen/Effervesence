@@ -52,7 +52,7 @@ class Behavior:
             self.perform_next_action(action)
             return
         action = np.argmax(self.q_table[self.state])
-        print("table behavior:", self.actions[action])
+        #print("table behavior:", self.actions[action])
         self.perform_next_action(action)
 
     def check_set_behaviors(self, step):
@@ -74,11 +74,11 @@ class Behavior:
             return self.actions.index("GORIGHT")
         if right_on_line:
             print("on line")
-            self._avoidance_boundary += 6
+            self._avoidance_boundary = 4
             return self.actions.index("GORIGHT")
         elif left_on_line:
             print("on line")
-            self._avoidance_boundary += 6
+            self._avoidance_boundary = 4
             return self.actions.index("GORIGHT")
         # avoidance behavior -- basically turn for a bit
         if self._avoidance_steps_left:

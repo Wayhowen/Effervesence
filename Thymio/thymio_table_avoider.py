@@ -26,7 +26,7 @@ if __name__ == '__main__':
         #behavior = Tagger(left_line_reading=200, right_line_reading=250, safezone_reading=400, five_cm_reading=2500, nine_cm_reading=1200, max_speed=500)
         # good base settings - Tagger
         # behavior = Tagger(left_line_reading=250, right_line_reading=250, safezone_reading=800, five_cm_reading=2500, nine_cm_reading=1200, max_speed=400)
-        behavior = Avoider(left_line_reading=250, right_line_reading=250, safezone_reading=800, five_cm_reading=2500, nine_cm_reading=1200, max_speed=400)
+        behavior = Avoider(left_line_reading=250, right_line_reading=250, safezone_reading=800, five_cm_reading=500, nine_cm_reading=200, max_speed=400)
         
         if isinstance(behavior, Avoider):
             t1 = threading.Thread(target=tagged_checker, args=(behavior,))
